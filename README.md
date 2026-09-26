@@ -38,3 +38,7 @@ O produto inclui Skill Passport, Evidence Chain, Readiness contextual, Gap-to-Tr
 
 O matching de vagas agora é persistido no Supabase: score contextual, razões explicáveis e gaps por candidato/vaga. O painel consulta esses resultados no backend quando está conectado ao projeto real.
 
+
+## Operação e governança
+
+O onboarding orienta a conta ao primeiro passo, o Skill Passport coleta preferências de turno e o profissional controla explicitamente a visibilidade do perfil. O dashboard mede o funil e o tempo entre criação da vaga e o primeiro candidato com readiness >=80.
