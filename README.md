@@ -32,3 +32,9 @@ npm run build
 ## V5 diferenciadores
 
 O produto inclui Skill Passport, Evidence Chain, Readiness contextual, Gap-to-Training, Market Graph e Decision Timeline. Estes recursos são a base de diferenciação; desempenho superior à concorrência precisa ser demonstrado por métricas de clientes, não presumido.
+
+
+## Motor de matching
+
+O matching de vagas agora é persistido no Supabase: score contextual, razões explicáveis e gaps por candidato/vaga. O painel consulta esses resultados no backend quando está conectado ao projeto real.
+
