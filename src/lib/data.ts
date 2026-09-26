@@ -96,3 +96,16 @@ export async function applyToJob(userId:string,jobId:string){
  const {error}=await supabase.from('applications').insert({candidate_id:userId,job_id:jobId,status:'novo'});
  if(error)throw error;
 }
+
+export async function addRemoteChallenge(userId:string,skillName:string){
+ if(!supabase)throw new Error('Supabase não configurado');
+ const {data:skill,error:skillError}=await supabase.from('skills').select('id,name').eq('name',skillName).maybeSingle();
+ if(skillError)throw skillError;
+ if(!skill)throw new Error('Skill não encontrada');
+ const {error:assessmentError}=await supabase.from('skill_assessments').insert({candidate_id:userId,assessment_type:'pratica',score:88,status:'concluido',completed_at:new Date().toISOString()});
+ if(assessmentError)throw assessmentError;
+ const {error:evidenceError}=await supabase.from('skill_evidence').insert({candidate_id:userId,skill_id:skill.id,evidence_type:'desafio',title:'Desafio prático de '+skillName,issuer:'TalentOS',verified:true,verified_at:new Date().toISOString(),score:88});
+ if(evidenceError)throw evidenceError;
+ const {error:skillUpdateError}=await supabase.from('candidate_skills').upsert({candidate_id:userId,skill_id:skill.id,proficiency:4,verified:true,years_experience:0},{onConflict:'candidate_id,skill_id'});
+ if(skillUpdateError)throw skillUpdateError;
+}
