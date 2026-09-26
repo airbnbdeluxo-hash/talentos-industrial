@@ -1,7 +1,7 @@
 import { supabase } from './supabase';
 
 type Status='novo'|'triagem'|'entrevista'|'aprovado'|'rejeitado'|'contratado';
-export type Evidence={id:string;skill:string;type:string;title:string;issuer:string;verified:boolean;expires?:string;score?:number};
+export type Evidence={id:string;skill:string;type:string;title:string;issuer:string;verified:boolean;expires?:string;score?:number;storagePath?:string;fileName?:string;mimeType?:string;fileSize?:number};
 export type Candidate={id:string;name:string;city:string;role:string;years:number;salary:number;skills:string[];verified:string[];evidence:Evidence[];shifts:string[]};
 export type Company={id:string;name:string;city:string;industry:string};
 export type Job={id:string;title:string;companyId:string;companyName?:string;city:string;min:number;max:number;skills:string[];status:'aberta'|'pausada'|'fechada';shift:string};
@@ -11,7 +11,7 @@ export type MatchRow={id:string;jobId:string;candidateId:string;score:number;rea
 export type DB={candidates:Candidate[];companies:Company[];jobs:Job[];applications:AppRow[];events:AppEvent[];matches:MatchRow[]};
 export type RemoteProfile={id:string;role:'empresa'|'candidato'|'admin';full_name:string;city?:string|null};
 
-const mapEvidence=(e:any):Evidence=>({id:e.id,skill:e.skills?.name??'Skill',type:e.evidence_type,title:e.title,issuer:e.issuer??'',verified:Boolean(e.verified),expires:e.expires_at??undefined,score:e.score??undefined});
+const mapEvidence=(e:any):Evidence=>({id:e.id,skill:e.skills?.name??'Skill',type:e.evidence_type,title:e.title,issuer:e.issuer??'',verified:Boolean(e.verified),expires:e.expires_at??undefined,score:e.score??undefined,storagePath:e.storage_path??undefined,fileName:e.file_name??undefined,mimeType:e.mime_type??undefined,fileSize:e.file_size??undefined});
 const mapCandidate=(c:any):Candidate=>{
  const prefs=Array.isArray(c.talent_preferences)?c.talent_preferences[0]:c.talent_preferences;
  return {id:c.profile_id,name:c.display_name??'Talento',city:c.city??'',role:c.role_title??'Profissional industrial',years:Number(c.years_experience??0),salary:Number(c.desired_salary??0),skills:(c.candidate_skills??[]).map((x:any)=>x.skills?.name).filter(Boolean),verified:(c.candidate_skills??[]).filter((x:any)=>x.verified).map((x:any)=>x.skills?.name).filter(Boolean),evidence:(c.skill_evidence??[]).map(mapEvidence),shifts:prefs?.preferred_shifts??[]};
@@ -38,7 +38,7 @@ export async function loadRemoteData(userId:string):Promise<DB>{
  const [companyRes,jobsRes,candidatesRes,appsRes,eventsRes,matchesRes]=await Promise.all([
    companyQuery,
    supabase.from('jobs').select('*').order('created_at',{ascending:false}),
-   supabase.from('candidate_profiles').select('profile_id,display_name,role_title,years_experience,desired_salary,city,searchable,candidate_skills(skill_id,proficiency,verified,years_experience,skills(name)),skill_evidence(id,skill_id,evidence_type,title,issuer,verified,expires_at,score,skills(name)),talent_preferences(preferred_shifts)').eq('searchable',true),
+   supabase.from('candidate_profiles').select('profile_id,display_name,role_title,years_experience,desired_salary,city,searchable,candidate_skills(skill_id,proficiency,verified,years_experience,skills(name)),skill_evidence(id,skill_id,evidence_type,title,issuer,verified,expires_at,score,storage_path,file_name,mime_type,file_size,skills(name)),talent_preferences(preferred_shifts)').eq('searchable',true),
    supabase.from('applications').select('*').order('updated_at',{ascending:false}),
    supabase.from('application_events').select('*').order('created_at',{ascending:true}),
    supabase.from('matches').select('*').order('score',{ascending:false})
@@ -108,6 +108,36 @@ export async function generateRemoteMatches(jobId:string){
  const {data,error}=await supabase.rpc('generate_matches_for_job',{p_job_id:jobId});
  if(error)throw error;
  return (data??[]) as Array<{candidate_id:string;score:number;reasons:any;gaps:any}>;
+}
+
+export async function uploadRemoteEvidence(userId:string,skillName:string,file:File){
+ if(!supabase)throw new Error('Supabase não configurado');
+ if(file.size>10*1024*1024)throw new Error('Arquivo maior que 10 MB');
+ const allowed=['application/pdf','image/jpeg','image/png','image/webp','text/plain'];
+ if(file.type&&!allowed.includes(file.type))throw new Error('Formato não suportado');
+ const {data:skill,error:skillError}=await supabase.from('skills').select('id,name').eq('name',skillName).maybeSingle();
+ if(skillError)throw skillError;
+ if(!skill)throw new Error('Skill não encontrada');
+ const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+ const storagePath=userId+'/'+skill.id+'/'+crypto.randomUUID()+'-'+safe;
+ const upload=await supabase.storage.from('skill-evidence').upload(storagePath,file,{contentType:file.type||'application/octet-stream',upsert:false});
+ if(upload.error)throw upload.error;
+ const evidence=await supabase.from('skill_evidence').insert({
+   candidate_id:userId,skill_id:skill.id,evidence_type:'certificado',title:file.name,issuer:'Enviado pelo profissional',
+   verified:false,storage_path:storagePath,file_name:file.name,mime_type:file.type||null,file_size:file.size
+ }).select('id,storage_path,file_name,mime_type,file_size').single();
+ if(evidence.error){
+   await supabase.storage.from('skill-evidence').remove([storagePath]);
+   throw evidence.error;
+ }
+ return evidence.data;
+}
+
+export async function getEvidenceDownloadUrl(storagePath:string){
+ if(!supabase)throw new Error('Supabase não configurado');
+ const {data,error}=await supabase.storage.from('skill-evidence').createSignedUrl(storagePath,300);
+ if(error)throw error;
+ return data.signedUrl;
 }
 
 export async function addRemoteChallenge(userId:string,skillName:string){
