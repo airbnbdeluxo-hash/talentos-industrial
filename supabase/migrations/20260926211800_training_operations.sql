@@ -140,6 +140,8 @@ revoke all on function public.generate_training_plan_for_job(uuid,uuid) from pub
 grant execute on function public.generate_training_plan_for_job(uuid,uuid) to authenticated;
 revoke all on function public.update_training_recommendation(uuid,text,text) from public;
 grant execute on function public.update_training_recommendation(uuid,text,text) to authenticated;
+revoke execute on function public.generate_training_plan_for_job(uuid,uuid) from anon;
+revoke execute on function public.update_training_recommendation(uuid,text,text) from anon;
 
 drop policy if exists "candidate_training_update" on public.training_recommendations;
 create policy "candidate_training_update" on public.training_recommendations
