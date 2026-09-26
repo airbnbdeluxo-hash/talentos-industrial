@@ -42,3 +42,7 @@ O matching de vagas agora é persistido no Supabase: score contextual, razões e
 ## Operação e governança
 
 O onboarding orienta a conta ao primeiro passo, o Skill Passport coleta preferências de turno e o profissional controla explicitamente a visibilidade do perfil. O dashboard mede o funil e o tempo entre criação da vaga e o primeiro candidato com readiness >=80.
+
+## Desafios técnicos
+
+O TalentOS mantém uma biblioteca de desafios por competência. A tentativa e as respostas são persistidas no backend; concluir um desafio não marca automaticamente a skill como verificada. A evidência permanece pendente até validação humana.
