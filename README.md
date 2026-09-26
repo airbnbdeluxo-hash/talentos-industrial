@@ -2,28 +2,29 @@
 
 MVP de inteligência e operação de talentos para a indústria.
 
-## Tese
-A indústria não precisa de mais currículos; precisa saber quais pessoas conseguem executar quais funções, quais competências estão comprovadas e quais lacunas precisam ser fechadas.
-
-## V1
+## O que já funciona
 - Dashboard operacional
-- Vagas por competências
-- Talentos com SkillGraph
-- Matching explicável
-- Empresas
-- Base Supabase preparada para dados reais
+- Criação de vagas
+- Cadastro de talentos
+- Cadastro de empresas
+- Busca
+- Matching explicável por skills, evidência, localização, experiência e faixa salarial
+- Pipeline de contratação com mudança de etapa
+- SkillGraph visual
+- Persistência local no navegador
+- Schema Supabase preparado
 
-## Stack
-React + Vite + TypeScript · Supabase · GitHub · Cloudflare Pages · Lovable.
-
-## Desenvolvimento
+## Rodar
 ```bash
 npm install
 npm run dev
 ```
 
-## Banco
-Execute `supabase/schema.sql` no SQL Editor do Supabase.
+## Produção
+A V1 foi desenhada para começar sem serviço pago. O modo local funciona imediatamente. Para multiusuário, execute `supabase/schema.sql`, configure `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` e substitua a camada local pelo repositório Supabase.
 
-## Princípio
-O MVP não depende de API de IA paga. O primeiro motor de matching é determinístico, auditável e explicável.
+## Princípios
+1. Não é um portal genérico de empregos.
+2. O ativo central é a representação de competências e evidências.
+3. O matching deve ser explicável e auditável.
+4. Não colocar secrets no frontend.
