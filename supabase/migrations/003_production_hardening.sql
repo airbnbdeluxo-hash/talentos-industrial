@@ -105,11 +105,10 @@ as $$
   ),
   eligible as (
     select cp.profile_id,cp.years_experience,cp.desired_salary,
-           p.city,
+           cp.city,
            array_agg(cs.skill_id) filter (where cs.skill_id is not null) as skill_ids,
            array_agg(cs.skill_id) filter (where cs.verified) as verified_ids
     from public.candidate_profiles cp
-    join public.profiles p on p.id=cp.profile_id
     left join public.candidate_skills cs on cs.candidate_id=cp.profile_id
     where cp.searchable or cp.profile_id=(select auth.uid())
     group by cp.profile_id,cp.years_experience,cp.desired_salary,p.city
