@@ -169,6 +169,6 @@ export async function completeRemoteChallenge(attemptId:string,answers:Record<st
  if(!supabase)throw new Error('Supabase não configurado');
  const {data,error}=await supabase.rpc('complete_challenge',{p_attempt_id:attemptId,p_answers:answers});
  if(error)throw error;
- return data?.[0] as {score:number;correct_count:number;total_count:number}|undefined;
+ return data?.[0] as {score:number|null;correct_count:number|null;total_count:number}|undefined;
 }
 
