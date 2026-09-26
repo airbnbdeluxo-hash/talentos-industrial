@@ -31,6 +31,8 @@ TalentOS não é um ATS genérico. É uma camada de **Capability Intelligence** 
 - [x] Consentimento explícito de visibilidade do candidato
 - [x] Validação humana de evidências com autoria e trilha de revisão
 - [x] Proteção do papel da conta após criação
+- [x] Plano de desenvolvimento persistido por candidato/vaga
+- [x] Progresso de desenvolvimento: recomendado → em andamento → concluído
 
 ## Próxima entrega
 - [ ] Seed operacional / onboarding da primeira empresa real
@@ -39,6 +41,7 @@ TalentOS não é um ATS genérico. É uma camada de **Capability Intelligence** 
 - [x] Desafios com respostas persistidas e validação humana antes de evidência verificada
 - [x] Gerar e persistir matches no backend por vaga
 - [x] Dashboard de time-to-qualified-candidate
+- [x] Gap-to-Training operacional com persistência de status, níveis e estimativa de carga
 - [ ] Consentimento com tela dedicada
 - [ ] Analytics do funil
 - [x] Testes automatizados de RLS
@@ -47,7 +50,7 @@ TalentOS não é um ATS genérico. É uma camada de **Capability Intelligence** 
 - [ ] Taxonomia industrial própria
 - [ ] Grafo skill -> evidência -> contexto -> readiness
 - [ ] Dados de oferta/demanda por região
-- [ ] Trilhas de treinamento baseadas em gaps reais
+- [x] Trilhas de treinamento operacionais baseadas em gaps reais
 - [ ] Histórico de resultados por skill e função
 - [ ] Benchmark de contratação
 - [ ] Mobilidade interna e adjacências de carreira
