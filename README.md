@@ -28,3 +28,7 @@ npm ci
 npm run dev
 npm run build
 ```
+
+## V5 diferenciadores
+
+O produto inclui Skill Passport, Evidence Chain, Readiness contextual, Gap-to-Training, Market Graph e Decision Timeline. Estes recursos são a base de diferenciação; desempenho superior à concorrência precisa ser demonstrado por métricas de clientes, não presumido.
