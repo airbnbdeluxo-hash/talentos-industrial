@@ -27,6 +27,9 @@ TalentOS não é um ATS genérico. É uma camada de **Capability Intelligence** 
 - [x] Onboarding inicial por tipo de conta
 - [x] Preferências de turno persistidas no Skill Passport
 - [x] Métrica inicial de time-to-qualified-candidate
+- [x] Funil operacional no dashboard
+- [x] Consentimento explícito de visibilidade do candidato
+- [x] Proteção do papel da conta após criação
 
 ## Próxima entrega
 - [ ] Seed operacional / onboarding da primeira empresa real
