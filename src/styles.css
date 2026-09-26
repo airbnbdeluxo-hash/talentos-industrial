@@ -7,3 +7,5 @@
 
 
 .file-action{position:relative;cursor:pointer}.file-action input{display:none}.file-action:has(input:disabled){opacity:.65;cursor:wait}
+
+.evidence-open{margin-top:4px;padding:0;font-size:11px}
