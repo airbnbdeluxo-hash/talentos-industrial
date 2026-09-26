@@ -46,3 +46,7 @@ O onboarding orienta a conta ao primeiro passo, o Skill Passport coleta preferê
 ## Desafios técnicos
 
 O TalentOS mantém uma biblioteca de desafios por competência. A tentativa e as respostas são persistidas no backend; concluir um desafio não marca automaticamente a skill como verificada. A evidência permanece pendente até validação humana.
+
+## Fila de validação humana
+
+Empresas podem revisar evidências de candidatos que estejam em seu pipeline. Cada decisão registra status, responsável, horário e observação. Uma evidência aprovada atualiza a competência correspondente; uma rejeitada não pode ser usada como prova verificada.
