@@ -1,5 +1,6 @@
+-- Base schema; for an existing project run migrations/002_security_multitenant.sql after this file.
 create extension if not exists pgcrypto;
-create type public.app_role as enum ('empresa','candidato','admin');
+do $$ begin create type public.app_role as enum ('empresa','candidato','admin'); exception when duplicate_object then null; end $$;
 create table if not exists public.profiles(id uuid primary key references auth.users(id) on delete cascade,role public.app_role not null default 'candidato',full_name text not null,phone text,city text,state text default 'RS',created_at timestamptz not null default now());
 create table if not exists public.companies(id uuid primary key default gen_random_uuid(),name text not null,cnpj text unique,city text not null,state text not null default 'RS',industry text,created_at timestamptz not null default now());
 create table if not exists public.skills(id uuid primary key default gen_random_uuid(),name text not null unique,category text not null,parent_skill_id uuid references public.skills(id) on delete set null,created_at timestamptz not null default now());
@@ -14,9 +15,4 @@ create index if not exists idx_job_skills_skill on public.job_skills(skill_id);
 create index if not exists idx_jobs_city_status on public.jobs(city,status);
 create index if not exists idx_matches_job_score on public.matches(job_id,score desc);
 alter table public.profiles enable row level security;alter table public.companies enable row level security;alter table public.skills enable row level security;alter table public.candidate_profiles enable row level security;alter table public.candidate_skills enable row level security;alter table public.jobs enable row level security;alter table public.job_skills enable row level security;alter table public.matches enable row level security;alter table public.applications enable row level security;
-create policy "skills readable" on public.skills for select using(true);
-create policy "jobs public when open" on public.jobs for select using(status='aberta' or auth.uid() is not null);
-create policy "own profile" on public.profiles for select using(auth.uid()=id);
-create policy "own candidate profile" on public.candidate_profiles for all using(auth.uid()=profile_id) with check(auth.uid()=profile_id);
-create policy "own candidate skills" on public.candidate_skills for all using(auth.uid()=candidate_id) with check(auth.uid()=candidate_id);
 insert into public.skills(name,category) values('CNC','Usinagem'),('Metrologia','Usinagem'),('Desenho Técnico','Usinagem'),('Leitura de Instrumentos','Usinagem'),('Mecânica','Manutenção'),('Elétrica','Manutenção'),('CLP','Automação'),('Pneumática','Manutenção'),('MIG/MAG','Soldagem'),('TIG','Soldagem'),('Usinagem','Usinagem') on conflict(name) do nothing;
