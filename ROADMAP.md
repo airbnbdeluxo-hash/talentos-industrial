@@ -1,42 +1,42 @@
 # Roadmap TalentOS
 
-## Fase 0 — concluída
-- [x] Repositório GitHub
-- [x] Interface V1
-- [x] SkillGraph conceitual
-- [x] Matching determinístico
-- [x] Schema inicial Supabase
+## Norte do produto
+TalentOS não é um ATS genérico. É uma camada de **Capability Intelligence** para a indústria: descobrir capacidade, provar competência, medir prontidão, fechar gaps e observar oferta/demanda.
 
-## Fase 1 — produto funcional
-- [ ] Criar projeto Supabase
-- [ ] Configurar Auth
-- [ ] Conectar frontend ao Supabase
-- [ ] CRUD de empresas
-- [ ] CRUD de vagas
-- [ ] CRUD de candidatos
-- [ ] Cadastro de skills
-- [ ] Upload de evidências
-- [ ] Persistir matches
-- [ ] Pipeline de candidatura
+## V5 — diferenciadores implementados
+- [x] Skill Passport
+- [x] Evidence Chain
+- [x] Readiness por vaga
+- [x] Gap-to-Training
+- [x] Intelligence / Market Graph inicial
+- [x] Desafio técnico demonstrativo
+- [x] Matching explicável
+- [x] RLS + isolamento multiempresa
+- [x] GitHub Actions para build
 
-## Fase 2 — piloto Serra Gaúcha
-- [ ] 3 empresas-piloto
-- [ ] 10 vagas difíceis
-- [ ] 100–300 talentos
-- [ ] Medir time-to-qualified-candidate
-- [ ] Registrar motivos de rejeição
-- [ ] Identificar lacunas de skills
+## Próxima entrega — produto conectado
+- [ ] Carregar empresas/vagas/talentos do Supabase
+- [ ] Persistir CRUD no Supabase
+- [ ] Onboarding da empresa
+- [ ] Onboarding do talento
+- [ ] Consentimento de visibilidade
+- [ ] Evidence upload via Storage
+- [ ] Avaliações técnicas persistidas
+- [ ] Match persistido e auditável
+- [ ] Histórico de candidatura
+- [ ] Dashboard de tempo até candidato qualificado
 
-## Fase 3 — inteligência
-- [ ] SkillGraph relacional
-- [ ] recomendação de treinamento
-- [ ] matching ponderado por competência
-- [ ] explicações de match
-- [ ] analytics de oferta/demanda
+## Moat
+- [ ] Taxonomia industrial própria
+- [ ] Grafo de skill -> evidência -> contexto -> readiness
+- [ ] Dados de oferta/demanda por região
+- [ ] Trilhas de treinamento baseadas em gaps reais
+- [ ] Histórico de resultados por skill e função
+- [ ] Benchmark de tempo/custo de contratação por função
+- [ ] Mobilidade interna e adjacências de carreira
 
-## Fase 4 — escala
-- [ ] multiempresa
-- [ ] permissões avançadas
-- [ ] PWA/mobile
-- [ ] integrações
-- [ ] automações
+## Expansão
+- [ ] Serra Gaúcha piloto
+- [ ] RS
+- [ ] Sul do Brasil
+- [ ] Multi-região
