@@ -13,3 +13,5 @@
 .consent{display:flex;gap:9px;align-items:flex-start;margin:12px 0;font-size:12px;color:var(--muted);line-height:1.45}.consent input{margin-top:2px}
 
 .funnel{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}.funnel>div{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface-2)}.funnel strong{display:block;font-size:24px}.funnel span{display:block;color:var(--muted);font-size:12px;margin-top:3px}@media(max-width:720px){.funnel{grid-template-columns:1fr 1fr}.funnel>div:last-child{grid-column:1/-1}}
+
+.challenge-modal{max-width:720px;max-height:88vh;overflow:auto}.challenge-meta{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.challenge-meta span{border:1px solid var(--line);border-radius:999px;padding:5px 9px;font-size:11px;color:var(--muted)}.question{padding:14px 0;border-top:1px solid var(--line)}.question>b{display:block;margin-bottom:9px;line-height:1.4}.option{display:flex;gap:8px;align-items:flex-start;padding:7px 0;font-size:13px}.option input{margin-top:2px}
