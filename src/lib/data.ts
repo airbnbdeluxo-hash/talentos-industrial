@@ -79,11 +79,15 @@ export async function createRemoteJob(userId:string,input:{title:string;companyI
  return job;
 }
 
-export async function createRemoteCandidate(userId:string,input:{name:string;role:string;city:string;years:number;salary:number;skills:string[]}){
+export async function createRemoteCandidate(userId:string,input:{name:string;role:string;city:string;years:number;salary:number;skills:string[];preferredShifts?:string[]}){
  if(!supabase)throw new Error('Supabase não configurado');
  const {error:profileError}=await supabase.from('candidate_profiles').upsert({profile_id:userId,display_name:input.name,role_title:input.role,city:input.city,years_experience:input.years,desired_salary:input.salary,searchable:true,visibility_consent_at:new Date().toISOString(),consent_version:'v1'}, {onConflict:'profile_id'});
  if(profileError)throw profileError;
  const skills=await findSkillIds(input.skills);
+ if(input.preferredShifts){
+   const pref=await supabase.from('talent_preferences').upsert({candidate_id:userId,preferred_shifts:input.preferredShifts},{onConflict:'candidate_id'});
+   if(pref.error)throw pref.error;
+ }
  if(skills.length){
    await supabase.from('candidate_skills').delete().eq('candidate_id',userId);
    const r=await supabase.from('candidate_skills').insert(skills.map(s=>({candidate_id:userId,skill_id:s.id,proficiency:3,verified:false,years_experience:input.years})));
