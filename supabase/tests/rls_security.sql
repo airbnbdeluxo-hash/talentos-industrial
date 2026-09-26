@@ -54,5 +54,21 @@ begin
     raise exception 'evidence storage select policy missing';
   end if;
 
+  if not exists(select 1 from pg_trigger where tgname='enforce_evidence_validation_state') then
+    raise exception 'evidence validation trigger missing';
+  end if;
+
+  if exists(select 1 from pg_policies where schemaname='public' and tablename='skill_evidence' and policyname='evidence_update') then
+    raise exception 'candidate evidence update policy must remain removed';
+  end if;
+
+  if not exists(select 1 from pg_policies where schemaname='public' and tablename='skill_evidence' and policyname='evidence_reviewer_update') then
+    raise exception 'reviewer evidence update policy missing';
+  end if;
+
+  if not exists(select 1 from pg_policies where schemaname='public' and tablename='skill_evidence' and policyname='evidence_delete') then
+    raise exception 'evidence delete policy missing';
+  end if;
+
   raise notice 'TalentOS RLS/security checks passed';
 end $$;
