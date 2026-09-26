@@ -10,6 +10,8 @@ export type AppEvent={id:string;applicationId:string;fromStatus?:Status;toStatus
 export type MatchRow={id:string;jobId:string;candidateId:string;score:number;reasons:string[];gaps:string[]};
 export type DB={candidates:Candidate[];companies:Company[];jobs:Job[];applications:AppRow[];events:AppEvent[];matches:MatchRow[]};
 export type RemoteProfile={id:string;role:'empresa'|'candidato'|'admin';full_name:string;city?:string|null};
+export type ChallengeQuestion={id:string;text:string;options:string[]};
+export type Challenge={id:string;skillId:string;skill:string;title:string;description:string;difficulty:string;timeLimitMinutes:number;questions:ChallengeQuestion[]};
 
 const mapEvidence=(e:any):Evidence=>({id:e.id,skill:e.skills?.name??'Skill',type:e.evidence_type,title:e.title,issuer:e.issuer??'',verified:Boolean(e.verified),expires:e.expires_at??undefined,score:e.score??undefined,storagePath:e.storage_path??undefined,fileName:e.file_name??undefined,mimeType:e.mime_type??undefined,fileSize:e.file_size??undefined});
 const mapCandidate=(c:any):Candidate=>{
@@ -21,6 +23,7 @@ const mapJob=(j:any):Job=>({id:j.id,title:j.title,companyId:j.company_id,company
 const mapApplication=(a:any):AppRow=>({id:a.id,jobId:a.job_id,candidateId:a.candidate_id,status:a.status as Status});
 const mapEvent=(e:any):AppEvent=>({id:e.id,applicationId:e.application_id,fromStatus:(e.from_status??undefined) as Status|undefined,toStatus:e.to_status as Status,at:e.created_at,note:e.note??undefined});
 const mapMatch=(m:any):MatchRow=>({id:m.id,jobId:m.job_id,candidateId:m.candidate_id,score:Number(m.score??0),reasons:Array.isArray(m.reasons)?m.reasons.map(String):[],gaps:Array.isArray(m.gaps)?m.gaps.map(String):[]});
+const mapChallenge=(c:any):Challenge=>({id:c.id,skillId:c.skill_id,skill:c.skills?.name??'Skill',title:c.title,description:c.description,difficulty:c.difficulty,timeLimitMinutes:Number(c.time_limit_minutes??10),questions:Array.isArray(c.questions)?c.questions.map((q:any)=>({id:String(q.id),text:String(q.text),options:Array.isArray(q.options)?q.options.map(String):[]})):[]});
 
 export async function getRemoteProfile(userId:string):Promise<RemoteProfile|null>{
  if(!supabase)return null;
@@ -143,6 +146,27 @@ export async function getEvidenceDownloadUrl(storagePath:string){
  const {data,error}=await supabase.storage.from('skill-evidence').createSignedUrl(storagePath,300);
  if(error)throw error;
  return data.signedUrl;
+}
+
+export async function getRemoteChallenges(skillName:string){
+ if(!supabase)throw new Error('Supabase não configurado');
+ const {data,error}=await supabase.from('challenge_library').select('id,skill_id,title,description,difficulty,time_limit_minutes,questions,skills(name)').eq('active',true).eq('skills.name',skillName);
+ if(error)throw error;
+ return (data??[]).map(mapChallenge);
+}
+
+export async function startRemoteChallenge(challengeId:string,jobId?:string){
+ if(!supabase)throw new Error('Supabase não configurado');
+ const {data,error}=await supabase.rpc('start_challenge',{p_challenge_id:challengeId,p_job_id:jobId??null});
+ if(error)throw error;
+ return String(data);
+}
+
+export async function completeRemoteChallenge(attemptId:string,answers:Record<string,number>){
+ if(!supabase)throw new Error('Supabase não configurado');
+ const {data,error}=await supabase.rpc('complete_challenge',{p_attempt_id:attemptId,p_answers:answers});
+ if(error)throw error;
+ return data?.[0] as {score:number;correct_count:number;total_count:number}|undefined;
 }
 
 export async function addRemoteChallenge(userId:string,skillName:string){
