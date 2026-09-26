@@ -34,12 +34,12 @@ TalentOS não é um ATS genérico. É uma camada de **Capability Intelligence** 
 ## Próxima entrega
 - [ ] Seed operacional / onboarding da primeira empresa real
 - [x] Upload real de evidências via Storage
-- [ ] Avaliações técnicas persistidas e biblioteca de desafios
+- [x] Avaliações técnicas persistidas e biblioteca de desafios
 - [x] Gerar e persistir matches no backend por vaga
 - [x] Dashboard de time-to-qualified-candidate
 - [ ] Consentimento com tela dedicada
 - [ ] Analytics do funil
-- [ ] Testes automatizados de RLS
+- [x] Testes automatizados de RLS
 
 ## Moat
 - [ ] Taxonomia industrial própria
