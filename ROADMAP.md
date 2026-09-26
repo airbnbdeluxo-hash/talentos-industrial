@@ -24,13 +24,16 @@ TalentOS não é um ATS genérico. É uma camada de **Capability Intelligence** 
 - [x] GitHub Actions para build
 - [x] Matching persistido no backend com score explicável e gaps
 - [x] Upload privado de evidências via Supabase Storage
+- [x] Onboarding inicial por tipo de conta
+- [x] Preferências de turno persistidas no Skill Passport
+- [x] Métrica inicial de time-to-qualified-candidate
 
 ## Próxima entrega
-- [ ] Seed operacional / onboarding da primeira empresa
+- [ ] Seed operacional / onboarding da primeira empresa real
 - [x] Upload real de evidências via Storage
 - [ ] Avaliações técnicas persistidas e biblioteca de desafios
 - [x] Gerar e persistir matches no backend por vaga
-- [ ] Dashboard de time-to-qualified-candidate
+- [x] Dashboard de time-to-qualified-candidate
 - [ ] Consentimento com tela dedicada
 - [ ] Analytics do funil
 - [ ] Testes automatizados de RLS
