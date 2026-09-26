@@ -1,7 +1,7 @@
 import { supabase } from './supabase';
 
 type Status='novo'|'triagem'|'entrevista'|'aprovado'|'rejeitado'|'contratado';
-export type Evidence={id:string;skill:string;type:string;title:string;issuer:string;verified:boolean;expires?:string;score?:number;storagePath?:string;fileName?:string;mimeType?:string;fileSize?:number};
+export type Evidence={id:string;skill:string;type:string;title:string;issuer:string;verified:boolean;expires?:string;score?:number;storagePath?:string;fileName?:string;mimeType?:string;fileSize?:number;validationStatus?:'pendente'|'aprovada'|'reprovada';reviewedBy?:string;reviewedAt?:string;reviewNote?:string};
 export type Candidate={id:string;name:string;city:string;role:string;years:number;salary:number;skills:string[];verified:string[];evidence:Evidence[];shifts:string[];consentGiven?:boolean};
 export type Company={id:string;name:string;city:string;industry:string};
 export type Job={id:string;title:string;companyId:string;companyName?:string;city:string;min:number;max:number;skills:string[];status:'aberta'|'pausada'|'fechada';shift:string;createdAt?:string|null;qualifiedCandidateAt?:string|null};
@@ -13,7 +13,7 @@ export type RemoteProfile={id:string;role:'empresa'|'candidato'|'admin';full_nam
 export type ChallengeQuestion={id:string;text:string;options:string[]};
 export type Challenge={id:string;skillId:string;skill:string;title:string;description:string;difficulty:string;timeLimitMinutes:number;questions:ChallengeQuestion[]};
 
-const mapEvidence=(e:any):Evidence=>({id:e.id,skill:e.skills?.name??'Skill',type:e.evidence_type,title:e.title,issuer:e.issuer??'',verified:Boolean(e.verified),expires:e.expires_at??undefined,score:e.score??undefined,storagePath:e.storage_path??undefined,fileName:e.file_name??undefined,mimeType:e.mime_type??undefined,fileSize:e.file_size??undefined});
+const mapEvidence=(e:any):Evidence=>({id:e.id,skill:e.skills?.name??'Skill',type:e.evidence_type,title:e.title,issuer:e.issuer??'',verified:Boolean(e.verified),expires:e.expires_at??undefined,score:e.score??undefined,storagePath:e.storage_path??undefined,fileName:e.file_name??undefined,mimeType:e.mime_type??undefined,fileSize:e.file_size??undefined,validationStatus:e.validation_status??'pendente',reviewedBy:e.reviewed_by??undefined,reviewedAt:e.reviewed_at??undefined,reviewNote:e.review_note??undefined});
 const mapCandidate=(c:any):Candidate=>{
  const prefs=Array.isArray(c.talent_preferences)?c.talent_preferences[0]:c.talent_preferences;
  return {id:c.profile_id,name:c.display_name??'Talento',city:c.city??'',role:c.role_title??'Profissional industrial',years:Number(c.years_experience??0),salary:Number(c.desired_salary??0),skills:(c.candidate_skills??[]).map((x:any)=>x.skills?.name).filter(Boolean),verified:(c.candidate_skills??[]).filter((x:any)=>x.verified).map((x:any)=>x.skills?.name).filter(Boolean),evidence:(c.skill_evidence??[]).map(mapEvidence),shifts:prefs?.preferred_shifts??[],consentGiven:Boolean(c.visibility_consent_at&&c.consent_version)};
@@ -41,7 +41,7 @@ export async function loadRemoteData(userId:string):Promise<DB>{
  const [companyRes,jobsRes,candidatesRes,appsRes,eventsRes,matchesRes]=await Promise.all([
    companyQuery,
    supabase.from('jobs').select('*').order('created_at',{ascending:false}),
-   supabase.from('candidate_profiles').select('profile_id,display_name,role_title,years_experience,desired_salary,city,searchable,candidate_skills(skill_id,proficiency,verified,years_experience,skills(name)),skill_evidence(id,skill_id,evidence_type,title,issuer,verified,expires_at,score,storage_path,file_name,mime_type,file_size,skills(name)),talent_preferences(preferred_shifts)').or(`searchable.eq.true,profile_id.eq.\${userId}`),
+   supabase.from('candidate_profiles').select('profile_id,display_name,role_title,years_experience,desired_salary,city,searchable,candidate_skills(skill_id,proficiency,verified,years_experience,skills(name)),skill_evidence(id,skill_id,evidence_type,title,issuer,verified,verified_at,expires_at,score,storage_path,file_name,mime_type,file_size,validation_status,reviewed_by,reviewed_at,review_note,skills(name)),talent_preferences(preferred_shifts)').or(`searchable.eq.true,profile_id.eq.${userId}`),
    supabase.from('applications').select('*').order('updated_at',{ascending:false}),
    supabase.from('application_events').select('*').order('created_at',{ascending:true}),
    supabase.from('matches').select('*').order('score',{ascending:false})
@@ -172,3 +172,10 @@ export async function completeRemoteChallenge(attemptId:string,answers:Record<st
  return data?.[0] as {score:number|null;correct_count:number|null;total_count:number}|undefined;
 }
 
+
+export async function reviewRemoteEvidence(evidenceId:string,status:'aprovada'|'reprovada',note?:string){
+ if(!supabase)throw new Error('Supabase não configurado');
+ const {data,error}=await supabase.rpc('review_skill_evidence',{p_evidence_id:evidenceId,p_status:status,p_note:note??null});
+ if(error)throw error;
+ return data;
+}
