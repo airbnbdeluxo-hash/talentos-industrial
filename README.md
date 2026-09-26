@@ -24,7 +24,7 @@ Supabase Auth + RLS + isolamento multiempresa. Não coloque service-role keys no
 
 ## Desenvolvimento
 ```bash
-npm ci
+npm install --no-audit --no-fund
 npm run dev
 npm run build
 ```
@@ -46,6 +46,10 @@ O onboarding orienta a conta ao primeiro passo, o Skill Passport coleta preferê
 ## Desafios técnicos
 
 O TalentOS mantém uma biblioteca de desafios por competência. A tentativa e as respostas são persistidas no backend; concluir um desafio não marca automaticamente a skill como verificada. A evidência permanece pendente até validação humana.
+
+## Gap-to-Training operacional
+
+Ao se candidatar a uma vaga, o TalentOS pode gerar um plano persistido por candidato/vaga. Cada gap registra skill, nível atual quando disponível, nível-alvo, prioridade, estimativa de horas e estado de desenvolvimento. O profissional pode iniciar e concluir cada ação; o plano é recalculável quando o conjunto de gaps muda.
 
 ## Fila de validação humana
 
