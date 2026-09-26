@@ -150,9 +150,12 @@ export async function getEvidenceDownloadUrl(storagePath:string){
 
 export async function getRemoteChallenges(skillName:string){
  if(!supabase)throw new Error('Supabase não configurado');
- const {data,error}=await supabase.from('challenge_library').select('id,skill_id,title,description,difficulty,time_limit_minutes,questions,skills(name)').eq('active',true).eq('skills.name',skillName);
+ const skillRes=await supabase.from('skills').select('id,name').eq('name',skillName).maybeSingle();
+ if(skillRes.error)throw skillRes.error;
+ if(!skillRes.data)return [];
+ const {data,error}=await supabase.from('challenge_library').select('id,skill_id,title,description,difficulty,time_limit_minutes,questions').eq('active',true).eq('skill_id',skillRes.data.id).order('created_at',{ascending:true});
  if(error)throw error;
- return (data??[]).map(mapChallenge);
+ return (data??[]).map((x:any)=>mapChallenge({...x,skills:{name:skillName}}));
 }
 
 export async function startRemoteChallenge(challengeId:string,jobId?:string){
@@ -169,15 +172,3 @@ export async function completeRemoteChallenge(attemptId:string,answers:Record<st
  return data?.[0] as {score:number;correct_count:number;total_count:number}|undefined;
 }
 
-export async function addRemoteChallenge(userId:string,skillName:string){
- if(!supabase)throw new Error('Supabase não configurado');
- const {data:skill,error:skillError}=await supabase.from('skills').select('id,name').eq('name',skillName).maybeSingle();
- if(skillError)throw skillError;
- if(!skill)throw new Error('Skill não encontrada');
- const {error:assessmentError}=await supabase.from('skill_assessments').insert({candidate_id:userId,assessment_type:'pratica',score:88,status:'concluido',completed_at:new Date().toISOString()});
- if(assessmentError)throw assessmentError;
- const {error:evidenceError}=await supabase.from('skill_evidence').insert({candidate_id:userId,skill_id:skill.id,evidence_type:'desafio',title:'Desafio prático de '+skillName,issuer:'TalentOS',verified:true,verified_at:new Date().toISOString(),score:88});
- if(evidenceError)throw evidenceError;
- const {error:skillUpdateError}=await supabase.from('candidate_skills').upsert({candidate_id:userId,skill_id:skill.id,proficiency:4,verified:true,years_experience:0},{onConflict:'candidate_id,skill_id'});
- if(skillUpdateError)throw skillUpdateError;
-}
