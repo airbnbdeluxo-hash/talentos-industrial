@@ -4,7 +4,7 @@ type Status='novo'|'triagem'|'entrevista'|'aprovado'|'rejeitado'|'contratado';
 export type Evidence={id:string;skill:string;type:string;title:string;issuer:string;verified:boolean;expires?:string;score?:number};
 export type Candidate={id:string;name:string;city:string;role:string;years:number;salary:number;skills:string[];verified:string[];evidence:Evidence[];shifts:string[]};
 export type Company={id:string;name:string;city:string;industry:string};
-export type Job={id:string;title:string;companyId:string;city:string;min:number;max:number;skills:string[];status:'aberta'|'pausada'|'fechada';shift:string};
+export type Job={id:string;title:string;companyId:string;companyName?:string;city:string;min:number;max:number;skills:string[];status:'aberta'|'pausada'|'fechada';shift:string};
 export type AppRow={id:string;jobId:string;candidateId:string;status:Status};
 export type AppEvent={id:string;applicationId:string;fromStatus?:Status;toStatus:Status;at:string;note?:string};
 export type DB={candidates:Candidate[];companies:Company[];jobs:Job[];applications:AppRow[];events:AppEvent[]};
@@ -13,7 +13,7 @@ export type RemoteProfile={id:string;role:'empresa'|'candidato'|'admin';full_nam
 const mapEvidence=(e:any):Evidence=>({id:e.id,skill:e.skills?.name??'Skill',type:e.evidence_type,title:e.title,issuer:e.issuer??'',verified:Boolean(e.verified),expires:e.expires_at??undefined,score:e.score??undefined});
 const mapCandidate=(c:any):Candidate=>({id:c.profile_id,name:c.display_name??'Talento',city:c.city??'',role:c.role_title??'Profissional industrial',years:Number(c.years_experience??0),salary:Number(c.desired_salary??0),skills:(c.candidate_skills??[]).map((x:any)=>x.skills?.name).filter(Boolean),verified:(c.candidate_skills??[]).filter((x:any)=>x.verified).map((x:any)=>x.skills?.name).filter(Boolean),evidence:(c.skill_evidence??[]).map(mapEvidence),shifts:[]});
 const mapCompany=(c:any):Company=>({id:c.id,name:c.name,city:c.city,industry:c.industry??'Indústria'});
-const mapJob=(j:any):Job=>({id:j.id,title:j.title,companyId:j.company_id,city:j.city,min:Number(j.salary_min??0),max:Number(j.salary_max??0),skills:[],status:j.status,shift:j.shift??'1º turno'});
+const mapJob=(j:any):Job=>({id:j.id,title:j.title,companyId:j.company_id,companyName:j.company_public_name??undefined,city:j.city,min:Number(j.salary_min??0),max:Number(j.salary_max??0),skills:[],status:j.status,shift:j.shift??'1º turno'});
 const mapApplication=(a:any):AppRow=>({id:a.id,jobId:a.job_id,candidateId:a.candidate_id,status:a.status as Status});
 const mapEvent=(e:any):AppEvent=>({id:e.id,applicationId:e.application_id,fromStatus:(e.from_status??undefined) as Status|undefined,toStatus:e.to_status as Status,at:e.created_at,note:e.note??undefined});
 
@@ -62,7 +62,8 @@ export async function createRemoteCompany(userId:string, input:{name:string;city
 
 export async function createRemoteJob(userId:string,input:{title:string;companyId:string;city:string;min:number;max:number;shift:string;skills:string[]}){
  if(!supabase)throw new Error('Supabase não configurado');
- const {data:job,error}=await supabase.from('jobs').insert({title:input.title,company_id:input.companyId,city:input.city,salary_min:input.min,salary_max:input.max,shift:input.shift,status:'aberta'}).select('*').single();
+ const company=await supabase.from('companies').select('name').eq('id',input.companyId).single();if(company.error)throw company.error;
+ const {data:job,error}=await supabase.from('jobs').insert({title:input.title,company_id:input.companyId,company_public_name:company.data.name,city:input.city,salary_min:input.min,salary_max:input.max,shift:input.shift,status:'aberta'}).select('*').single();
  if(error)throw error;
  const skills=await findSkillIds(input.skills);
  if(skills.length) {
