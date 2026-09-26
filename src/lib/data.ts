@@ -8,7 +8,14 @@ export type Job={id:string;title:string;companyId:string;companyName?:string;cit
 export type AppRow={id:string;jobId:string;candidateId:string;status:Status};
 export type AppEvent={id:string;applicationId:string;fromStatus?:Status;toStatus:Status;at:string;note?:string};
 export type MatchRow={id:string;jobId:string;candidateId:string;score:number;reasons:string[];gaps:string[]};
-export type DB={candidates:Candidate[];companies:Company[];jobs:Job[];applications:AppRow[];events:AppEvent[];matches:MatchRow[]};
+export type TrainingStatus='recomendado'|'em_andamento'|'concluido'|'dispensado'|'resolvido';
+export type TrainingRecommendation={
+  id:string;candidateId:string;jobId:string;skillId:string;skill:string;
+  priority:number;reason:string;estimatedHours?:number|null;status:TrainingStatus;
+  gapType:'ausente'|'nivel';currentProficiency?:number|null;targetProficiency:number;
+  startedAt?:string|null;completedAt?:string|null;updatedAt?:string|null;outcomeNote?:string|null;
+};
+export type DB={candidates:Candidate[];companies:Company[];jobs:Job[];applications:AppRow[];events:AppEvent[];matches:MatchRow[];training:TrainingRecommendation[]};
 export type RemoteProfile={id:string;role:'empresa'|'candidato'|'admin';full_name:string;city?:string|null};
 export type ChallengeQuestion={id:string;text:string;options:string[]};
 export type Challenge={id:string;skillId:string;skill:string;title:string;description:string;difficulty:string;timeLimitMinutes:number;questions:ChallengeQuestion[]};
@@ -23,6 +30,14 @@ const mapJob=(j:any):Job=>({id:j.id,title:j.title,companyId:j.company_id,company
 const mapApplication=(a:any):AppRow=>({id:a.id,jobId:a.job_id,candidateId:a.candidate_id,status:a.status as Status});
 const mapEvent=(e:any):AppEvent=>({id:e.id,applicationId:e.application_id,fromStatus:(e.from_status??undefined) as Status|undefined,toStatus:e.to_status as Status,at:e.created_at,note:e.note??undefined});
 const mapMatch=(m:any):MatchRow=>({id:m.id,jobId:m.job_id,candidateId:m.candidate_id,score:Number(m.score??0),reasons:Array.isArray(m.reasons)?m.reasons.map(String):[],gaps:Array.isArray(m.gaps)?m.gaps.map(String):[]});
+const mapTraining=(t:any):TrainingRecommendation=>({
+  id:t.id,candidateId:t.candidate_id,jobId:t.job_id,skillId:t.skill_id,skill:t.skills?.name??'Skill',
+  priority:Number(t.priority??3),reason:t.reason,estimatedHours:t.estimated_hours==null?null:Number(t.estimated_hours),
+  status:t.status as TrainingStatus,gapType:(t.gap_type??'nivel') as 'ausente'|'nivel',
+  currentProficiency:t.current_proficiency==null?null:Number(t.current_proficiency),
+  targetProficiency:Number(t.target_proficiency??3),startedAt:t.started_at??null,
+  completedAt:t.completed_at??null,updatedAt:t.updated_at??null,outcomeNote:t.outcome_note??null
+});
 const mapChallenge=(c:any):Challenge=>({id:c.id,skillId:c.skill_id,skill:c.skills?.name??'Skill',title:c.title,description:c.description,difficulty:c.difficulty,timeLimitMinutes:Number(c.time_limit_minutes??10),questions:Array.isArray(c.questions)?c.questions.map((q:any)=>({id:String(q.id),text:String(q.text),options:Array.isArray(q.options)?q.options.map(String):[]})):[]});
 
 export async function getRemoteProfile(userId:string):Promise<RemoteProfile|null>{
@@ -38,20 +53,21 @@ export async function loadRemoteData(userId:string):Promise<DB>{
  if(memberError)throw memberError;
  const companyIds=(members??[]).map((x:any)=>x.company_id);
  const companyQuery=companyIds.length?supabase.from('companies').select('*').in('id',companyIds):Promise.resolve({data:[],error:null} as any);
- const [companyRes,jobsRes,candidatesRes,appsRes,eventsRes,matchesRes]=await Promise.all([
+ const [companyRes,jobsRes,candidatesRes,appsRes,eventsRes,matchesRes,trainingRes]=await Promise.all([
    companyQuery,
    supabase.from('jobs').select('*').order('created_at',{ascending:false}),
    supabase.from('candidate_profiles').select('profile_id,display_name,role_title,years_experience,desired_salary,city,searchable,candidate_skills(skill_id,proficiency,verified,years_experience,skills(name)),skill_evidence(id,skill_id,evidence_type,title,issuer,verified,verified_at,expires_at,score,storage_path,file_name,mime_type,file_size,validation_status,reviewed_by,reviewed_at,review_note,skills(name)),talent_preferences(preferred_shifts)').or(`searchable.eq.true,profile_id.eq.${userId}`),
    supabase.from('applications').select('*').order('updated_at',{ascending:false}),
    supabase.from('application_events').select('*').order('created_at',{ascending:true}),
-   supabase.from('matches').select('*').order('score',{ascending:false})
+   supabase.from('matches').select('*').order('score',{ascending:false}),
+   supabase.from('training_recommendations').select('id,candidate_id,job_id,skill_id,priority,reason,estimated_hours,status,gap_type,current_proficiency,target_proficiency,started_at,completed_at,updated_at,outcome_note,skills(name)').order('updated_at',{ascending:false})
  ]);
- if(companyRes.error)throw companyRes.error;if(jobsRes.error)throw jobsRes.error;if(candidatesRes.error)throw candidatesRes.error;if(appsRes.error)throw appsRes.error;if(eventsRes.error)throw eventsRes.error;if(matchesRes.error)throw matchesRes.error;
+ if(companyRes.error)throw companyRes.error;if(jobsRes.error)throw jobsRes.error;if(candidatesRes.error)throw candidatesRes.error;if(appsRes.error)throw appsRes.error;if(eventsRes.error)throw eventsRes.error;if(matchesRes.error)throw matchesRes.error;if(trainingRes.error)throw trainingRes.error;
  const jobIds=(jobsRes.data??[]).map((j:any)=>j.id);
  let jobSkills:any[]=[];
  if(jobIds.length){const r=await supabase.from('job_skills').select('job_id,skill_id,skills(name)').in('job_id',jobIds);if(r.error)throw r.error;jobSkills=r.data??[];}
  const jobs=(jobsRes.data??[]).map((j:any)=>({...mapJob(j),skills:jobSkills.filter(s=>s.job_id===j.id).map(s=>s.skills?.name).filter(Boolean)}));
- return {candidates:(candidatesRes.data??[]).map(mapCandidate),companies:(companyRes.data??[]).map(mapCompany),jobs,applications:(appsRes.data??[]).map(mapApplication),events:(eventsRes.data??[]).map(mapEvent),matches:(matchesRes.data??[]).map(mapMatch)};
+ return {candidates:(candidatesRes.data??[]).map(mapCandidate),companies:(companyRes.data??[]).map(mapCompany),jobs,applications:(appsRes.data??[]).map(mapApplication),events:(eventsRes.data??[]).map(mapEvent),matches:(matchesRes.data??[]).map(mapMatch),training:(trainingRes.data??[]).map(mapTraining)};
 }
 
 async function findSkillIds(names:string[]):Promise<{id:string,name:string}[]>{
@@ -116,6 +132,26 @@ export async function generateRemoteMatches(jobId:string){
  const {data,error}=await supabase.rpc('generate_matches_for_job',{p_job_id:jobId});
  if(error)throw error;
  return (data??[]) as Array<{candidate_id:string;score:number;reasons:any;gaps:any}>;
+}
+
+export async function generateRemoteTrainingRecommendations(candidateId:string,jobId:string){
+ if(!supabase)throw new Error('Supabase não configurado');
+ const {data,error}=await supabase.rpc('generate_training_plan_for_job',{p_candidate_id:candidateId,p_job_id:jobId});
+ if(error)throw error;
+ return (data??[]).map(mapTraining);
+}
+
+export async function updateRemoteTrainingRecommendation(
+ recommendationId:string,
+ status:Exclude<TrainingStatus,'recomendado'|'resolvido'>,
+ note?:string
+){
+ if(!supabase)throw new Error('Supabase não configurado');
+ const {data,error}=await supabase.rpc('update_training_recommendation',{
+   p_recommendation_id:recommendationId,p_status:status,p_note:note??null
+ });
+ if(error)throw error;
+ return data ? mapTraining(data) : null;
 }
 
 export async function uploadRemoteEvidence(userId:string,skillName:string,file:File){
