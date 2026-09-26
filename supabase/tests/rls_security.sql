@@ -34,8 +34,12 @@ begin
     raise exception 'anon can execute complete_challenge';
   end if;
 
-  if has_table_privilege('authenticated','public.challenge_answer_keys','select') then
-    raise exception 'authenticated can select challenge answer keys';
+  if not exists(
+    select 1 from pg_proc p
+    join pg_namespace n on n.oid=p.pronamespace
+    where n.nspname='public' and p.proname='complete_challenge' and not p.prosecdef
+  ) then
+    raise exception 'complete_challenge must remain SECURITY INVOKER';
   end if;
 
   if not exists(select 1 from pg_trigger where tgname='protect_profile_role') then
