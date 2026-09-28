@@ -51,6 +51,8 @@ O TalentOS mantém uma biblioteca de desafios por competência. A tentativa e as
 
 Ao se candidatar a uma vaga, o TalentOS pode gerar um plano persistido por candidato/vaga. Cada gap registra skill, nível atual quando disponível, nível-alvo, prioridade, estimativa de horas e estado de desenvolvimento. O profissional pode iniciar e concluir cada ação; o plano é recalculável quando o conjunto de gaps muda.
 
+A aba de Inteligência consolida os gaps visíveis para a conta, mostrando volume ativo, desenvolvimento em andamento, conclusões e horas estimadas por competência.
+
 ## Fila de validação humana
 
 Empresas podem revisar evidências de candidatos que estejam em seu pipeline. Cada decisão registra status, responsável, horário e observação. Uma evidência aprovada atualiza a competência correspondente; uma rejeitada não pode ser usada como prova verificada.
