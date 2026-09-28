@@ -38,6 +38,9 @@ TalentOS não é um ATS genérico. É uma camada de **Capability Intelligence** 
 - [x] Outcome por competência agregado no backend e consumido pela aba de Inteligência
 
 ## Próxima entrega
+- [x] Onboarding B2B guiado (empresa → primeira vaga → matching)
+- [x] Recuperação e alteração de senha
+- [x] Tela dedicada de consentimento e visibilidade B2C
 - [ ] Seed operacional / onboarding da primeira empresa real
 - [x] Upload real de evidências via Storage
 - [x] Avaliações técnicas persistidas e biblioteca de desafios
