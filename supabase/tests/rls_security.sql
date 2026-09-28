@@ -6,7 +6,7 @@ declare
     'profiles','companies','skills','candidate_profiles','candidate_skills',
     'jobs','job_skills','matches','applications','company_members',
     'skill_evidence','skill_assessments','training_recommendations',
-    'talent_preferences','application_events','challenge_library','challenge_attempts','capability_nodes','capability_edges'
+    'talent_preferences','application_events','challenge_library','challenge_attempts','capability_nodes','capability_edges','employment_outcomes'
   ];
   t text;
 begin
@@ -112,5 +112,30 @@ begin
     raise exception 'legacy candidate_training_update policy must remain removed';
   end if;
 
+  if has_table_privilege('anon','public.employment_outcomes','select') then
+    raise exception 'anon can read employment_outcomes';
+  end if;
+  if not has_table_privilege('authenticated','public.employment_outcomes','select') then
+    raise exception 'authenticated cannot read employment_outcomes';
+  end if;
+  if has_function_privilege('anon','public.record_employment_outcome(uuid,text,numeric,smallint,text,jsonb,text)') then
+    raise exception 'anon can execute record_employment_outcome';
+  end if;
+  if not has_function_privilege('authenticated','public.record_employment_outcome(uuid,text,numeric,smallint,text,jsonb,text)') then
+    raise exception 'authenticated cannot execute record_employment_outcome';
+  end if;
+  if not exists(
+    select 1 from pg_proc p
+    join pg_namespace n on n.oid=p.pronamespace
+    where n.nspname='public' and p.proname='record_employment_outcome' and not p.prosecdef
+  ) then
+    raise exception 'record_employment_outcome must remain SECURITY INVOKER';
+  end if;
+  if not exists(select 1 from pg_trigger where tgname='trg_guard_employment_outcome_write') then
+    raise exception 'employment outcome write guard missing';
+  end if;
+  if not exists(select 1 from pg_policies where schemaname='public' and tablename='employment_outcomes' and policyname='employment_outcomes_visibility') then
+    raise exception 'employment outcome visibility policy missing';
+  end if;
   raise notice 'TalentOS RLS/security checks passed';
 end $$;
