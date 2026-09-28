@@ -22,6 +22,7 @@ export type RetentionStatus='ativo'|'desligado'|'promovido'|'transferido';
 export type EmploymentOutcome={id:string;applicationId:string;candidateId:string;jobId:string;companyId:string;checkpoint:OutcomeCheckpoint;performanceScore?:number|null;rampUpDays?:number|null;retentionStatus:RetentionStatus;skillFeedback:Record<string,unknown>;managerNote?:string|null;createdBy:string;createdAt:string;updatedAt:string};
 export type OutcomeSkillSignalStatus='utilizada'|'necessita_desenvolvimento'|'nao_observado'|'nao_aplicavel';
 export type EmploymentOutcomeSkillSignal={id:string;outcomeId:string;skillId:string;capabilityNodeId?:string|null;skill:string;signalStatus:OutcomeSkillSignalStatus;managerRating?:number|null;trainingNeeded:boolean;note?:string|null;createdBy:string;createdAt:string;updatedAt:string};
+export type OutcomeSkillIntelligence={skillId:string;capabilityNodeId?:string|null;skillName:string;signalCount:number;utilizedCount:number;needsDevelopmentCount:number;trainingNeededCount:number;avgManagerRating?:number|null;avgPerformance?:number|null;avgRampUpDays?:number|null};
 export type DB={candidates:Candidate[];companies:Company[];jobs:Job[];applications:AppRow[];events:AppEvent[];matches:MatchRow[];training:TrainingRecommendation[];capabilityNodes:CapabilityNode[];capabilityEdges:CapabilityEdge[];outcomes:EmploymentOutcome[];outcomeSkillSignals:EmploymentOutcomeSkillSignal[]};
 export type RemoteProfile={id:string;role:'empresa'|'candidato'|'admin';full_name:string;city?:string|null};
 export type ChallengeQuestion={id:string;text:string;options:string[]};
@@ -260,4 +261,12 @@ export async function saveRemoteOutcomeSkillSignal(input:{outcomeId:string;skill
  });
  if(error)throw error;
  return data?mapOutcomeSkillSignal(data):null;
+}
+
+
+export async function getRemoteOutcomeSkillIntelligence():Promise<OutcomeSkillIntelligence[]>{
+ if(!supabase)throw new Error('Supabase não configurado');
+ const {data,error}=await supabase.rpc('get_company_outcome_skill_intelligence');
+ if(error)throw error;
+ return (data??[]).map((row:any)=>({skillId:row.skill_id,capabilityNodeId:row.capability_node_id??null,skillName:row.skill_name??'Skill',signalCount:Number(row.signal_count??0),utilizedCount:Number(row.utilized_count??0),needsDevelopmentCount:Number(row.needs_development_count??0),trainingNeededCount:Number(row.training_needed_count??0),avgManagerRating:row.avg_manager_rating==null?null:Number(row.avg_manager_rating),avgPerformance:row.avg_performance==null?null:Number(row.avg_performance),avgRampUpDays:row.avg_ramp_up_days==null?null:Number(row.avg_ramp_up_days)}));
 }
