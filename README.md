@@ -68,3 +68,8 @@ O dashboard consolida conversões descritivas entre etapas e o tempo médio obse
 O SkillGraph agora possui uma camada persistida no Supabase com nós de família, processo, máquina, controle, competência, cargo e contexto, além de relações ponderadas entre eles. A intenção é que a taxonomia evolua com evidências e resultados reais e se torne o mapa proprietário de capacidade industrial do TalentOS.
 
 A versão inicial é deliberadamente curada: o banco contém o vocabulário e as relações-base; clientes não escrevem diretamente na taxonomia. Alterações estruturais entram por migração e podem ser governadas como ativo de produto.
+
+
+## Outcome Loop
+
+Após uma candidatura chegar a **contratado**, a empresa pode registrar checkpoints de 30, 60 e 90 dias ou uma saída. O registro inclui performance, ramp-up, situação de retenção e observação interna. Cada checkpoint fica vinculado à candidatura, vaga, empresa e profissional, criando a base para aprender com resultados reais de contratação sem misturar dados internos com o perfil público do candidato.
