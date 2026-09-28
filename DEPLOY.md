@@ -22,7 +22,7 @@ Nunca publique uma service-role key.
 O workflow `.github/workflows/ci.yml` executa:
 
 ```
-npm ci
+npm install --no-audit --no-fund
 npm run build
 ```
 
