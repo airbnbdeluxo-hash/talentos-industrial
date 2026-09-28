@@ -6,7 +6,7 @@ declare
     'profiles','companies','skills','candidate_profiles','candidate_skills',
     'jobs','job_skills','matches','applications','company_members',
     'skill_evidence','skill_assessments','training_recommendations',
-    'talent_preferences','application_events','challenge_library','challenge_attempts'
+    'talent_preferences','application_events','challenge_library','challenge_attempts','capability_nodes','capability_edges'
   ];
   t text;
 begin
@@ -68,6 +68,19 @@ begin
 
   if not exists(select 1 from pg_policies where schemaname='public' and tablename='skill_evidence' and policyname='evidence_delete') then
     raise exception 'evidence delete policy missing';
+  end if;
+
+  if has_table_privilege('anon','public.capability_nodes','select') then
+    raise exception 'anon can read capability_nodes';
+  end if;
+  if not has_table_privilege('authenticated','public.capability_nodes','select') then
+    raise exception 'authenticated cannot read capability_nodes';
+  end if;
+  if not exists(select 1 from pg_policies where schemaname='public' and tablename='capability_nodes' and policyname='capability_nodes_read') then
+    raise exception 'capability nodes read policy missing';
+  end if;
+  if not exists(select 1 from pg_policies where schemaname='public' and tablename='capability_edges' and policyname='capability_edges_read') then
+    raise exception 'capability edges read policy missing';
   end if;
 
   if has_function_privilege('anon','public.generate_training_plan_for_job(uuid,uuid)','execute') then
