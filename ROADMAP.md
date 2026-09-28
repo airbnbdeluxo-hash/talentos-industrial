@@ -21,6 +21,7 @@ TalentOS não é um ATS genérico. É uma camada de **Capability Intelligence** 
 - [x] Aplicação a vaga
 - [x] Pipeline remoto
 - [x] RLS e isolamento multiempresa
+- [x] Provisionamento confiável de papéis
 - [x] GitHub Actions para build
 - [x] Matching persistido no backend com score explicável e gaps
 - [x] Upload privado de evidências via Supabase Storage
