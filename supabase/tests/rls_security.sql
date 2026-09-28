@@ -89,6 +89,12 @@ begin
   if not exists(select 1 from pg_trigger where tgname='trg_guard_training_recommendation_insert') then
     raise exception 'training recommendation insert guard missing';
   end if;
+  if not exists(select 1 from pg_policies where schemaname='public' and tablename='training_recommendations' and policyname='training_generation_update') then
+    raise exception 'training generation update policy missing';
+  end if;
+  if not exists(select 1 from pg_trigger where tgname='trg_guard_training_recommendation_update') then
+    raise exception 'training recommendation update guard missing';
+  end if;
 
   raise notice 'TalentOS RLS/security checks passed';
 end $$;
