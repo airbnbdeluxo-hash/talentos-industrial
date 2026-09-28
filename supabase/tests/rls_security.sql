@@ -6,7 +6,7 @@ declare
     'profiles','companies','skills','candidate_profiles','candidate_skills',
     'jobs','job_skills','matches','applications','company_members',
     'skill_evidence','skill_assessments','training_recommendations',
-    'talent_preferences','application_events','challenge_library','challenge_attempts','capability_nodes','capability_edges','employment_outcomes'
+    'talent_preferences','application_events','challenge_library','challenge_attempts','capability_nodes','capability_edges','employment_outcomes','employment_outcome_skill_signals'
   ];
   t text;
 begin
