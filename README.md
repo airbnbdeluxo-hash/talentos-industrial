@@ -90,3 +90,12 @@ A aba de Inteligência consome uma agregação protegida no backend (`get_compan
 ## Provisionamento de papéis
 
 O cadastro público não define privilégios de empresa ou administração. Novas contas entram como profissionais por padrão; papéis elevados são atribuídos por metadado administrativo confiável e permanecem protegidos pelo backend.
+
+
+## Acesso, recuperação e consentimento
+
+O acesso usa Supabase Auth com sessão persistente. O fluxo inclui login, criação de conta profissional, recuperação de senha por e-mail e atualização de senha. A recuperação redireciona para a origem configurada da aplicação; essa origem precisa estar cadastrada nas Redirect URLs do projeto Supabase. A experiência B2C possui onboarding do Skill Passport e uma tela dedicada para o profissional decidir se permite que empresas encontrem seu perfil. A visibilidade não transforma arquivos de evidência em conteúdo público: os documentos permanecem em Storage privado e sujeitos às políticas de acesso.
+
+## Operação B2B
+
+Contas empresariais entram por provisionamento confiável. No primeiro acesso, o onboarding orienta a empresa em três passos: cadastrar a empresa, estruturar a primeira vaga e gerar o matching. Ao criar a vaga, o recrutador informa cargo, atividades/contexto, cidade, faixa salarial, turno e competências. O profissional visualiza a vaga, usa seu Skill Passport como base da candidatura e, com o consentimento de visibilidade ativo, pode se candidatar diretamente. A candidatura pode gerar um plano de desenvolvimento para gaps identificados.
