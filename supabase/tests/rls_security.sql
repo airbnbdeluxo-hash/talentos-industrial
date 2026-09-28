@@ -118,10 +118,10 @@ begin
   if not has_table_privilege('authenticated','public.employment_outcomes','select') then
     raise exception 'authenticated cannot read employment_outcomes';
   end if;
-  if has_function_privilege('anon','public.record_employment_outcome(uuid,text,numeric,smallint,text,jsonb,text)') then
+  if has_function_privilege('anon','public.record_employment_outcome(uuid,text,numeric,smallint,text,jsonb,text)','execute') then
     raise exception 'anon can execute record_employment_outcome';
   end if;
-  if not has_function_privilege('authenticated','public.record_employment_outcome(uuid,text,numeric,smallint,text,jsonb,text)') then
+  if not has_function_privilege('authenticated','public.record_employment_outcome(uuid,text,numeric,smallint,text,jsonb,text)','execute') then
     raise exception 'authenticated cannot execute record_employment_outcome';
   end if;
   if not exists(
