@@ -137,5 +137,31 @@ begin
   if not exists(select 1 from pg_policies where schemaname='public' and tablename='employment_outcomes' and policyname='employment_outcomes_visibility') then
     raise exception 'employment outcome visibility policy missing';
   end if;
+  if not has_table_privilege('authenticated','public.employment_outcome_skill_signals','select') then
+    raise exception 'authenticated cannot read employment_outcome_skill_signals';
+  end if;
+  if has_table_privilege('anon','public.employment_outcome_skill_signals','select') then
+    raise exception 'anon can read employment_outcome_skill_signals';
+  end if;
+  if has_function_privilege('anon','public.save_employment_outcome_skill_signal(uuid,uuid,text,smallint,boolean,text)','execute') then
+    raise exception 'anon can execute save_employment_outcome_skill_signal';
+  end if;
+  if not has_function_privilege('authenticated','public.save_employment_outcome_skill_signal(uuid,uuid,text,smallint,boolean,text)','execute') then
+    raise exception 'authenticated cannot execute save_employment_outcome_skill_signal';
+  end if;
+  if exists(
+    select 1 from pg_proc p
+    join pg_namespace n on n.oid=p.pronamespace
+    where n.nspname='public' and p.proname='save_employment_outcome_skill_signal' and p.prosecdef
+  ) then
+    raise exception 'save_employment_outcome_skill_signal must remain SECURITY INVOKER';
+  end if;
+  if not exists(select 1 from pg_trigger where tgname='trg_guard_employment_outcome_skill_write') then
+    raise exception 'outcome skill signal write guard missing';
+  end if;
+  if not exists(select 1 from pg_policies where schemaname='public' and tablename='employment_outcome_skill_signals' and policyname='outcome_skill_signals_visibility') then
+    raise exception 'outcome skill signal visibility policy missing';
+  end if;
+
   raise notice 'TalentOS RLS/security checks passed';
 end $$;
