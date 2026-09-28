@@ -73,3 +73,8 @@ A versão inicial é deliberadamente curada: o banco contém o vocabulário e as
 ## Outcome Loop
 
 Após uma candidatura chegar a **contratado**, a empresa pode registrar checkpoints de 30, 60 e 90 dias ou uma saída. O registro inclui performance, ramp-up, situação de retenção e observação interna. Cada checkpoint fica vinculado à candidatura, vaga, empresa e profissional, criando a base para aprender com resultados reais de contratação sem misturar dados internos com o perfil público do candidato.
+
+
+## Estratégia de capacidade
+
+O dashboard separa, para a vaga selecionada, profissionais com readiness alto, profissionais próximos de prontidão e casos com gaps maiores. A leitura é uma heurística operacional baseada nos dados atuais do TalentOS; não é uma previsão de performance ou uma decisão automática de contratação.
