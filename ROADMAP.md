@@ -35,6 +35,7 @@ TalentOS não é um ATS genérico. É uma camada de **Capability Intelligence** 
 - [x] Plano de desenvolvimento persistido por candidato/vaga
 - [x] Progresso de desenvolvimento: recomendado → em andamento → concluído
 - [x] Inteligência de desenvolvimento por gaps, competências e horas estimadas
+- [x] Outcome por competência agregado no backend e consumido pela aba de Inteligência
 
 ## Próxima entrega
 - [ ] Seed operacional / onboarding da primeira empresa real
