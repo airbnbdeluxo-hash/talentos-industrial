@@ -52,6 +52,7 @@ TalentOS não é um ATS genérico. É uma camada de **Capability Intelligence** 
 - [x] Grafo skill -> evidência -> contexto -> readiness — base de capability graph criada
 - [ ] Dados de oferta/demanda por região
 - [x] Trilhas de treinamento operacionais baseadas em gaps reais
+- [x] Base de histórico pós-contratação — Outcome Loop 30/60/90d
 - [ ] Histórico de resultados por skill e função
 - [ ] Benchmark de contratação
 - [ ] Mobilidade interna e adjacências de carreira
