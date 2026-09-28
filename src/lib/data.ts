@@ -20,7 +20,9 @@ export type CapabilityEdge={fromNodeId:string;toNodeId:string;relationshipType:'
 export type OutcomeCheckpoint='30d'|'60d'|'90d'|'saida';
 export type RetentionStatus='ativo'|'desligado'|'promovido'|'transferido';
 export type EmploymentOutcome={id:string;applicationId:string;candidateId:string;jobId:string;companyId:string;checkpoint:OutcomeCheckpoint;performanceScore?:number|null;rampUpDays?:number|null;retentionStatus:RetentionStatus;skillFeedback:Record<string,unknown>;managerNote?:string|null;createdBy:string;createdAt:string;updatedAt:string};
-export type DB={candidates:Candidate[];companies:Company[];jobs:Job[];applications:AppRow[];events:AppEvent[];matches:MatchRow[];training:TrainingRecommendation[];capabilityNodes:CapabilityNode[];capabilityEdges:CapabilityEdge[];outcomes:EmploymentOutcome[]};
+export type OutcomeSkillSignalStatus='utilizada'|'necessita_desenvolvimento'|'nao_observado'|'nao_aplicavel';
+export type EmploymentOutcomeSkillSignal={id:string;outcomeId:string;skillId:string;capabilityNodeId?:string|null;skill:string;signalStatus:OutcomeSkillSignalStatus;managerRating?:number|null;trainingNeeded:boolean;note?:string|null;createdBy:string;createdAt:string;updatedAt:string};
+export type DB={candidates:Candidate[];companies:Company[];jobs:Job[];applications:AppRow[];events:AppEvent[];matches:MatchRow[];training:TrainingRecommendation[];capabilityNodes:CapabilityNode[];capabilityEdges:CapabilityEdge[];outcomes:EmploymentOutcome[];outcomeSkillSignals:EmploymentOutcomeSkillSignal[]};
 export type RemoteProfile={id:string;role:'empresa'|'candidato'|'admin';full_name:string;city?:string|null};
 export type ChallengeQuestion={id:string;text:string;options:string[]};
 export type Challenge={id:string;skillId:string;skill:string;title:string;description:string;difficulty:string;timeLimitMinutes:number;questions:ChallengeQuestion[]};
@@ -47,6 +49,7 @@ const mapChallenge=(c:any):Challenge=>({id:c.id,skillId:c.skill_id,skill:c.skill
 const mapCapabilityNode=(n:any):CapabilityNode=>({id:n.id,nodeType:n.node_type,name:n.name,slug:n.slug,skillId:n.skill_id??null,parentId:n.parent_id??null,description:n.description??null});
 const mapCapabilityEdge=(e:any):CapabilityEdge=>({fromNodeId:e.from_node_id,toNodeId:e.to_node_id,relationshipType:e.relationship_type,weight:Number(e.weight??1),source:e.source??'TalentOS'});
 const mapOutcome=(o:any):EmploymentOutcome=>({id:o.id,applicationId:o.application_id,candidateId:o.candidate_id,jobId:o.job_id,companyId:o.company_id,checkpoint:o.checkpoint as OutcomeCheckpoint,performanceScore:o.performance_score==null?null:Number(o.performance_score),rampUpDays:o.ramp_up_days==null?null:Number(o.ramp_up_days),retentionStatus:o.retention_status as RetentionStatus,skillFeedback:(o.skill_feedback&&typeof o.skill_feedback==='object')?o.skill_feedback:{},managerNote:o.manager_note??null,createdBy:o.created_by,createdAt:o.created_at,updatedAt:o.updated_at});
+const mapOutcomeSkillSignal=(s:any):EmploymentOutcomeSkillSignal=>({id:s.id,outcomeId:s.outcome_id,skillId:s.skill_id,capabilityNodeId:s.capability_node_id??null,skill:s.skills?.name??'Skill',signalStatus:s.signal_status as OutcomeSkillSignalStatus,managerRating:s.manager_rating==null?null:Number(s.manager_rating),trainingNeeded:Boolean(s.training_needed),note:s.note??null,createdBy:s.created_by,createdAt:s.created_at,updatedAt:s.updated_at});
 
 export async function getRemoteProfile(userId:string):Promise<RemoteProfile|null>{
  if(!supabase)return null;
@@ -61,7 +64,7 @@ export async function loadRemoteData(userId:string):Promise<DB>{
  if(memberError)throw memberError;
  const companyIds=(members??[]).map((x:any)=>x.company_id);
  const companyQuery=companyIds.length?supabase.from('companies').select('*').in('id',companyIds):Promise.resolve({data:[],error:null} as any);
- const [companyRes,jobsRes,candidatesRes,appsRes,eventsRes,matchesRes,trainingRes,capabilityNodesRes,capabilityEdgesRes,outcomesRes]=await Promise.all([
+ const [companyRes,jobsRes,candidatesRes,appsRes,eventsRes,matchesRes,trainingRes,capabilityNodesRes,capabilityEdgesRes,outcomesRes,outcomeSkillSignalsRes]=await Promise.all([
    companyQuery,
    supabase.from('jobs').select('*').order('created_at',{ascending:false}),
    supabase.from('candidate_profiles').select('profile_id,display_name,role_title,years_experience,desired_salary,city,searchable,candidate_skills(skill_id,proficiency,verified,years_experience,skills(name)),skill_evidence(id,skill_id,evidence_type,title,issuer,verified,verified_at,expires_at,score,storage_path,file_name,mime_type,file_size,validation_status,reviewed_by,reviewed_at,review_note,skills(name)),talent_preferences(preferred_shifts)').or(`searchable.eq.true,profile_id.eq.${userId}`),
@@ -71,14 +74,15 @@ export async function loadRemoteData(userId:string):Promise<DB>{
    supabase.from('training_recommendations').select('id,candidate_id,job_id,skill_id,priority,reason,estimated_hours,status,gap_type,current_proficiency,target_proficiency,started_at,completed_at,updated_at,outcome_note,skills(name)').order('updated_at',{ascending:false}),
    supabase.from('capability_nodes').select('id,node_type,name,slug,skill_id,parent_id,description').order('node_type',{ascending:true}).order('name',{ascending:true}),
    supabase.from('capability_edges').select('from_node_id,to_node_id,relationship_type,weight,source').order('relationship_type',{ascending:true}),
-   supabase.from('employment_outcomes').select('id,application_id,candidate_id,job_id,company_id,checkpoint,performance_score,ramp_up_days,retention_status,skill_feedback,manager_note,created_by,created_at,updated_at').order('created_at',{ascending:false})
+   supabase.from('employment_outcomes').select('id,application_id,candidate_id,job_id,company_id,checkpoint,performance_score,ramp_up_days,retention_status,skill_feedback,manager_note,created_by,created_at,updated_at').order('created_at',{ascending:false}),
+   supabase.from('employment_outcome_skill_signals').select('id,outcome_id,skill_id,capability_node_id,signal_status,manager_rating,training_needed,note,created_by,created_at,updated_at,skills(name)').order('created_at',{ascending:false})
  ]);
- if(companyRes.error)throw companyRes.error;if(jobsRes.error)throw jobsRes.error;if(candidatesRes.error)throw candidatesRes.error;if(appsRes.error)throw appsRes.error;if(eventsRes.error)throw eventsRes.error;if(matchesRes.error)throw matchesRes.error;if(trainingRes.error)throw trainingRes.error;if(capabilityNodesRes.error)throw capabilityNodesRes.error;if(capabilityEdgesRes.error)throw capabilityEdgesRes.error;if(outcomesRes.error)throw outcomesRes.error;
+ if(companyRes.error)throw companyRes.error;if(jobsRes.error)throw jobsRes.error;if(candidatesRes.error)throw candidatesRes.error;if(appsRes.error)throw appsRes.error;if(eventsRes.error)throw eventsRes.error;if(matchesRes.error)throw matchesRes.error;if(trainingRes.error)throw trainingRes.error;if(capabilityNodesRes.error)throw capabilityNodesRes.error;if(capabilityEdgesRes.error)throw capabilityEdgesRes.error;if(outcomesRes.error)throw outcomesRes.error;if(outcomeSkillSignalsRes.error)throw outcomeSkillSignalsRes.error;
  const jobIds=(jobsRes.data??[]).map((j:any)=>j.id);
  let jobSkills:any[]=[];
  if(jobIds.length){const r=await supabase.from('job_skills').select('job_id,skill_id,skills(name)').in('job_id',jobIds);if(r.error)throw r.error;jobSkills=r.data??[];}
  const jobs=(jobsRes.data??[]).map((j:any)=>({...mapJob(j),skills:jobSkills.filter(s=>s.job_id===j.id).map(s=>s.skills?.name).filter(Boolean)}));
- return {candidates:(candidatesRes.data??[]).map(mapCandidate),companies:(companyRes.data??[]).map(mapCompany),jobs,applications:(appsRes.data??[]).map(mapApplication),events:(eventsRes.data??[]).map(mapEvent),matches:(matchesRes.data??[]).map(mapMatch),training:(trainingRes.data??[]).map(mapTraining),capabilityNodes:(capabilityNodesRes.data??[]).map(mapCapabilityNode),capabilityEdges:(capabilityEdgesRes.data??[]).map(mapCapabilityEdge),outcomes:(outcomesRes.data??[]).map(mapOutcome)};
+ return {candidates:(candidatesRes.data??[]).map(mapCandidate),companies:(companyRes.data??[]).map(mapCompany),jobs,applications:(appsRes.data??[]).map(mapApplication),events:(eventsRes.data??[]).map(mapEvent),matches:(matchesRes.data??[]).map(mapMatch),training:(trainingRes.data??[]).map(mapTraining),capabilityNodes:(capabilityNodesRes.data??[]).map(mapCapabilityNode),capabilityEdges:(capabilityEdgesRes.data??[]).map(mapCapabilityEdge),outcomes:(outcomesRes.data??[]).map(mapOutcome),outcomeSkillSignals:(outcomeSkillSignalsRes.data??[]).map(mapOutcomeSkillSignal)};
 }
 
 async function findSkillIds(names:string[]):Promise<{id:string,name:string}[]>{
@@ -241,4 +245,19 @@ export async function recordRemoteEmploymentOutcome(input:{applicationId:string;
  });
  if(error)throw error;
  return data?mapOutcome(data):null;
+}
+
+
+export async function saveRemoteOutcomeSkillSignal(input:{outcomeId:string;skillId:string;signalStatus:OutcomeSkillSignalStatus;managerRating?:number|null;trainingNeeded?:boolean;note?:string|null}){
+ if(!supabase)throw new Error('Supabase não configurado');
+ const {data,error}=await supabase.rpc('save_employment_outcome_skill_signal',{
+   p_outcome_id:input.outcomeId,
+   p_skill_id:input.skillId,
+   p_signal_status:input.signalStatus,
+   p_manager_rating:input.managerRating??null,
+   p_training_needed:Boolean(input.trainingNeeded),
+   p_note:input.note??null
+ });
+ if(error)throw error;
+ return data?mapOutcomeSkillSignal(data):null;
 }
