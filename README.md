@@ -56,3 +56,8 @@ A aba de Inteligência consolida os gaps visíveis para a conta, mostrando volum
 ## Fila de validação humana
 
 Empresas podem revisar evidências de candidatos que estejam em seu pipeline. Cada decisão registra status, responsável, horário e observação. Uma evidência aprovada atualiza a competência correspondente; uma rejeitada não pode ser usada como prova verificada.
+
+
+## Analytics do funil
+
+O dashboard consolida conversões descritivas entre etapas e o tempo médio observado entre mudanças de status registradas em `application_events`. As métricas são históricas e não são usadas como previsão de contratação.
