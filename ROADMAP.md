@@ -44,7 +44,7 @@ TalentOS não é um ATS genérico. É uma camada de **Capability Intelligence** 
 - [x] Dashboard de time-to-qualified-candidate
 - [x] Gap-to-Training operacional com persistência de status, níveis e estimativa de carga
 - [ ] Consentimento com tela dedicada
-- [ ] Analytics do funil
+- [x] Analytics do funil
 - [x] Testes automatizados de RLS
 
 ## Moat
