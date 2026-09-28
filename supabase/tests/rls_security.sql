@@ -177,5 +177,17 @@ begin
     raise exception 'get_company_outcome_skill_intelligence must remain SECURITY INVOKER';
   end if;
 
+  if not exists(
+    select 1
+    from pg_proc p
+    join pg_namespace n on n.oid=p.pronamespace
+    where n.nspname='public'
+      and p.proname='handle_new_user'
+      and pg_get_functiondef(p.oid) like '%raw_app_meta_data%'
+      and pg_get_functiondef(p.oid) not like '%case when (new.raw_user_meta_data ->> ''role'')%'
+  ) then
+    raise exception 'handle_new_user must provision roles from trusted app metadata';
+  end if;
+
   raise notice 'TalentOS RLS/security checks passed';
 end $$;
