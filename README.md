@@ -78,3 +78,8 @@ Após uma candidatura chegar a **contratado**, a empresa pode registrar checkpoi
 ## Estratégia de capacidade
 
 O dashboard separa, para a vaga selecionada, profissionais com readiness alto, profissionais próximos de prontidão e casos com gaps maiores. A leitura é uma heurística operacional baseada nos dados atuais do TalentOS; não é uma previsão de performance ou uma decisão automática de contratação.
+
+
+## Outcome Skill Signals
+
+Cada checkpoint pós-contratação pode registrar sinais estruturados por competência da vaga: se a skill foi utilizada, se necessita desenvolvimento, se não foi observada ou se não era aplicável. O gestor pode registrar uma avaliação de 1 a 5 e indicar necessidade de treinamento. Esses sinais ficam ligados à competência correspondente no Industrial Capability Graph, criando uma ponte entre contratação, utilização real da capacidade e desenvolvimento.
