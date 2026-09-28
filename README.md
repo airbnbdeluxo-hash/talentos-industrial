@@ -61,3 +61,10 @@ Empresas podem revisar evidências de candidatos que estejam em seu pipeline. Ca
 ## Analytics do funil
 
 O dashboard consolida conversões descritivas entre etapas e o tempo médio observado entre mudanças de status registradas em `application_events`. As métricas são históricas e não são usadas como previsão de contratação.
+
+
+## Industrial Capability Graph
+
+O SkillGraph agora possui uma camada persistida no Supabase com nós de família, processo, máquina, controle, competência, cargo e contexto, além de relações ponderadas entre eles. A intenção é que a taxonomia evolua com evidências e resultados reais e se torne o mapa proprietário de capacidade industrial do TalentOS.
+
+A versão inicial é deliberadamente curada: o banco contém o vocabulário e as relações-base; clientes não escrevem diretamente na taxonomia. Alterações estruturais entram por migração e podem ser governadas como ativo de produto.
