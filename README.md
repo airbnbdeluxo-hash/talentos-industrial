@@ -83,3 +83,8 @@ O dashboard separa, para a vaga selecionada, profissionais com readiness alto, p
 ## Outcome Skill Signals
 
 Cada checkpoint pós-contratação pode registrar sinais estruturados por competência da vaga: se a skill foi utilizada, se necessita desenvolvimento, se não foi observada ou se não era aplicável. O gestor pode registrar uma avaliação de 1 a 5 e indicar necessidade de treinamento. Esses sinais ficam ligados à competência correspondente no Industrial Capability Graph, criando uma ponte entre contratação, utilização real da capacidade e desenvolvimento.
+
+
+## Provisionamento de papéis
+
+O cadastro público não define privilégios de empresa ou administração. Novas contas entram como profissionais por padrão; papéis elevados são atribuídos por metadado administrativo confiável e permanecem protegidos pelo backend.
