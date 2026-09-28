@@ -163,5 +163,19 @@ begin
     raise exception 'outcome skill signal visibility policy missing';
   end if;
 
+  if has_function_privilege('anon','public.get_company_outcome_skill_intelligence()','execute') then
+    raise exception 'anon can execute get_company_outcome_skill_intelligence';
+  end if;
+  if not has_function_privilege('authenticated','public.get_company_outcome_skill_intelligence()','execute') then
+    raise exception 'authenticated cannot execute get_company_outcome_skill_intelligence';
+  end if;
+  if exists(
+    select 1 from pg_proc p
+    join pg_namespace n on n.oid=p.pronamespace
+    where n.nspname='public' and p.proname='get_company_outcome_skill_intelligence' and p.prosecdef
+  ) then
+    raise exception 'get_company_outcome_skill_intelligence must remain SECURITY INVOKER';
+  end if;
+
   raise notice 'TalentOS RLS/security checks passed';
 end $$;
