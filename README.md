@@ -84,6 +84,8 @@ O dashboard separa, para a vaga selecionada, profissionais com readiness alto, p
 
 Cada checkpoint pós-contratação pode registrar sinais estruturados por competência da vaga: se a skill foi utilizada, se necessita desenvolvimento, se não foi observada ou se não era aplicável. O gestor pode registrar uma avaliação de 1 a 5 e indicar necessidade de treinamento. Esses sinais ficam ligados à competência correspondente no Industrial Capability Graph, criando uma ponte entre contratação, utilização real da capacidade e desenvolvimento.
 
+A aba de Inteligência consome uma agregação protegida no backend (`get_company_outcome_skill_intelligence`) para consolidar esses sinais por competência, mantendo o detalhe operacional separado da camada analítica.
+
 
 ## Provisionamento de papéis
 
