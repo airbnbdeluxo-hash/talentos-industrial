@@ -48,8 +48,8 @@ TalentOS não é um ATS genérico. É uma camada de **Capability Intelligence** 
 - [x] Testes automatizados de RLS
 
 ## Moat
-- [ ] Taxonomia industrial própria
-- [ ] Grafo skill -> evidência -> contexto -> readiness
+- [x] Taxonomia industrial própria — v1 persistida no Supabase
+- [x] Grafo skill -> evidência -> contexto -> readiness — base de capability graph criada
 - [ ] Dados de oferta/demanda por região
 - [x] Trilhas de treinamento operacionais baseadas em gaps reais
 - [ ] Histórico de resultados por skill e função
