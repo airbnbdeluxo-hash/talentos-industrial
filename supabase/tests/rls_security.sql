@@ -70,5 +70,25 @@ begin
     raise exception 'evidence delete policy missing';
   end if;
 
+  if has_function_privilege('anon','public.generate_training_plan_for_job(uuid,uuid)','execute') then
+    raise exception 'anon can execute generate_training_plan_for_job';
+  end if;
+  if not has_function_privilege('authenticated','public.generate_training_plan_for_job(uuid,uuid)','execute') then
+    raise exception 'authenticated cannot execute generate_training_plan_for_job';
+  end if;
+  if exists(
+    select 1 from pg_proc p
+    join pg_namespace n on n.oid=p.pronamespace
+    where n.nspname='public' and p.proname='generate_training_plan_for_job' and p.prosecdef
+  ) then
+    raise exception 'generate_training_plan_for_job must remain SECURITY INVOKER';
+  end if;
+  if not exists(select 1 from pg_policies where schemaname='public' and tablename='training_recommendations' and policyname='training_generation_insert') then
+    raise exception 'training generation insert policy missing';
+  end if;
+  if not exists(select 1 from pg_trigger where tgname='trg_guard_training_recommendation_insert') then
+    raise exception 'training recommendation insert guard missing';
+  end if;
+
   raise notice 'TalentOS RLS/security checks passed';
 end $$;
