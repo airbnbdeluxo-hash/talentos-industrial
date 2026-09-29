@@ -99,3 +99,10 @@ O acesso usa Supabase Auth com sessão persistente. O fluxo inclui login, criaç
 ## Operação B2B
 
 Contas empresariais entram por provisionamento confiável. No primeiro acesso, o onboarding orienta a empresa em três passos: cadastrar a empresa, estruturar a primeira vaga e gerar o matching. Ao criar a vaga, o recrutador informa cargo, atividades/contexto, cidade, faixa salarial, turno e competências. O profissional visualiza a vaga, usa seu Skill Passport como base da candidatura e, com o consentimento de visibilidade ativo, pode se candidatar diretamente. A candidatura pode gerar um plano de desenvolvimento para gaps identificados.
+
+
+## Deploy do piloto
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fairbnbdeluxo-hash%2Ftalentos-industrial&project-name=talentos-industrial)
+
+O fluxo de produção do piloto usa Vercel + Supabase.
