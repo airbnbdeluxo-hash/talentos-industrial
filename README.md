@@ -106,3 +106,5 @@ Contas empresariais entram por provisionamento confiável. No primeiro acesso, o
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fairbnbdeluxo-hash%2Ftalentos-industrial&project-name=talentos-industrial)
 
 O fluxo de produção do piloto usa Vercel + Supabase.
+
+<!-- Vercel production sync -->
