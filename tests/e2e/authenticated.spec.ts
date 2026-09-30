@@ -156,6 +156,33 @@ test.describe('TalentOS authenticated journeys', () => {
     await expectPlainLanguage(page);
   });
 
+  test('empresa registra motivo estruturado ao rejeitar candidato', async ({ page }) => {
+    await page.goto('/?e2eRole=empresa');
+    await page.getByRole('button', { name: 'Processo seletivo', exact: true }).click();
+
+    const jobSelect = page.locator('.pipeline-job-picker select');
+    await jobSelect.selectOption({ label: 'Técnico de Manutenção' });
+
+    let candidate = page.locator('article.pipeline-card').filter({ hasText: 'Juliana Costa' });
+    await expect(candidate).toBeVisible();
+    await candidate.locator('summary').click();
+    await candidate.locator('.pipeline-status-control select').selectOption('rejeitado');
+
+    await expect(page.getByRole('heading', { level: 2, name: 'Por que este candidato não avançará?' })).toBeVisible();
+    await page.getByLabel('Motivo').selectOption('disponibilidade');
+    await page.getByLabel(/Observação interna/).fill('Disponibilidade atual incompatível com o turno desta vaga.');
+    await page.getByRole('button', { name: 'Registrar rejeição', exact: true }).click();
+
+    await expect(page.locator('.overlay')).toHaveCount(0);
+    candidate = page.locator('article.pipeline-card').filter({ hasText: 'Juliana Costa' });
+    await expect(candidate.getByText('Disponibilidade incompatível', { exact: true })).toBeVisible();
+    await expect(candidate.getByText('Disponibilidade atual incompatível com o turno desta vaga.', { exact: true })).toBeVisible();
+
+    await candidate.locator('summary').click();
+    await expect(candidate.getByText(/Motivo da rejeição: Disponibilidade incompatível/)).toBeVisible();
+    await expect(candidate.getByRole('button', { name: 'Reabrir processo', exact: true })).toBeVisible();
+  });
+
   test('empresa pausa, reabre e encerra uma vaga mantendo o histórico', async ({ page }) => {
     await page.goto('/?e2eRole=empresa');
     await page.getByRole('button', { name: 'Vagas', exact: true }).click();
