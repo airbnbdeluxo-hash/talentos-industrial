@@ -86,7 +86,7 @@ export async function loadRemoteData(userId:string, role?:'empresa'|'candidato'|
  const [companyRes,jobsRes,candidatesRes,appsRes,eventsRes,matchesRes,trainingRes,capabilityNodesRes,capabilityEdgesRes,outcomesRes,outcomeSkillSignalsRes,savedJobsRes,jobAlertsRes,messagesRes,interviewsRes,scorecardsRes,talentPoolsRes,talentPoolMembersRes,offersRes,notificationsRes,applicationNotesRes]=await Promise.all([
    companyQuery,
    supabase.from('jobs').select('*').order('created_at',{ascending:false}),
-   (role==='candidato'?supabase.from('candidate_profiles').select('profile_id,display_name,role_title,years_experience,desired_salary,bio,city,searchable,candidate_skills(skill_id,proficiency,verified,years_experience,skills(name)),skill_evidence(id,skill_id,evidence_type,title,issuer,verified,verified_at,expires_at,score,storage_path,file_name,mime_type,file_size,validation_status,reviewed_by,reviewed_at,review_note,skills(name)),talent_preferences(preferred_shifts)').eq('profile_id',userId):supabase.from('candidate_profiles').select('profile_id,display_name,role_title,years_experience,desired_salary,bio,city,searchable,candidate_skills(skill_id,proficiency,verified,years_experience,skills(name)),skill_evidence(id,skill_id,evidence_type,title,issuer,verified,verified_at,expires_at,score,storage_path,file_name,mime_type,file_size,validation_status,reviewed_by,reviewed_at,review_note,skills(name)),talent_preferences(preferred_shifts)').or(`searchable.eq.true,profile_id.eq.${userId}`)),
+   (role==='candidato'?supabase.from('candidate_profiles').select('profile_id,display_name,role_title,years_experience,desired_salary,bio,city,searchable,candidate_skills(skill_id,proficiency,verified,years_experience,skills(name)),skill_evidence(id,skill_id,evidence_type,title,issuer,verified,verified_at,expires_at,score,storage_path,file_name,mime_type,file_size,file_hash,integrity_status,validation_status,reviewed_by,reviewed_at,review_note,skills(name)),talent_preferences(preferred_shifts)').eq('profile_id',userId):supabase.from('candidate_profiles').select('profile_id,display_name,role_title,years_experience,desired_salary,bio,city,searchable,candidate_skills(skill_id,proficiency,verified,years_experience,skills(name)),skill_evidence(id,skill_id,evidence_type,title,issuer,verified,verified_at,expires_at,score,storage_path,file_name,mime_type,file_size,validation_status,reviewed_by,reviewed_at,review_note,skills(name)),talent_preferences(preferred_shifts)').or(`searchable.eq.true,profile_id.eq.${userId}`)),
    supabase.from('applications').select('*').order('updated_at',{ascending:false}),
    supabase.from('application_events').select('*').order('created_at',{ascending:true}),
    supabase.from('matches').select('*').order('score',{ascending:false}),
@@ -244,13 +244,13 @@ export async function uploadRemoteEvidence(userId:string,skillName:string,file:F
  const {data:skill,error:skillError}=await supabase.from('skills').select('id,name').eq('name',skillName).maybeSingle();
  if(skillError)throw skillError;
  if(!skill)throw new Error('Skill não encontrada');
- const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+ const hashBuffer=await crypto.subtle.digest('SHA-256',await file.arrayBuffer());const fileHash=Array.from(new Uint8Array(hashBuffer)).map(b=>b.toString(16).padStart(2,'0')).join('');const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
  const storagePath=userId+'/'+skill.id+'/'+crypto.randomUUID()+'-'+safe;
  const upload=await supabase.storage.from('skill-evidence').upload(storagePath,file,{contentType:file.type||'application/octet-stream',upsert:false});
  if(upload.error)throw upload.error;
  const evidence=await supabase.from('skill_evidence').insert({
    candidate_id:userId,skill_id:skill.id,evidence_type:'certificado',title:file.name,issuer:'Enviado pelo profissional',
-   verified:false,storage_path:storagePath,file_name:file.name,mime_type:file.type||null,file_size:file.size
+   verified:false,storage_path:storagePath,file_name:file.name,mime_type:file.type||null,file_size:file.size,file_hash:fileHash,integrity_status:'normal'
  }).select('id,storage_path,file_name,mime_type,file_size').single();
  if(evidence.error){
    await supabase.storage.from('skill-evidence').remove([storagePath]);
