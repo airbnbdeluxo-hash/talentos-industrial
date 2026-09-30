@@ -269,6 +269,13 @@ export async function getRemoteTrainingResources(recommendationId:string):Promis
  return (data??[]).map((x:any)=>({id:x.resource_id,title:x.title,description:x.description??null,resourceType:x.resource_type,provider:x.provider,url:x.url,durationMinutes:x.duration_minutes==null?null:Number(x.duration_minutes),difficulty:x.difficulty,stepOrder:Number(x.step_order??1),mandatory:Boolean(x.mandatory),reason:x.reason??null}));
 }
 
+export async function recordRemoteTrainingEvidence(recommendationId:string, evidenceId?:string|null, assessmentId?:string|null, attemptId?:string|null, completionType:'evidencia'|'avaliacao'|'desafio'|'manual'='evidencia'){
+ if(!supabase)throw new Error('Supabase não configurado');
+ const {data,error}=await supabase.rpc('record_training_evidence',{p_recommendation_id:recommendationId,p_evidence_id:evidenceId??null,p_assessment_id:assessmentId??null,p_attempt_id:attemptId??null,p_completion_type:completionType});
+ if(error)throw error;
+ return data?.[0]?mapTraining(data[0]):null;
+}
+
 export async function updateRemoteTrainingRecommendation(
  recommendationId:string,
  status:Exclude<TrainingStatus,'recomendado'|'resolvido'>,
