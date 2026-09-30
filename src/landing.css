@@ -816,3 +816,13 @@
   .landing-passport::after{animation:none!important;background-position:0 0!important}
   .landing-badge.verified::before{animation:none!important;opacity:1!important}
 }
+
+
+/* Final alignment/visibility guarantees */
+.landing-copy>.landing-trust{margin-top:auto;padding-top:10px}
+.landing-home.motion-paused .landing-reveal,
+.landing-home.motion-paused .landing-title .word,
+.landing-home.motion-paused .landing-proof-word path,
+.landing-home.motion-paused .landing-graph .graph-line.active{
+  animation-play-state:paused!important
+}
