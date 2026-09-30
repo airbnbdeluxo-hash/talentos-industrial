@@ -395,17 +395,32 @@ const openInterview=async(appId:string,interview?:Interview)=>{
  setInterviewDuration(interview?String(interview.durationMinutes):'45');setInterviewMode(interview?.mode??'online');setInterviewLocation(interview?.location??'');setInterviewMeetingUrl(interview?.meetingUrl??'');setModal('interview');
 };
 const scheduleInterviewHandler=async()=>{
- if(dataMode!=='remote'||!interviewApplicationId||!interviewScheduledAt)return;
+ if(!interviewApplicationId||!interviewScheduledAt)return;
  try{
-  const item=editingInterviewId
-   ? await rescheduleRemoteInterview(editingInterviewId,new Date(interviewScheduledAt).toISOString(),Number(interviewDuration)||45,interviewMode,interviewLocation,interviewMeetingUrl)
-   : await scheduleRemoteInterview(interviewApplicationId,new Date(interviewScheduledAt).toISOString(),Number(interviewDuration)||45,interviewMode,interviewLocation,interviewMeetingUrl);
-  await reloadRemote();setModal(null);setEditingInterviewId(null);setToast((editingInterviewId?'Entrevista reagendada para ':'Entrevista agendada para ')+new Date(item.scheduledAt).toLocaleString('pt-BR'));
+  const scheduledAt=new Date(interviewScheduledAt).toISOString();
+  const durationMinutes=Number(interviewDuration)||45;
+  const currentApp=db.applications.find(a=>a.id===interviewApplicationId);
+  if(dataMode==='remote'){
+   const item=editingInterviewId
+    ? await rescheduleRemoteInterview(editingInterviewId,scheduledAt,durationMinutes,interviewMode,interviewLocation,interviewMeetingUrl)
+    : await scheduleRemoteInterview(interviewApplicationId,scheduledAt,durationMinutes,interviewMode,interviewLocation,interviewMeetingUrl);
+   if(currentApp&&['novo','triagem'].includes(currentApp.status))await updateRemoteApplication(interviewApplicationId,'entrevista');
+   await reloadRemote();setModal(null);setEditingInterviewId(null);setToast((editingInterviewId?'Entrevista reagendada para ':'Entrevista agendada para ')+new Date(item.scheduledAt).toLocaleString('pt-BR'));
+  }else{
+   const now=new Date().toISOString();
+   const existing=editingInterviewId?db.interviews.find(i=>i.id===editingInterviewId):undefined;
+   const item:Interview=existing?{...existing,scheduledAt,durationMinutes,mode:interviewMode,location:interviewLocation||null,meetingUrl:interviewMeetingUrl||null,updatedAt:now}:{id:'int'+Date.now(),applicationId:interviewApplicationId,scheduledAt,durationMinutes,mode:interviewMode,location:interviewLocation||null,meetingUrl:interviewMeetingUrl||null,interviewerId:session?.user?.id??null,status:'agendada',createdAt:now,updatedAt:now};
+   const interviews=existing?db.interviews.map(i=>i.id===item.id?item:i):[...db.interviews,item];
+   const advance=Boolean(currentApp&&['novo','triagem'].includes(currentApp.status));
+   const applications=advance?db.applications.map(a=>a.id===interviewApplicationId?{...a,status:'entrevista' as Status}:a):db.applications;
+   const events=advance&&currentApp?[...db.events,{id:'ev'+Date.now(),applicationId:interviewApplicationId,fromStatus:currentApp.status,toStatus:'entrevista' as Status,at:now,note:'Entrevista agendada'}]:db.events;
+   setModal(null);setEditingInterviewId(null);persist({...db,interviews,applications,events},(existing?'Entrevista reagendada para ':'Entrevista agendada para ')+new Date(item.scheduledAt).toLocaleString('pt-BR'));
+  }
  }catch(err){console.error(err);setToast(localizeDisplayedText(err instanceof Error?err.message:'Não foi possível salvar a entrevista'))}
 };
-const setCandidateInterviewStatus=async(interview:Interview,status:'confirmada'|'cancelada')=>{try{if(dataMode==='remote'){await respondRemoteInterviewSecure(interview.id,status);await reloadRemote();setToast(status==='confirmada'?'Entrevista confirmada':'Entrevista cancelada')}}catch(err){console.error(err);setToast(localizeDisplayedText(err instanceof Error?err.message:'Não foi possível responder à entrevista'))}};
+const setCandidateInterviewStatus=async(interview:Interview,status:'confirmada'|'cancelada')=>{try{if(dataMode==='remote'){await respondRemoteInterviewSecure(interview.id,status);await reloadRemote();setToast(status==='confirmada'?'Entrevista confirmada':'Entrevista cancelada')}else{persist({...db,interviews:db.interviews.map(i=>i.id===interview.id?{...i,status,updatedAt:new Date().toISOString()}:i)},status==='confirmada'?'Entrevista confirmada':'Entrevista cancelada')}}catch(err){console.error(err);setToast(localizeDisplayedText(err instanceof Error?err.message:'Não foi possível responder à entrevista'))}};
 const setInterviewStatusHandler=async(interview:Interview,status:InterviewStatus)=>{
- try{if(dataMode==='remote'){await updateRemoteInterview(interview.id,status);await reloadRemote();setToast('Entrevista atualizada')}}catch(err){console.error(err);setToast('Não foi possível atualizar a entrevista')}
+ try{if(dataMode==='remote'){await updateRemoteInterview(interview.id,status);await reloadRemote();setToast('Entrevista atualizada')}else{persist({...db,interviews:db.interviews.map(i=>i.id===interview.id?{...i,status,updatedAt:new Date().toISOString()}:i)},'Entrevista atualizada')}}catch(err){console.error(err);setToast('Não foi possível atualizar a entrevista')}
 };
 const openScorecard=async(appId:string)=>{
  const target=db.jobs.find(j=>j.id===db.applications.find(a=>a.id===appId)?.jobId);
@@ -415,10 +430,17 @@ const openScorecard=async(appId:string)=>{
  setScorecardApplicationId(appId);setScorecardForms(forms);setModal('scorecard');
 };
 const saveScorecardHandler=async()=>{
- if(dataMode!=='remote'||!scorecardApplicationId||!session)return;
+ if(!scorecardApplicationId||!session)return;
  try{
-  for(const [competency,form] of Object.entries(scorecardForms)){const rating=Number(form.rating);if(!Number.isFinite(rating)||rating<1||rating>5)throw new Error('Avalie todas as competências de 1 a 5');await saveRemoteScorecard(scorecardApplicationId,session.user.id,competency,rating,form.note)}
-  await reloadRemote();setModal(null);setToast('Avaliação estruturada salva');
+  const entries=Object.entries(scorecardForms).map(([competency,form])=>{const rating=Number(form.rating);if(!Number.isFinite(rating)||rating<1||rating>5)throw new Error('Avalie todas as competências de 1 a 5');return{competency,rating,note:form.note}});
+  if(dataMode==='remote'){
+   for(const entry of entries)await saveRemoteScorecard(scorecardApplicationId,session.user.id,entry.competency,entry.rating,entry.note);
+   await reloadRemote();setModal(null);setToast('Avaliação estruturada salva');
+  }else{
+   const now=new Date().toISOString();let scorecards=[...db.scorecards];
+   for(const entry of entries){const index=scorecards.findIndex(s=>s.applicationId===scorecardApplicationId&&s.interviewerId===session.user.id&&s.competency===entry.competency);const row:InterviewScorecard={id:index>=0?scorecards[index].id:'sc'+Date.now()+'-'+entry.competency,applicationId:scorecardApplicationId,interviewerId:session.user.id,competency:entry.competency,rating:entry.rating,evidenceNote:entry.note.trim()||null,createdAt:index>=0?scorecards[index].createdAt:now};if(index>=0)scorecards[index]=row;else scorecards.push(row)}
+   setModal(null);persist({...db,scorecards},'Avaliação estruturada salva');
+  }
  }catch(err){console.error(err);setToast(localizeDisplayedText(err instanceof Error?err.message:'Não foi possível salvar a avaliação'))}
 };
 const openPool=async(candidateId?:string)=>{setPoolName('');setPoolDescription('');setPoolCandidateId(candidateId??talentId);setModal('pool')};
@@ -435,12 +457,12 @@ const openOffer=async(appId:string)=>{
  setOfferApplicationId(appId);setOfferSalary('');setOfferStartDate('');setOfferMessage('');setModal('offer');
 };
 const createOfferHandler=async()=>{
- if(dataMode!=='remote'||!offerApplicationId||!session)return;
- try{const salary=Number(offerSalary);if(!Number.isFinite(salary)||salary<=0)throw new Error('Informe o salário da proposta');if(!offerStartDate)throw new Error('Informe a data de início');await createRemoteOffer(offerApplicationId,session.user.id,salary,offerStartDate,offerMessage);await reloadRemote();setModal(null);setToast('Proposta enviada ao candidato');}
+ if(!offerApplicationId||!session)return;
+ try{const salary=Number(offerSalary);if(!Number.isFinite(salary)||salary<=0)throw new Error('Informe o salário da proposta');if(!offerStartDate)throw new Error('Informe a data de início');if(dataMode==='remote'){await createRemoteOffer(offerApplicationId,session.user.id,salary,offerStartDate,offerMessage);await reloadRemote();setModal(null);setToast('Proposta enviada ao candidato')}else{const now=new Date().toISOString();const existing=db.offers.find(o=>o.applicationId===offerApplicationId);const row:Offer={id:existing?.id??'off'+Date.now(),applicationId:offerApplicationId,salary,startDate:offerStartDate,message:offerMessage.trim()||null,status:'enviada',createdBy:session.user.id,respondedAt:null,createdAt:existing?.createdAt??now,updatedAt:now};setModal(null);persist({...db,offers:[...db.offers.filter(o=>o.applicationId!==offerApplicationId),row]},'Proposta enviada ao candidato')}}
  catch(err){console.error(err);setToast(localizeDisplayedText(err instanceof Error?err.message:'Não foi possível enviar a proposta'))}
 };
 const respondOfferHandler=async(offerId:string,status:'aceita'|'recusada')=>{
- try{if(dataMode==='remote'){await respondRemoteOfferSecure(offerId,status);await reloadRemote();setToast(status==='aceita'?'Proposta aceita · candidatura atualizada para contratado':'Proposta recusada')}}catch(err){console.error(err);setToast('Não foi possível responder à proposta')}
+ try{if(dataMode==='remote'){await respondRemoteOfferSecure(offerId,status);await reloadRemote();setToast(status==='aceita'?'Proposta aceita · candidatura atualizada para contratado':'Proposta recusada')}else{const offer=db.offers.find(o=>o.id===offerId);if(!offer)return;const now=new Date().toISOString();const current=db.applications.find(a=>a.id===offer.applicationId);const applications=status==='aceita'?db.applications.map(a=>a.id===offer.applicationId?{...a,status:'contratado' as Status}:a):db.applications;const events=status==='aceita'&&current&&current.status!=='contratado'?[...db.events,{id:'ev'+Date.now(),applicationId:current.id,fromStatus:current.status,toStatus:'contratado' as Status,at:now,note:'Proposta aceita'}]:db.events;persist({...db,offers:db.offers.map(o=>o.id===offerId?{...o,status,respondedAt:now,updatedAt:now}:o),applications,events},status==='aceita'?'Proposta aceita · candidatura atualizada para contratado':'Proposta recusada')}}catch(err){console.error(err);setToast('Não foi possível responder à proposta')}
 };
 const interviewCandidateAvailability=useMemo(()=>{
   const app=interviewApplicationId?db.applications.find(a=>a.id===interviewApplicationId):null;
