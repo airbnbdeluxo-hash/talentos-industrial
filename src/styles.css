@@ -606,3 +606,14 @@
 
 .danger-outline{border-color:#f0b6b6!important;color:#a32626!important;background:#fffafa!important}
 .danger-outline:hover{border-color:#dc8e8e!important;background:#fff3f3!important}
+
+
+/* Structured rejection decision */
+.rejection-modal>p{font-size:10px;line-height:1.55;color:#768397;margin:8px 0 14px}
+.rejection-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+.pipeline-rejection-summary{display:flex;gap:9px;align-items:flex-start;margin:10px 0;padding:10px 11px;border:1px solid #f0d4d4;border-radius:10px;background:#fff9f9;color:#9b2c2c}
+.pipeline-rejection-summary>svg{flex:0 0 auto;margin-top:1px}
+.pipeline-rejection-summary b,.pipeline-rejection-summary span{display:block}
+.pipeline-rejection-summary b{font-size:10px}
+.pipeline-rejection-summary span{font-size:9px;color:#7e5b5b;margin-top:3px;line-height:1.45}
+@media(max-width:600px){.rejection-modal-actions{display:grid;grid-template-columns:1fr}.rejection-modal-actions>*{width:100%;justify-content:center}}
