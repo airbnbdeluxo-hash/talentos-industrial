@@ -418,3 +418,51 @@ export async function getRemoteOutcomeSkillIntelligence():Promise<OutcomeSkillIn
 
 
 export async function saveRemoteCandidateConsent(userId:string,consentGiven:boolean,consentVersion='v1'){ if(!supabase)throw new Error('Supabase não configurado'); const {data,error}=await supabase.from('candidate_profiles').update({searchable:consentGiven,visibility_consent_at:consentGiven?new Date().toISOString():null,consent_version:consentVersion}).eq('profile_id',userId).select('profile_id,searchable,visibility_consent_at,consent_version').single(); if(error)throw error; return data; }
+
+
+export type PrivacyRequest={
+ id:string;
+ userId:string;
+ requestType:'account_deletion';
+ status:'pending'|'in_review'|'completed'|'rejected'|'cancelled';
+ requestedAt:string;
+ updatedAt:string;
+ resolvedAt?:string|null;
+ adminNote?:string|null;
+};
+
+const mapPrivacyRequest=(row:any):PrivacyRequest=>({
+ id:String(row.id),
+ userId:String(row.user_id),
+ requestType:'account_deletion',
+ status:row.status,
+ requestedAt:row.requested_at,
+ updatedAt:row.updated_at,
+ resolvedAt:row.resolved_at??null,
+ adminNote:row.admin_note??null
+});
+
+export async function exportRemoteCandidateData():Promise<Record<string,unknown>>{
+ if(!supabase)throw new Error('Supabase não configurado');
+ const {data,error}=await supabase.rpc('export_my_candidate_data');
+ if(error)throw error;
+ return (data??{}) as Record<string,unknown>;
+}
+
+export async function requestRemoteAccountDeletion():Promise<PrivacyRequest>{
+ if(!supabase)throw new Error('Supabase não configurado');
+ const {data,error}=await supabase.rpc('request_my_account_deletion');
+ if(error)throw error;
+ return mapPrivacyRequest(data);
+}
+
+export async function getRemotePrivacyRequests(userId:string):Promise<PrivacyRequest[]>{
+ if(!supabase)throw new Error('Supabase não configurado');
+ const {data,error}=await supabase
+  .from('privacy_requests')
+  .select('id,user_id,request_type,status,requested_at,updated_at,resolved_at,admin_note')
+  .eq('user_id',userId)
+  .order('requested_at',{ascending:false});
+ if(error)throw error;
+ return (data??[]).map(mapPrivacyRequest);
+}
