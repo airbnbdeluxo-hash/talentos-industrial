@@ -92,6 +92,13 @@ async function findSkillIds(names:string[]):Promise<{id:string,name:string}[]>{
  if(error)throw error;return data??[];
 }
 
+export async function getRemoteBrazilCities():Promise<Array<{name:string;uf:string;ibgeCode:number}>>{
+ if(!supabase)throw new Error('Supabase não configurado');
+ const {data,error}=await supabase.from('brazil_cities').select('name,uf,ibge_code').order('name',{ascending:true}).order('uf',{ascending:true});
+ if(error)throw error;
+ return (data??[]).map((x:any)=>({name:String(x.name),uf:String(x.uf),ibgeCode:Number(x.ibge_code)}));
+}
+
 export async function getRemoteSkills():Promise<string[]>{
  if(!supabase)throw new Error('Supabase não configurado');
  const {data,error}=await supabase.from('skills').select('name').order('name',{ascending:true});
