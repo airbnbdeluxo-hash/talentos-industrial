@@ -157,15 +157,25 @@ create policy messages_select on public.messages for select to authenticated usi
   sender_id=(select auth.uid()) or recipient_id=(select auth.uid())
   or exists(select 1 from public.applications a join public.jobs j on j.id=a.job_id join public.company_members cm on cm.company_id=j.company_id where a.id=application_id and cm.user_id=(select auth.uid()))
 );
-create policy messages_insert on public.messages for insert to authenticated with check(
+create policy messages_insert on public.messages for insert to authenticated
+with check(
   sender_id=(select auth.uid()) and (
-    exists(select 1 from public.applications a where a.id=application_id and a.candidate_id=(select auth.uid()))
-    or exists(select 1 from public.applications a join public.jobs j on j.id=a.job_id join public.company_members cm on cm.company_id=j.company_id where a.id=application_id and cm.user_id=(select auth.uid()) and recipient_id=a.candidate_id)
+    (
+      exists(select 1 from public.applications a where a.id=application_id and a.candidate_id=(select auth.uid()))
+      and exists(
+        select 1 from public.applications a join public.jobs j on j.id=a.job_id
+        join public.company_members cm on cm.company_id=j.company_id
+        where a.id=application_id and cm.user_id=recipient_id and cm.member_role in ('owner','recruiter','viewer')
+      )
+    )
+    or (
+      exists(select 1 from public.applications a join public.jobs j on j.id=a.job_id
+        join public.company_members cm on cm.company_id=j.company_id
+        where a.id=application_id and cm.user_id=(select auth.uid()) and cm.member_role in ('owner','recruiter'))
+      and exists(select 1 from public.applications a where a.id=application_id and recipient_id=a.candidate_id)
+    )
   )
 );
-create policy messages_update on public.messages for update to authenticated
-using(sender_id=(select auth.uid()) or recipient_id=(select auth.uid()))
-with check(sender_id=(select auth.uid()) or recipient_id=(select auth.uid()));
 
 drop policy if exists interviews_select on public.interviews;
 drop policy if exists interviews_insert on public.interviews;
