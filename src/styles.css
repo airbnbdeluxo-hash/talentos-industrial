@@ -256,3 +256,13 @@
 .pipeline-outcome-summary span{font-size:7px;color:#78869a}
 .stage-empty{font-size:8px;color:#9aa5b3;text-align:center;padding:14px 8px}
 @media(max-width:760px){.pipeline-topbar{flex-direction:column}.pipeline-job-picker{width:100%;justify-content:flex-start}.pipeline-job-picker label{width:100%}.pipeline-job-picker select{width:100%;min-width:0}.pipeline-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.pipeline-clean .stage{min-width:225px}.pipeline-primary-actions{grid-template-columns:1fr}.pipeline-secondary-actions{grid-template-columns:1fr}}
+
+
+/* Candidate privacy controls */
+.privacy-data-setting>div,.privacy-delete-setting>div{align-items:flex-start;flex-direction:column}
+.privacy-data-setting>div small,.privacy-delete-setting>div small{max-width:560px;line-height:1.5;color:#7d899b;font-size:10px}
+.privacy-data-setting .secondary,.privacy-delete-setting .secondary{margin-top:7px}
+.privacy-request-status{font-style:normal;font-size:9px;font-weight:750;padding:5px 8px;border-radius:999px;background:#fff7e6;color:#8b5f13}
+.privacy-delete-button{border:1px solid #e3e7ed;background:#f7f8fa;color:#4b5565}
+.privacy-delete-button:hover{background:#f1f3f6}
+@media(max-width:600px){.setting{flex-direction:column;gap:8px}.privacy-data-setting .secondary,.privacy-delete-setting .secondary{width:100%;justify-content:center}}
