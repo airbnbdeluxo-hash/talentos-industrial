@@ -351,7 +351,7 @@ const createOfferHandler=async()=>{
  catch(err){console.error(err);setToast(localizeDisplayedText(err instanceof Error?err.message:'Não foi possível enviar a proposta'))}
 };
 const respondOfferHandler=async(offerId:string,status:'aceita'|'recusada')=>{
- try{if(dataMode==='remote'){await respondRemoteOfferSecure(offerId,status);if(status==='aceita'){const offerApp=db.offers.find(o=>o.id===offerId)?.applicationId;if(offerApp)await updateRemoteApplication(offerApp,'contratado')}await reloadRemote();setToast(status==='aceita'?'Proposta aceita':'Proposta recusada')}}catch(err){console.error(err);setToast('Não foi possível responder à proposta')}
+ try{if(dataMode==='remote'){await respondRemoteOfferSecure(offerId,status);await reloadRemote();setToast(status==='aceita'?'Proposta aceita · candidatura atualizada para contratado':'Proposta recusada')}}catch(err){console.error(err);setToast('Não foi possível responder à proposta')}
 };
 const statusLabel=(s:Status)=>({novo:'Nova',triagem:'Triagem',entrevista:'Entrevista',aprovado:'Aprovada',rejeitado:'Não avançou',contratado:'Contratado'}[s]);
 const interviewStatusLabel=(s:InterviewStatus)=>({agendada:'Agendada',confirmada:'Confirmada',cancelada:'Cancelada',realizada:'Realizada'}[s]);
