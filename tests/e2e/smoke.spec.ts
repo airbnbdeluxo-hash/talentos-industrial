@@ -1,6 +1,20 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('TalentOS smoke', () => {
+  test.beforeEach(async ({ page }) => {
+    const errors: string[] = [];
+    page.on('pageerror', error => errors.push('pageerror: ' + error.message));
+    page.on('console', message => {
+      if (message.type() === 'error') errors.push('console.error: ' + message.text());
+    });
+    (page as any).__talentosErrors = errors;
+  });
+
+  test.afterEach(async ({ page }) => {
+    const errors = ((page as any).__talentosErrors ?? []) as string[];
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+
   test('navegação principal troca de área sem abrir modal inesperado', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByRole('heading', { level: 1, name: 'Visão geral' })).toBeVisible();
