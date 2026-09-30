@@ -151,7 +151,7 @@ test.describe('TalentOS authenticated journeys', () => {
 
     await page.getByRole('button', { name: 'Aceitar proposta', exact: true }).click();
     await expect(page.getByText('Contratado', { exact: true })).toBeVisible();
-    await expect(page.getByText(/Proposta aceita/i)).toBeVisible();
+    await expect(page.locator('.toast').getByText(/Proposta aceita/i)).toBeVisible();
     await expect(page.locator('.overlay')).toHaveCount(0);
     await expectPlainLanguage(page);
   });
