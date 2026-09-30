@@ -67,6 +67,7 @@ test.describe('TalentOS smoke', () => {
 
     await expect(page.getByRole('heading', { level: 3, name: 'Sou empresa' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Entrar como empresa', exact: true })).toBeVisible();
-    await expect(page.getByText('O acesso empresarial é liberado para empresas e recrutadores cadastrados no TalentOS.')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Criar conta empresarial', exact: true })).toBeVisible();
+    await expect(page.getByText('Novas empresas podem criar a conta Owner. Recrutadores entram por convite da empresa.')).toBeVisible();
   });
 });
