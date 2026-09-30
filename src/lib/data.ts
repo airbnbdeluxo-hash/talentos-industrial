@@ -257,7 +257,9 @@ export async function generateRemoteTrainingRecommendations(candidateId:string,j
  if(!supabase)throw new Error('Supabase não configurado');
  const {data,error}=await supabase.rpc('generate_training_plan_for_job',{p_candidate_id:candidateId,p_job_id:jobId});
  if(error)throw error;
- return (data??[]).map(mapTraining);
+ const rows=(data??[]).map(mapTraining);
+ await Promise.all(rows.map(async row=>{try{await supabase.rpc('attach_training_resources',{p_recommendation_id:row.id});}catch(err){console.warn('training resource attachment',err);}}));
+ return rows;
 }
 
 export async function getRemoteTrainingResources(recommendationId:string):Promise<TrainingResource[]>{
