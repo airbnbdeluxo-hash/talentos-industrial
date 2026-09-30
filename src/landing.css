@@ -141,7 +141,8 @@
 .landing-stage{height:318px;min-height:318px;display:grid;align-content:stretch;overflow:hidden}
 .landing-state{height:100%;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:12px;animation:landing-state-in .24s ease-out both}
 .landing-resume-state,.landing-skills-state{justify-content:center}
-.landing-resume{display:grid;gap:13px;padding:20px;border-radius:18px;border:1px solid rgba(148,163,184,.12);background:rgba(15,23,42,.38)}
+.landing-skills-state>.landing-chip-grid:not(.condensed){min-height:246px}
+.landing-resume{display:grid;align-content:center;gap:15px;min-height:230px;padding:20px;border-radius:18px;border:1px solid rgba(148,163,184,.12);background:rgba(15,23,42,.38)}
 .landing-resume-title{display:flex;align-items:center;gap:9px;color:#9fb2cf;font-size:12px;font-weight:750}
 .landing-skeleton{height:8px;border-radius:999px;background:linear-gradient(90deg,rgba(100,116,139,.22),rgba(148,163,184,.38),rgba(100,116,139,.22));background-size:200% 100%;animation:landing-shimmer 1.8s linear infinite}
 .landing-skeleton.w92{width:92%}.landing-skeleton.w78{width:78%}.landing-skeleton.w63{width:63%}.landing-skeleton.w48{width:48%}
@@ -227,19 +228,19 @@
 .landing-path-card span{margin-top:7px;color:#7e90aa;font-size:12px;line-height:1.5}
 .landing-path-card em{margin-top:auto;padding-top:18px;font-style:normal;color:#66a3ff;font-size:11px;font-weight:800;display:flex;align-items:center;gap:5px}
 .landing-mobile-action{display:none}
-.landing-reveal{opacity:0;transform:translateY(12px);animation:landing-reveal .6s cubic-bezier(.22,1,.36,1) forwards}
+.landing-reveal{opacity:1;transform:none;animation:landing-reveal .6s cubic-bezier(.22,1,.36,1) both}
 .landing-eyebrow.landing-reveal{animation-delay:.08s}
 .landing-title.landing-reveal{animation-delay:.13s}
 .landing-subtitle.landing-reveal{animation-delay:.28s}
 .landing-actions.landing-reveal{animation-delay:.36s}
 .landing-trust.landing-reveal{animation-delay:.44s}
 .landing-visual.landing-reveal{animation-delay:.2s}
-.landing-title .word{opacity:0;transform:translateY(12px);animation:landing-word .6s cubic-bezier(.22,1,.36,1) forwards}
+.landing-title .word{opacity:1;transform:none;animation:landing-word .6s cubic-bezier(.22,1,.36,1) both}
 .landing-title .word:nth-child(1){animation-delay:.12s}.landing-title .word:nth-child(2){animation-delay:.2s}.landing-title .word:nth-child(3){animation-delay:.28s}
 .landing-title .word:nth-child(4){animation-delay:.36s}.landing-title .word:nth-child(5){animation-delay:.44s}.landing-title .word:nth-child(6){animation-delay:.52s}
 .landing-title .word:nth-child(7){animation-delay:.6s}
-@keyframes landing-reveal{to{opacity:1;transform:none}}
-@keyframes landing-word{to{opacity:1;transform:none}}
+@keyframes landing-reveal{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes landing-word{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @keyframes landing-underline{to{stroke-dashoffset:0}}
 @keyframes landing-shimmer{to{background-position:-200% 0}}
 @keyframes landing-draw{to{stroke-dashoffset:0}}
