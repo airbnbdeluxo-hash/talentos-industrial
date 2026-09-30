@@ -57,7 +57,7 @@ const mapScorecard=(x:any):InterviewScorecard=>({id:x.id,applicationId:x.applica
 const mapTalentPool=(x:any):TalentPool=>({id:x.id,companyId:x.company_id,name:x.name,description:x.description??null,createdBy:x.created_by,createdAt:x.created_at});
 const mapTalentPoolMember=(x:any):TalentPoolMember=>({poolId:x.pool_id,candidateId:x.candidate_id,notes:x.notes??null,createdAt:x.created_at});
 const mapOffer=(x:any):Offer=>({id:x.id,applicationId:x.application_id,salary:x.salary==null?null:Number(x.salary),startDate:x.start_date??null,message:x.message??null,status:x.status as OfferStatus,createdBy:x.created_by,respondedAt:x.responded_at??null,createdAt:x.created_at,updatedAt:x.updated_at});
-const mapMatch=(m:any):MatchRow=>({id:m.id,jobId:m.job_id,candidateId:m.candidate_id,score:Number(m.score??0),reasons:Array.isArray(m.reasons)?m.reasons.map(String):[],gaps:Array.isArray(m.gaps)?m.gaps.map(String):[]});
+const mapMatch=(m:any):MatchRow=>({id:m.id,jobId:m.job_id,candidateId:m.candidate_id,score:Number(m.score??0),reasons:Array.isArray(m.reasons)?m.reasons.map(String):[],gaps:Array.isArray(m.gaps)?m.gaps.map((gap:any)=>typeof gap==='string'?gap:`${gap.skill??'Habilidade'} · nível ${gap.candidate_level??0}/${gap.required_level??0}${gap.verified?'':' · aguardando validação'}`):[]});
 const mapTraining=(t:any):TrainingRecommendation=>({
   id:t.id,candidateId:t.candidate_id,jobId:t.job_id,skillId:t.skill_id,skill:t.skills?.name??'Skill',
   priority:Number(t.priority??3),reason:t.reason,estimatedHours:t.estimated_hours==null?null:Number(t.estimated_hours),
@@ -127,9 +127,15 @@ async function findSkillIds(names:string[]):Promise<{id:string,name:string}[]>{
 
 export async function getRemoteBrazilCities():Promise<Array<{name:string;uf:string;ibgeCode:number}>>{
  if(!supabase)throw new Error('Supabase não configurado');
- const {data,error}=await supabase.from('brazil_cities').select('name,uf,ibge_code').order('name',{ascending:true}).order('uf',{ascending:true});
- if(error)throw error;
- return (data??[]).map((x:any)=>({name:String(x.name),uf:String(x.uf),ibgeCode:Number(x.ibge_code)}));
+ const rows:Array<{name:string;uf:string;ibgeCode:number}>=[];
+ for(let offset=0;;offset+=1000){
+  const {data,error}=await supabase.from('brazil_cities').select('name,uf,ibge_code').order('ibge_code',{ascending:true}).range(offset,offset+999);
+  if(error)throw error;
+  rows.push(...(data??[]).map((x:any)=>({name:String(x.name),uf:String(x.uf).trim(),ibgeCode:Number(x.ibge_code)})));
+  if(!data||data.length<1000)break;
+ }
+ return rows;
+
 }
 
 export async function getRemoteSkills():Promise<string[]>{
@@ -163,29 +169,43 @@ export async function createRemoteJob(userId:string,input:{title:string;descript
 
 export async function createRemoteCandidate(userId:string,input:{name:string;role:string;city:string;years:number;salary:number;skills:string[];preferredShifts?:string[];searchable?:boolean;bio?:string;resumeFile?:File|null;skillMentions?:Array<{skill:string;excerpt:string;confidence:number}>}){
  if(!supabase)throw new Error('Supabase não configurado');
- const consented=input.searchable!==false;
- const {error:profileError}=await supabase.from('candidate_profiles').upsert({profile_id:userId,display_name:input.name,role_title:input.role,city:input.city,years_experience:input.years,desired_salary:input.salary,bio:input.bio?.trim()||null,searchable:consented,visibility_consent_at:consented?new Date().toISOString():null,consent_version:consented?'v1':null}, {onConflict:'profile_id'});
- if(profileError)throw profileError;
- let resumeId:string|null=null; let oldResume:any=null; let newStoragePath:string|null=null;
- if(input.resumeFile){
-  const file=input.resumeFile; const allowed=['application/pdf','application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-  if(!allowed.includes(file.type))throw new Error('O currículo precisa ser PDF ou Word (.docx).');
-  if(file.size>10*1024*1024)throw new Error('O currículo deve ter no máximo 10 MB.');
-  const existing=await supabase.from('candidate_resumes').select('id,storage_path,file_name,mime_type,file_size').eq('candidate_id',userId).maybeSingle(); if(existing.error)throw existing.error; oldResume=existing.data??null;
-  const safeName=file.name.replace(/[^a-zA-Z0-9._-]+/g,'-').slice(-120); newStoragePath=userId+'/'+crypto.randomUUID()+'-'+safeName;
-  const upload=await supabase.storage.from('candidate-resumes').upload(newStoragePath,file,{contentType:file.type,upsert:false}); if(upload.error)throw upload.error;
-  if(oldResume){ const updated=await supabase.from('candidate_resumes').update({storage_path:newStoragePath,file_name:file.name,mime_type:file.type,file_size:file.size,updated_at:new Date().toISOString()}).eq('id',oldResume.id).select('id').single(); if(updated.error){await supabase.storage.from('candidate-resumes').remove([newStoragePath]);throw updated.error;} resumeId=updated.data.id;
-  }else{ const inserted=await supabase.from('candidate_resumes').insert({candidate_id:userId,storage_path:newStoragePath,file_name:file.name,mime_type:file.type,file_size:file.size}).select('id').single(); if(inserted.error){await supabase.storage.from('candidate-resumes').remove([newStoragePath]);throw inserted.error;} resumeId=inserted.data.id; }
- }
+ const client=supabase;
  const skills=await findSkillIds(input.skills);
- if(input.preferredShifts){const pref=await supabase.from('talent_preferences').upsert({candidate_id:userId,preferred_shifts:input.preferredShifts},{onConflict:'candidate_id'});if(pref.error)throw pref.error;}
- await supabase.from('candidate_skills').delete().eq('candidate_id',userId);
- if(skills.length){
-  const mentions=new Map((input.skillMentions??[]).map(m=>[m.skill.toLowerCase(),m]));
-  const rows=skills.map(s=>{const mention=mentions.get(s.name.toLowerCase());const fromResume=Boolean(resumeId&&mention);return {candidate_id:userId,skill_id:s.id,proficiency:fromResume?1:3,verified:false,years_experience:fromResume?0:input.years,source_type:fromResume?'curriculo':'manual',source_confidence:fromResume?Math.max(0,Math.min(1,mention?.confidence??0.6)):null,source_excerpt:fromResume?(mention?.excerpt?.slice(0,500)??null):null,source_resume_id:fromResume?resumeId:null};});
-  const r=await supabase.from('candidate_skills').insert(rows); if(r.error)throw r.error;
- }else if(newStoragePath){await supabase.storage.from('candidate-resumes').remove([newStoragePath]); if(oldResume)await supabase.from('candidate_resumes').update({storage_path:oldResume.storage_path,file_name:oldResume.file_name,mime_type:oldResume.mime_type,file_size:oldResume.file_size,updated_at:new Date().toISOString()}).eq('id',oldResume.id);else if(resumeId)await supabase.from('candidate_resumes').delete().eq('id',resumeId);}
- if(oldResume?.storage_path&&newStoragePath&&oldResume.storage_path!==newStoragePath){const removed=await supabase.storage.from('candidate-resumes').remove([oldResume.storage_path]);if(removed.error)console.warn('Não foi possível remover o currículo anterior',removed.error);}
+ if(skills.length!==new Set(input.skills).size)throw new Error('Uma ou mais habilidades não foram encontradas no catálogo. Revise a seleção.');
+ let oldStoragePath:string|null=null;let newStoragePath:string|null=null;
+ let resume:Record<string,unknown>|null=null;
+ if(input.resumeFile){
+  const file=input.resumeFile;
+  const mime=file.type||(/\.pdf$/i.test(file.name)?'application/pdf':/\.docx$/i.test(file.name)?'application/vnd.openxmlformats-officedocument.wordprocessingml.document':'');
+  if(!['application/pdf','application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(mime))throw new Error('O currículo precisa ser PDF ou Word (.docx).');
+  if(file.size===0||file.size>10*1024*1024)throw new Error('O currículo deve ter conteúdo e no máximo 10 MB.');
+  const existing=await client.from('candidate_resumes').select('storage_path').eq('candidate_id',userId).maybeSingle();
+  if(existing.error)throw existing.error;
+  oldStoragePath=existing.data?.storage_path??null;
+  const safeName=file.name.replace(/[^a-zA-Z0-9._-]+/g,'-').slice(-120);
+  newStoragePath=userId+'/'+crypto.randomUUID()+'-'+safeName;
+  const upload=await client.storage.from('candidate-resumes').upload(newStoragePath,file,{contentType:mime,upsert:false});
+  if(upload.error)throw upload.error;
+  resume={storage_path:newStoragePath,file_name:file.name,mime_type:mime,file_size:file.size};
+ }
+ const mentions=new Map((input.skillMentions??[]).map(m=>[m.skill.toLowerCase(),m]));
+ const rows=skills.map(s=>{const mention=mentions.get(s.name.toLowerCase());const fromResume=Boolean(resume&&mention);return {
+  skill_id:s.id,years_experience:fromResume?0:input.years,source_type:fromResume?'curriculo':'manual',
+  source_confidence:fromResume?Math.max(0,Math.min(1,mention?.confidence??0.6)):null,
+  source_excerpt:fromResume?(mention?.excerpt?.slice(0,500)??null):null,
+ };});
+ try{
+  const {error}=await client.rpc('save_candidate_passport',{p_profile:{name:input.name,role:input.role,city:input.city,years:input.years,salary:input.salary,bio:input.bio??'',searchable:input.searchable===true,...(input.preferredShifts?{preferredShifts:input.preferredShifts}:{})},p_skills:rows,p_resume:resume});
+  if(error)throw error;
+ }catch(error){
+  if(newStoragePath){const cleanup=await client.storage.from('candidate-resumes').remove([newStoragePath]);if(cleanup.error)console.warn('Não foi possível limpar o novo arquivo',cleanup.error);}
+  throw error;
+ }
+ if(oldStoragePath&&newStoragePath&&oldStoragePath!==newStoragePath){
+  const cleanup=await client.storage.from('candidate-resumes').remove([oldStoragePath]);
+  if(cleanup.error)console.warn('Não foi possível remover o currículo anterior',cleanup.error);
+ }
+
 }
 
 export async function updateRemoteApplication(applicationId:string,status:Status){
@@ -275,7 +295,8 @@ export async function recordRemoteTrainingEvidence(recommendationId:string, evid
  if(!supabase)throw new Error('Supabase não configurado');
  const {data,error}=await supabase.rpc('record_training_evidence',{p_recommendation_id:recommendationId,p_evidence_id:evidenceId??null,p_assessment_id:assessmentId??null,p_attempt_id:attemptId??null,p_completion_type:completionType});
  if(error)throw error;
- return data?.[0]?mapTraining(data[0]):null;
+ const row=Array.isArray(data)?data[0]:data;
+ return row?mapTraining(row):null;
 }
 
 export async function updateRemoteTrainingRecommendation(
