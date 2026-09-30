@@ -1,5 +1,10 @@
 import { expect, test } from '@playwright/test';
 
+async function expectPlainLanguage(page: import('@playwright/test').Page) {
+  const text = await page.locator('body').innerText();
+  expect(text).not.toMatch(/Skill Passport|Readiness|Adicionar evidência|Evidência desta habilidade|\bAnalytics\b|\bGaps?\b/i);
+}
+
 test.describe('TalentOS authenticated journeys', () => {
   test.beforeEach(async ({ page }) => {
     const errors: string[] = [];
@@ -25,6 +30,7 @@ test.describe('TalentOS authenticated journeys', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Meu currículo' })).toBeVisible();
     await expect(page.getByText('Marcos Silva', { exact: true })).toBeVisible();
     await expect(page.locator('.overlay')).toHaveCount(0);
+    await expectPlainLanguage(page);
 
     await page.getByRole('button', { name: 'Editar currículo', exact: true }).click();
     await expect(page.getByRole('heading', { level: 2, name: 'Editar meu currículo' })).toBeVisible();
@@ -47,6 +53,7 @@ test.describe('TalentOS authenticated journeys', () => {
       await page.getByRole('button', { name: menu, exact: true }).click();
       await expect(page.getByRole('heading', { level: 1, name: heading })).toBeVisible();
       await expect(page.locator('.overlay')).toHaveCount(0);
+      await expectPlainLanguage(page);
     }
   });
 
@@ -56,6 +63,7 @@ test.describe('TalentOS authenticated journeys', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Início' })).toBeVisible();
     await expect(page.getByText('RECRUTAMENTO DA EMPRESA')).toBeVisible();
     await expect(page.locator('.overlay')).toHaveCount(0);
+    await expectPlainLanguage(page);
 
     await page.getByRole('button', { name: 'Criar vaga', exact: true }).click();
     await expect(page.getByRole('heading', { level: 2, name: 'Estruturar nova vaga' })).toBeVisible();
@@ -76,6 +84,7 @@ test.describe('TalentOS authenticated journeys', () => {
       await page.getByRole('button', { name: menu, exact: true }).click();
       await expect(page.getByRole('heading', { level: 1, name: heading })).toBeVisible();
       await expect(page.locator('.overlay')).toHaveCount(0);
+      await expectPlainLanguage(page);
     }
   });
 });
