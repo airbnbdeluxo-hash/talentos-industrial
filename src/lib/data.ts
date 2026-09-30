@@ -216,6 +216,21 @@ export async function respondRemoteInterviewSecure(interviewId:string,status:'co
 export async function markRemoteNotificationRead(notificationId:string){if(!supabase)throw new Error('Supabase não configurado');const {error}=await supabase.from('notifications').update({read_at:new Date().toISOString()}).eq('id',notificationId);if(error)throw error;}
 
 export async function respondRemoteOffer(offerId:string,status:'aceita'|'recusada'){if(!supabase)throw new Error('Supabase não configurado');const {data,error}=await supabase.from('offers').update({status,responded_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq('id',offerId).select('*').single();if(error)throw error;return mapOffer(data);}
+export async function getRemotePublicJobs():Promise<Job[]>{
+ if(!supabase)throw new Error('Supabase não configurado');
+ const {data,error}=await supabase.from('jobs').select('*').eq('status','aberta').order('created_at',{ascending:false});
+ if(error)throw error;
+ const rows=data??[];
+ const ids=rows.map((x:any)=>x.id);
+ let skills:any[]=[];
+ if(ids.length){
+  const res=await supabase.from('job_skills').select('job_id,skills(name)').in('job_id',ids).eq('required',true);
+  if(res.error)throw res.error;
+  skills=res.data??[];
+ }
+ return rows.map((row:any)=>({...mapJob(row),companyName:row.company_public_name??'Empresa',skills:skills.filter((x:any)=>x.job_id===row.id).map((x:any)=>x.skills?.name).filter(Boolean)}));
+}
+
 export async function getRemotePublicJob(slug:string){if(!supabase)throw new Error('Supabase não configurado');const {data,error}=await supabase.from('jobs').select('*,companies(name)').eq('public_slug',slug).eq('status','aberta').maybeSingle();if(error)throw error;if(!data)return null;const {data:skills,error:skillsError}=await supabase.from('job_skills').select('skills(name)').eq('job_id',data.id).eq('required',true);if(skillsError)throw skillsError;return {...mapJob(data),skills:(skills??[]).map((x:any)=>x.skills?.name).filter(Boolean),companyName:data.companies?.name??data.company_public_name??'Empresa'} as Job;}
 
 export async function generateRemoteMatches(jobId:string){
