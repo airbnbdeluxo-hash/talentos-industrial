@@ -102,7 +102,8 @@ export async function loadRemoteData(userId:string, role?:'empresa'|'candidato'|
    supabase.from('interview_scorecards').select('*').order('created_at',{ascending:true}),
    supabase.from('talent_pools').select('*').order('created_at',{ascending:false}),
    supabase.from('talent_pool_members').select('*').order('created_at',{ascending:false}),
-   supabase.from('offers').select('*').order('created_at',{ascending:false})
+   supabase.from('offers').select('*').order('created_at',{ascending:false}),
+   supabase.from('notifications').select('*').order('created_at',{ascending:false})
  ]);
  if(companyRes.error)throw companyRes.error;if(jobsRes.error)throw jobsRes.error;if(candidatesRes.error)throw candidatesRes.error;if(appsRes.error)throw appsRes.error;if(eventsRes.error)throw eventsRes.error;if(matchesRes.error)throw matchesRes.error;if(trainingRes.error)throw trainingRes.error;if(capabilityNodesRes.error)throw capabilityNodesRes.error;if(capabilityEdgesRes.error)throw capabilityEdgesRes.error;if(outcomesRes.error)throw outcomesRes.error;if(outcomeSkillSignalsRes.error)throw outcomeSkillSignalsRes.error;if(savedJobsRes.error)throw savedJobsRes.error;if(jobAlertsRes.error)throw jobAlertsRes.error;if(messagesRes.error)throw messagesRes.error;if(interviewsRes.error)throw interviewsRes.error;if(scorecardsRes.error)throw scorecardsRes.error;if(talentPoolsRes.error)throw talentPoolsRes.error;if(talentPoolMembersRes.error)throw talentPoolMembersRes.error;if(offersRes.error)throw offersRes.error;if(notificationsRes.error)throw notificationsRes.error;
  const jobIds=(jobsRes.data??[]).map((j:any)=>j.id);
