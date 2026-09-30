@@ -592,3 +592,15 @@
   .landing-ticker-track{animation:none!important;transform:none!important}
   .landing-ticker-track span[aria-hidden="true"]{display:none}
 }
+
+
+/* Acceptance sizing: 1366x768 and 360x640 */
+@media(min-width:1181px){
+  .landing-shell{width:min(1334px,calc(100% - 32px))}
+  .landing-hero{grid-template-columns:minmax(620px,.94fr) minmax(0,1.06fr);gap:26px}
+  .landing-title{max-width:640px}
+}
+@media(max-width:767px){
+  .landing-shell{padding-left:9px;padding-right:9px}
+  .landing-title{letter-spacing:-.08em}
+}
