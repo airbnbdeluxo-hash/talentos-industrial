@@ -244,13 +244,15 @@ export async function uploadRemoteEvidence(userId:string,skillName:string,file:F
  const {data:skill,error:skillError}=await supabase.from('skills').select('id,name').eq('name',skillName).maybeSingle();
  if(skillError)throw skillError;
  if(!skill)throw new Error('Skill não encontrada');
- const hashBuffer=await crypto.subtle.digest('SHA-256',await file.arrayBuffer());const fileHash=Array.from(new Uint8Array(hashBuffer)).map(b=>b.toString(16).padStart(2,'0')).join('');const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+ const hashBuffer=await crypto.subtle.digest('SHA-256',await file.arrayBuffer());const sameCandidate=await supabase.from('skill_evidence').select('id').eq('candidate_id',userId).eq('file_hash',fileHash).limit(1).maybeSingle();const fileHash=Array.from(new Uint8Array(hashBuffer)).map(b=>b.toString(16).padStart(2,'0')).join('');const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+if(sameCandidate.error)throw sameCandidate.error;
+ const duplicateOther=await supabase.from('skill_evidence').select('id').neq('candidate_id',userId).eq('file_hash',fileHash).limit(1).maybeSingle();if(duplicateOther.error)throw duplicateOther.error;if(sameCandidate.data)throw new Error('Este arquivo já foi enviado neste perfil');const integrityStatus=duplicateOther.data?'revisao':'normal';
  const storagePath=userId+'/'+skill.id+'/'+crypto.randomUUID()+'-'+safe;
  const upload=await supabase.storage.from('skill-evidence').upload(storagePath,file,{contentType:file.type||'application/octet-stream',upsert:false});
  if(upload.error)throw upload.error;
  const evidence=await supabase.from('skill_evidence').insert({
    candidate_id:userId,skill_id:skill.id,evidence_type:'certificado',title:file.name,issuer:'Enviado pelo profissional',
-   verified:false,storage_path:storagePath,file_name:file.name,mime_type:file.type||null,file_size:file.size,file_hash:fileHash,integrity_status:'normal'
+   verified:false,storage_path:storagePath,file_name:file.name,mime_type:file.type||null,file_size:file.size,file_hash:fileHash,integrity_status:integrityStatus
  }).select('id,storage_path,file_name,mime_type,file_size').single();
  if(evidence.error){
    await supabase.storage.from('skill-evidence').remove([storagePath]);
