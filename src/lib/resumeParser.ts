@@ -169,7 +169,7 @@ export async function extractResumeText(file: File): Promise<string> {
   if (lowerName.endsWith('.pdf') || file.type === 'application/pdf') {
     const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
     const data = new Uint8Array(await file.arrayBuffer());
-    const loadingTask = pdfjs.getDocument({ data, disableWorker: true });
+    const loadingTask = pdfjs.getDocument({ data });
     const pdf = await loadingTask.promise;
     const pages: string[] = [];
     for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
