@@ -8,6 +8,7 @@ export type ResumeDraft = {
   salary: number;
   preferredShifts: string[];
   skills: string[];
+  skillMentions: Array<{ skill: string; excerpt: string; confidence: number }>;
   bio: string;
   email?: string;
   phone?: string;
@@ -137,14 +138,24 @@ export function parseResumeText(text: string, catalog: string[] = []): ResumeDra
     )
   ).slice(0, 4);
 
-  const skills = Array.from(
-    new Set(
+  const normalizedClean = normalize(clean);
+  const skillMentions = Array.from(
+    new Map(
       catalog
         .map((skill) => ({ skill, normalized: normalize(skill) }))
-        .filter((entry) => entry.normalized && normalize(clean).includes(entry.normalized))
-        .map((entry) => entry.skill)
-    )
+        .filter((entry) => entry.normalized && normalizedClean.includes(entry.normalized))
+        .map((entry) => {
+          const index = normalizedClean.indexOf(entry.normalized);
+          const start = Math.max(0, index - 90);
+          const end = Math.min(clean.length, index + entry.skill.length + 110);
+          const excerpt = clean.slice(start, end).replace(/\\s+/g, ' ').trim();
+          const before = normalizedClean.slice(Math.max(0, index - 180), index);
+          const confidence = /habilidades|competencias|conhecimentos|skills/.test(before) ? 0.8 : 0.6;
+          return [entry.skill, { skill: entry.skill, excerpt, confidence }];
+        })
+    ).values()
   );
+  const skills = skillMentions.map((mention) => mention.skill);
 
   const summary =
     extractSection(lines, ['resumo profissional', 'resumo', 'perfil profissional', 'perfil', 'sobre mim']) ||
@@ -158,6 +169,7 @@ export function parseResumeText(text: string, catalog: string[] = []): ResumeDra
     salary,
     preferredShifts: shifts,
     skills,
+    skillMentions,
     bio: summary,
     email,
     phone,
