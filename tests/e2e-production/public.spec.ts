@@ -11,6 +11,8 @@ test('área pública não apresenta perfis de demonstração como dados reais', 
 
 test('recuperação de senha usa título coerente e mantém a tela de login acessível', async ({ page }) => {
   await page.goto('/');
+  const closeOverlay = page.locator('.overlay button.close').first();
+  if (await closeOverlay.isVisible().catch(() => false)) await closeOverlay.click();
   await page.getByRole('button', { name: 'Entrar', exact: true }).first().click();
   await expect(page.getByRole('heading', { name: 'Entrar como candidato' })).toBeVisible();
   await page.getByRole('button', { name: 'Alterar ou recuperar minha senha' }).click();
