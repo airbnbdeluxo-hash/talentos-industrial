@@ -12,6 +12,18 @@ const json = (body: unknown, status = 200, origin = 'https://talentos-industrial
 
 const normalizeEmail = (value: unknown) => String(value ?? '').trim().toLowerCase();
 const isUuid = (value: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+const normalizeCnpj = (value: unknown) => String(value ?? '').replace(/\D/g, '');
+const isValidCnpj = (value: string) => {
+  if (!/^\d{14}$/.test(value) || /^(\d)\1{13}$/.test(value)) return false;
+  const calc = (digits: string, weights: number[]) => {
+    const sum = digits.split('').reduce((total, digit, index) => total + Number(digit) * weights[index], 0);
+    const remainder = sum % 11;
+    return remainder < 2 ? 0 : 11 - remainder;
+  };
+  const first = calc(value.slice(0, 12), [5,4,3,2,9,8,7,6,5,4,3,2]);
+  const second = calc(value.slice(0, 12) + String(first), [6,5,4,3,2,9,8,7,6,5,4,3,2]);
+  return value.endsWith(String(first) + String(second));
+};
 
 Deno.serve(async (request) => {
   const appUrl = Deno.env.get('APP_URL') ?? 'https://talentos-industrial.vercel.app';
@@ -43,9 +55,11 @@ Deno.serve(async (request) => {
     if (action === 'create-company') {
       if (!caller.email_confirmed_at) return json({ error: 'Confirme seu e-mail antes de cadastrar a empresa.' }, 403, origin);
       const name = String(body.name ?? '').trim();
+      const cnpj = normalizeCnpj(body.cnpj);
       const industry = String(body.industry ?? '').trim();
       const cityLabel = String(body.city ?? '').trim();
       if (!name || name.length > 160) return json({ error: 'Informe o nome da empresa.' }, 400, origin);
+      if (!isValidCnpj(cnpj)) return json({ error: 'Informe um CNPJ válido.' }, 400, origin);
       if (industry.length > 120) return json({ error: 'Segmento inválido.' }, 400, origin);
       const cityMatch = cityLabel.match(/^(.+?)\s+—\s+([A-Z]{2})$/);
       if (!cityMatch) return json({ error: 'Selecione uma cidade da lista oficial de municípios.' }, 400, origin);
@@ -63,6 +77,7 @@ Deno.serve(async (request) => {
       const { data: company, error } = await admin.rpc('company_team_create_company_service', {
         p_actor_id: caller.id,
         p_name: name,
+        p_cnpj: cnpj,
         p_city: `${city.name} — ${String(city.uf).trim()}`,
         p_state: String(city.uf).trim(),
         p_city_ibge_code: city.ibge_code,
