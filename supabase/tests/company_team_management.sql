@@ -24,22 +24,33 @@ begin
      or has_function_privilege('anon','public.accept_company_invitation(uuid)','execute') then
     raise exception 'anonymous users must not execute company team functions';
   end if;
-  if not has_function_privilege('authenticated','public.company_team_update_member_role(uuid,uuid,text)','execute')
-     or not has_function_privilege('authenticated','public.company_team_remove_member(uuid,uuid)','execute')
-     or not has_function_privilege('authenticated','public.company_team_transfer_owner(uuid,uuid)','execute')
-     or not has_function_privilege('authenticated','public.accept_company_invitation(uuid)','execute') then
-    raise exception 'authenticated team functions are missing';
+  if to_regprocedure('public.company_team_update_member_role(uuid,uuid,text)') is not null
+     or to_regprocedure('public.company_team_remove_member(uuid,uuid)') is not null
+     or to_regprocedure('public.company_team_transfer_owner(uuid,uuid)') is not null
+     or to_regprocedure('public.accept_company_invitation(uuid)') is not null then
+    raise exception 'browser-callable team security definer functions must be removed';
   end if;
 
   foreach function_name in array array[
-    'company_team_update_member_role','company_team_remove_member',
-    'company_team_transfer_owner','accept_company_invitation'
+    'company_team_create_company_service',
+    'company_team_accept_invitation_service',
+    'company_team_update_member_role_service',
+    'company_team_remove_member_service',
+    'company_team_transfer_owner_service'
   ] loop
     select pg_get_functiondef(p.oid) into definition
     from pg_proc p join pg_namespace n on n.oid=p.pronamespace
     where n.nspname='public' and p.proname=function_name;
-    if definition is null or definition not like '%auth.uid()%' or definition not like '%search_path%' then
-      raise exception 'team function % must bind the caller and pin search_path',function_name;
+    if definition is null or definition not like '%SECURITY DEFINER%' or definition not like '%search_path%' then
+      raise exception 'server team function % must be security definer with pinned search_path',function_name;
     end if;
   end loop;
+
+  if has_function_privilege('authenticated','public.company_team_create_company_service(uuid,text,text,text,integer,text)','execute')
+     or has_function_privilege('authenticated','public.company_team_accept_invitation_service(uuid,text,uuid)','execute')
+     or has_function_privilege('authenticated','public.company_team_update_member_role_service(uuid,uuid,uuid,text)','execute')
+     or has_function_privilege('authenticated','public.company_team_remove_member_service(uuid,uuid,uuid)','execute')
+     or has_function_privilege('authenticated','public.company_team_transfer_owner_service(uuid,uuid,uuid)','execute') then
+    raise exception 'server-only team functions must not be executable by authenticated clients';
+  end if;
 end $$;
