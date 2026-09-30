@@ -114,3 +114,9 @@ drop trigger if exists interview_response_notification on public.interviews;
 create trigger interview_response_notification after update of status on public.interviews
 for each row execute function public.notify_interview_response();
 revoke all on function public.notify_interview_response() from public;
+
+revoke execute on function public.notify_application_event() from anon, authenticated, public;
+revoke execute on function public.notify_message_event() from anon, authenticated, public;
+revoke execute on function public.notify_interview_event() from anon, authenticated, public;
+revoke execute on function public.notify_offer_event() from anon, authenticated, public;
+revoke execute on function public.notify_interview_response() from anon, authenticated, public;
