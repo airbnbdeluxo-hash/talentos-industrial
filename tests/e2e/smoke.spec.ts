@@ -55,4 +55,18 @@ test.describe('TalentOS smoke', () => {
 
     expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth + 1);
   });
+
+
+  test('entrada separa claramente candidato e empresa', async ({ page }) => {
+    await page.goto('/?e2eAuthGate=1');
+
+    await expect(page.getByRole('heading', { level: 2, name: 'Como você quer usar o TalentOS?' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 3, name: 'Quero encontrar vagas' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Entrar como candidato', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Criar conta de candidato', exact: true })).toBeVisible();
+
+    await expect(page.getByRole('heading', { level: 3, name: 'Sou empresa' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Entrar como empresa', exact: true })).toBeVisible();
+    await expect(page.getByText('O acesso empresarial é liberado para empresas e recrutadores cadastrados no TalentOS.')).toBeVisible();
+  });
 });
