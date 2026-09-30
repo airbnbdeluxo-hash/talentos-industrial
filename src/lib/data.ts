@@ -59,16 +59,16 @@ export async function getRemoteProfile(userId:string):Promise<RemoteProfile|null
  return data as RemoteProfile|null;
 }
 
-export async function loadRemoteData(userId:string):Promise<DB>{
+export async function loadRemoteData(userId:string, role?:'empresa'|'candidato'|'admin'):Promise<DB>{
  if(!supabase)throw new Error('Supabase não configurado');
  const {data:members,error:memberError}=await supabase.from('company_members').select('company_id').eq('user_id',userId);
  if(memberError)throw memberError;
  const companyIds=(members??[]).map((x:any)=>x.company_id);
- const companyQuery=companyIds.length?supabase.from('companies').select('*').in('id',companyIds):Promise.resolve({data:[],error:null} as any);
+ const companyQuery=role==='admin'?supabase.from('companies').select('*'):companyIds.length?supabase.from('companies').select('*').in('id',companyIds):Promise.resolve({data:[],error:null} as any);
  const [companyRes,jobsRes,candidatesRes,appsRes,eventsRes,matchesRes,trainingRes,capabilityNodesRes,capabilityEdgesRes,outcomesRes,outcomeSkillSignalsRes]=await Promise.all([
    companyQuery,
    supabase.from('jobs').select('*').order('created_at',{ascending:false}),
-   supabase.from('candidate_profiles').select('profile_id,display_name,role_title,years_experience,desired_salary,bio,city,searchable,candidate_skills(skill_id,proficiency,verified,years_experience,skills(name)),skill_evidence(id,skill_id,evidence_type,title,issuer,verified,verified_at,expires_at,score,storage_path,file_name,mime_type,file_size,validation_status,reviewed_by,reviewed_at,review_note,skills(name)),talent_preferences(preferred_shifts)').or(`searchable.eq.true,profile_id.eq.${userId}`),
+   (role==='candidato'?supabase.from('candidate_profiles').select('profile_id,display_name,role_title,years_experience,desired_salary,bio,city,searchable,candidate_skills(skill_id,proficiency,verified,years_experience,skills(name)),skill_evidence(id,skill_id,evidence_type,title,issuer,verified,verified_at,expires_at,score,storage_path,file_name,mime_type,file_size,validation_status,reviewed_by,reviewed_at,review_note,skills(name)),talent_preferences(preferred_shifts)').eq('profile_id',userId):supabase.from('candidate_profiles').select('profile_id,display_name,role_title,years_experience,desired_salary,bio,city,searchable,candidate_skills(skill_id,proficiency,verified,years_experience,skills(name)),skill_evidence(id,skill_id,evidence_type,title,issuer,verified,verified_at,expires_at,score,storage_path,file_name,mime_type,file_size,validation_status,reviewed_by,reviewed_at,review_note,skills(name)),talent_preferences(preferred_shifts)').or(`searchable.eq.true,profile_id.eq.${userId}`)),
    supabase.from('applications').select('*').order('updated_at',{ascending:false}),
    supabase.from('application_events').select('*').order('created_at',{ascending:true}),
    supabase.from('matches').select('*').order('score',{ascending:false}),
