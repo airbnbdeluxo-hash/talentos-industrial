@@ -441,6 +441,21 @@ const uploadEvidence=async(file:File,skillOverride?:string)=>{if(!session||role!
 const runChallenge=async(skillOverride?:string)=>{if(!talent)return;if(dataMode==='remote'&&(!session||role!=='candidato'||session.user.id!==talent.id)){setToast('Somente o próprio candidato pode iniciar este teste');return}try{const skill=skillOverride||proofSkill||talent.skills[0]||'CNC';if(dataMode==='remote'&&session&&role==='candidato'){setChallengeLoading(true);const list=await getRemoteChallenges(skill);if(!list.length)throw new Error('Ainda não há teste disponível para esta habilidade');const selected=list[0];const attemptId=await startRemoteChallenge(selected.id,job?.id);setProofSkill(null);setChallenge(selected);setChallengeAttemptId(attemptId);setChallengeAnswers({})}else{const ev:Evidence={id:'e'+Date.now(),skill,type:'desafio',title:'Teste demonstrativo de '+skill,issuer:'TalentOS (Demonstração)',verified:false};const updated={...talent,evidence:[...talent.evidence,ev]};setProofSkill(null);persist({...db,candidates:db.candidates.map(c=>c.id===talent.id?updated:c)},'Teste demonstrativo registrado · aguardando análise')}}catch(err){console.error(err);setToast(localizeDisplayedText(err instanceof Error?err.message:'Não foi possível iniciar o teste'))}finally{setChallengeLoading(false)}};
 const submitChallenge=async()=>{if(!challenge||!challengeAttemptId)return;try{setChallengeLoading(true);const result=await completeRemoteChallenge(challengeAttemptId,challengeAnswers);await reloadRemote();setChallenge(null);setChallengeAttemptId(null);setChallengeAnswers({});setToast('Avaliação enviada · aguardando validação humana')}catch(err){console.error(err);setToast(localizeDisplayedText(err instanceof Error?err.message:'Não foi possível concluir o desafio'))}finally{setChallengeLoading(false)}};
 const move=async(id:string,status:Status)=>{const current=db.applications.find(a=>a.id===id);if(!current||current.status===status)return;try{if(dataMode==='remote'){await updateRemoteApplication(id,status);await reloadRemote()}else{const event:AppEvent={id:'ev'+Date.now(),applicationId:id,fromStatus:current.status,toStatus:status,at:new Date().toISOString()};persist({...db,applications:db.applications.map(a=>a.id===id?{...a,status}:a),events:[...db.events,event]},'Pipeline atualizado')}}catch(err){console.error(err);setToast('Não foi possível atualizar')}};
+const openOutcomeForApplication=(applicationId:string)=>{
+ setOutcomeApplicationId(applicationId);
+ setOutcomeCheckpoint(db.outcomes.find(o=>o.applicationId===applicationId)?.checkpoint==='30d'?'60d':'30d');
+ const outcomeJob=db.jobs.find(j=>j.id===db.applications.find(a=>a.id===applicationId)?.jobId);
+ const priorSignals=db.outcomeSkillSignals.filter(s=>db.outcomes.some(o=>o.id===s.outcomeId&&o.applicationId===applicationId));
+ const initialForms:Record<string,{signalStatus:OutcomeSkillSignalStatus;managerRating:string;trainingNeeded:boolean;note:string}>={};
+ (outcomeJob?.skills??[]).forEach(skillName=>{
+  const node=db.capabilityNodes.find(n=>n.nodeType==='competencia'&&n.name.toLowerCase()===skillName.toLowerCase());
+  if(!node?.skillId)return;
+  const prior=priorSignals.find(x=>x.skillId===node.skillId);
+  initialForms[node.skillId]={signalStatus:prior?.signalStatus??'nao_observado',managerRating:prior?.managerRating==null?'':String(prior.managerRating),trainingNeeded:prior?.trainingNeeded??false,note:prior?.note??''};
+ });
+ setOutcomeSkillForms(initialForms);
+ setModal('outcome');
+};
 const generateTrainingPlanFor=async(candidateId:string,targetJobId:string)=>{
  if(dataMode!=='remote'||!session||!['candidato','empresa','admin'].includes(role??''))return;
  if(role==='candidato'&&session.user.id!==candidateId){setToast('Somente o próprio candidato pode gerar seu plano');return}
