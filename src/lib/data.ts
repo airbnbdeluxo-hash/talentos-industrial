@@ -175,6 +175,19 @@ export async function updateRemoteJobStatus(jobId:string,status:'aberta'|'pausad
  return data;
 }
 
+export async function updateRemoteJobDetails(input:{jobId:string;title:string;description?:string;city:string;min:number;max:number;shift:string;skills:string[];screeningQuestions?:string[];employmentType?:string;workModel?:string;benefits?:string[];travelRequired?:boolean;interviewQuestions?:string[]}){
+ if(!supabase)throw new Error('Supabase não configurado');
+ const {data,error}=await supabase.rpc('update_job_details',{
+  p_job_id:input.jobId,p_title:input.title,p_description:input.description?.trim()||null,p_city:input.city,
+  p_salary_min:input.min,p_salary_max:input.max,p_shift:input.shift,p_skills:input.skills,
+  p_screening_questions:(input.screeningQuestions??[]).filter(Boolean),p_employment_type:input.employmentType||'CLT',
+  p_work_model:input.workModel||'Presencial',p_benefits:(input.benefits??[]).filter(Boolean),
+  p_travel_required:Boolean(input.travelRequired),p_interview_questions:(input.interviewQuestions??[]).filter(Boolean)
+ });
+ if(error)throw error;
+ return data;
+}
+
 export async function createRemoteCandidate(userId:string,input:{name:string;role:string;city:string;years:number;salary:number;skills:string[];preferredShifts?:string[];searchable?:boolean;bio?:string;resumeFile?:File|null;skillMentions?:Array<{skill:string;excerpt:string;confidence:number}>}){
  if(!supabase)throw new Error('Supabase não configurado');
  const client=supabase;
