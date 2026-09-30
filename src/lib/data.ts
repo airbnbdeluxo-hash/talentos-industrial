@@ -177,7 +177,7 @@ export async function createRemoteCandidate(userId:string,input:{name:string;rol
 
 export async function updateRemoteApplication(applicationId:string,status:Status){
  if(!supabase)throw new Error('Supabase não configurado');
- const {error}=await supabase.from('applications').update({status,updated_at:new Date().toISOString()}).eq('id',applicationId);
+ const {error}=await supabase.rpc('update_application_status',{p_application_id:applicationId,p_status:status});
  if(error)throw error;
 }
 
