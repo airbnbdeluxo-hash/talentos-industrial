@@ -882,28 +882,22 @@ function LandingPage({onCandidateSignup,onCompanySignup,onLogin,onDemo}:{onCandi
  useEffect(()=>{const mq=window.matchMedia('(max-width:767px)');const sync=()=>setCompact(mq.matches);sync();mq.addEventListener?.('change',sync);return()=>mq.removeEventListener?.('change',sync)},[]);
  useEffect(()=>{const mq=window.matchMedia('(prefers-reduced-motion: reduce)');const sync=()=>setReduceMotion(mq.matches);sync();mq.addEventListener?.('change',sync);return()=>mq.removeEventListener?.('change',sync)},[]);
  useEffect(()=>{const sync=()=>setPageVisible(!document.hidden);document.addEventListener('visibilitychange',sync);return()=>document.removeEventListener('visibilitychange',sync)},[]);
- useEffect(()=>{const el=cardRef.current;if(!el)return;const observer=new IntersectionObserver(([entry])=>setCardInView(entry.isIntersecting),{threshold:.15});observer.observe(el);return()=>observer.disconnect()},[]);
- useEffect(()=>{const el=bodyCtaRef.current;if(!el)return;const observer=new IntersectionObserver(([entry])=>setStickyVisible(!entry.isIntersecting),{threshold:.3});observer.observe(el);return()=>observer.disconnect()},[audience]);
- useEffect(()=>{setStep(reduceMotion?(compact?2:5):0)},[compact,reduceMotion]);
- useEffect(()=>{if(reduceMotion||paused||!cardInView||!pageVisible)return;const count=compact?3:6;const timer=window.setInterval(()=>setStep(current=>(current+1)%count),compact?3000:2300);return()=>window.clearInterval(timer)},[compact,reduceMotion,paused,cardInView,pageVisible]);
+ useEffect(()=>{const el=cardRef.current;if(!el||typeof IntersectionObserver==='undefined'){setCardInView(true);return}const observer=new IntersectionObserver(([entry])=>setCardInView(entry.isIntersecting),{threshold:.15});observer.observe(el);return()=>observer.disconnect()},[]);
+ useEffect(()=>{const el=bodyCtaRef.current;if(!el||typeof IntersectionObserver==='undefined'){setStickyVisible(false);return}const observer=new IntersectionObserver(([entry])=>setStickyVisible(!entry.isIntersecting),{threshold:.3});observer.observe(el);return()=>observer.disconnect()},[audience]);
+ useEffect(()=>{setStep(reduceMotion?2:0)},[reduceMotion]);
+ useEffect(()=>{if(reduceMotion||paused||!cardInView||!pageVisible)return;const timer=window.setInterval(()=>setStep(current=>(current+1)%5),2500);return()=>window.clearInterval(timer)},[reduceMotion,paused,cardInView,pageVisible]);
  const isProfessional=audience==='candidato';
  const primaryLabel=isProfessional?'Criar meu Skill Passport':'Publicar minha primeira vaga';
  const subtitle=isProfessional?'Transforme seu currículo em capacidades verificadas e descubra quais vagas combinam com você.':'Publique vagas por capacidades e compare profissionais com evidências claras.';
  const primaryAction=isProfessional?onCandidateSignup:onCompanySignup;
- const maxSteps=compact?3:6;
- const advance=()=>setStep(current=>(current+1)%maxSteps);
- const desktopSkills=[
+ const advance=()=>{if(!reduceMotion)setStep(current=>(current+1)%5)};
+ const skills=[
   {name:'Operação CNC Fanuc',status:'verified',label:'✓ Verificada',source:'Certificado SENAI-RS'},
   {name:'Metrologia',status:'verified',label:'✓ Verificada',source:'Desafio prático · 92'},
   {name:'Leitura de desenho técnico',status:'declared',label:'◐ Declarada',source:'Experiência declarada'},
   {name:'Soldagem TIG',status:'developing',label:'✚ Em desenvolvimento',source:'Plano técnico'}
  ];
- const mobileSkills=[
-  {name:'Operação CNC Fanuc',status:'verified',label:'✓ Verificada'},
-  {name:'Metrologia',status:'declared',label:'◐ Declarada'},
-  {name:'Programação CNC',status:'gap',label:'Gap'}
- ];
- const renderDesktopSkills=(badges:boolean)=><div className="landing-chip-grid">{desktopSkills.map(skill=><div className="landing-skill-chip" key={skill.name}><b>{skill.name}</b>{badges&&<span className={'landing-badge '+skill.status}>{skill.label}</span>}<span>{badges?skill.source:'competência identificada'}</span></div>)}</div>;
+ const renderSkills=(badges:boolean,condensed=false)=><div className={'landing-chip-grid'+(condensed?' condensed':'')}>{skills.map(skill=><div className="landing-skill-chip" key={skill.name}><b>{skill.name}</b>{badges&&<span className={'landing-badge '+skill.status}>{skill.label}</span>}<span>{badges?skill.source:'competência identificada'}</span></div>)}</div>;
  return <section className="landing-home" aria-label="Entrada do TalentOS Industrial">
   <header className="landing-top">
    <div className="landing-brand" aria-label="TalentOS Industrial"><span className="landing-brand-mark"><Factory size={19}/></span><span><b>TalentOS</b><span>INDUSTRIAL</span></span></div>
@@ -939,27 +933,22 @@ function LandingPage({onCandidateSignup,onCompanySignup,onLogin,onDemo}:{onCandi
       onPointerLeave={e=>{setPaused(false);e.currentTarget.style.setProperty('--parallax-x','0px');e.currentTarget.style.setProperty('--parallax-y','0px')}}
       onPointerMove={e=>{if(compact||reduceMotion)return;const rect=e.currentTarget.getBoundingClientRect();const x=((e.clientX-rect.left)/rect.width-.5)*8;const y=((e.clientY-rect.top)/rect.height-.5)*8;e.currentTarget.style.setProperty('--parallax-x',x+'px');e.currentTarget.style.setProperty('--parallax-y',y+'px')}}
       onTouchStart={e=>{touchStartX.current=e.touches[0]?.clientX??null;touchMoved.current=false}}
-      onTouchEnd={e=>{const start=touchStartX.current;touchStartX.current=null;if(start==null||!e.changedTouches[0])return;const delta=e.changedTouches[0].clientX-start;if(Math.abs(delta)>38){touchMoved.current=true;setStep(current=>(current+(delta<0?1:maxSteps-1))%maxSteps)}}}
+      onTouchEnd={e=>{const start=touchStartX.current;touchStartX.current=null;if(start==null||!e.changedTouches[0])return;const delta=e.changedTouches[0].clientX-start;if(Math.abs(delta)>38){touchMoved.current=true;setStep(current=>(current+(delta<0?1:4))%5)}}}
       onClick={()=>{if(compact&&!touchMoved.current)advance();touchMoved.current=false}}
       aria-describedby="landing-passport-caption">
       <div className="landing-passport-head"><div><b>Skill Passport vivo</b><span>capacidade → evidência → compatibilidade</span></div><span className="landing-example">exemplo</span></div>
-      <span id="landing-passport-caption" style={{position:'absolute',width:1,height:1,padding:0,margin:-1,overflow:'hidden',clip:'rect(0,0,0,0)',whiteSpace:'nowrap',border:0}}>Exemplo animado: um currículo vira competências, recebe evidências e se conecta a uma vaga com compatibilidade explicada.</span>
-      <div className="landing-stage">
-       {compact&&step===0&&<div className="landing-resume"><div className="landing-resume-title"><FileText size={15}/> Currículo identificado</div><span className="landing-skeleton w92"/><span className="landing-skeleton w78"/><span className="landing-skeleton w63"/><div className="landing-chip-grid">{mobileSkills.slice(0,2).map(skill=><div className="landing-skill-chip" key={skill.name}><b>{skill.name}</b><span>competência extraída</span></div>)}</div></div>}
-       {compact&&step===1&&<div className="landing-chip-grid">{mobileSkills.map(skill=><div className="landing-skill-chip" key={skill.name}><b>{skill.name}</b><span className={'landing-badge '+skill.status}>{skill.label}</span></div>)}</div>}
-       {compact&&step===2&&<div><div className="landing-match-card"><span className="landing-match-kicker">Match explicado</span><b>4 de 5 competências críticas atendidas</b><span className="landing-match-line"><BadgeCheck size={14}/> 3 competências com evidência</span><span className="landing-match-line gap"><Target size={14}/> falta: <strong>Programação CNC</strong></span></div><div className="landing-outcome"><b>Outcome Loop 30/60/90</b><span className="landing-outcome-dots"><i className="on"/><i className="on"/><i className="on"/></span></div></div>}
-       {!compact&&step===0&&<div className="landing-resume"><div className="landing-resume-title"><FileText size={16}/> Currículo profissional</div><span className="landing-skeleton w92"/><span className="landing-skeleton w78"/><span className="landing-skeleton w63"/><span className="landing-skeleton w48"/></div>}
-       {!compact&&step===1&&renderDesktopSkills(false)}
-       {!compact&&step===2&&renderDesktopSkills(true)}
-       {!compact&&step===3&&<div className="landing-graph-wrap"><svg className="landing-graph" viewBox="0 0 320 240" role="img" aria-label="Grafo de competências conectando habilidades à vaga Operador CNC em Caxias do Sul"><path className="graph-line active" d="M74 55 L158 120 L245 55"/><path className="graph-line active" d="M65 184 L158 120 L253 184"/><circle className="graph-node" cx="74" cy="55" r="24"/><circle className="graph-node" cx="245" cy="55" r="24"/><circle className="graph-node" cx="65" cy="184" r="24"/><circle className="graph-node" cx="253" cy="184" r="24"/><circle className="graph-core" cx="158" cy="120" r="34"/><text x="158" y="116" textAnchor="middle" fill="#dbeafe" fontSize="10">SkillGraph</text><text x="158" y="131" textAnchor="middle" fill="#7ca5df" fontSize="8">CNC</text></svg><div className="landing-job-card"><small>vaga conectada</small><b>Operador CNC</b><span>Caxias do Sul</span><span>2º turno · Presencial</span></div></div>}
-       {!compact&&step===4&&<div className="landing-match-card"><span className="landing-match-kicker">Compatibilidade explicada</span><b>4 de 5 competências críticas atendidas</b><span className="landing-match-line"><BadgeCheck size={14}/> 3 com evidência</span><span className="landing-match-line gap"><Target size={14}/> falta: <strong>Programação CNC</strong></span><span className="landing-match-line"><GraduationCap size={14}/> treinamento estimado: ~40h</span></div>}
-       {!compact&&step===5&&<div><div className="landing-match-card"><span className="landing-match-kicker">Depois da contratação</span><b>A capacidade continua sendo acompanhada no trabalho.</b><span className="landing-match-line"><ShieldCheck size={14}/> decisão final e validação continuam humanas</span></div><div className="landing-outcome"><b>Outcome Loop 30/60/90</b><span className="landing-outcome-dots"><i className="on"/><i className="on"/><i className="on"/></span></div></div>}
+      <span id="landing-passport-caption" style={{position:'absolute',width:1,height:1,padding:0,margin:-1,overflow:'hidden',clip:'rect(0,0,0,0)',whiteSpace:'nowrap',border:0}}>Exemplo animado em cinco etapas: currículo, competências, evidências, SkillGraph e compatibilidade explicada.</span>
+      <div className="landing-stage" data-step={step}>
+       {step===0&&<div className="landing-state landing-resume-state"><div className="landing-resume"><div className="landing-resume-title"><FileText size={16}/> Currículo profissional</div><span className="landing-skeleton w92"/><span className="landing-skeleton w78"/><span className="landing-skeleton w63"/><span className="landing-skeleton w48"/></div></div>}
+       {step===1&&<div className="landing-state landing-skills-state">{renderSkills(false)}</div>}
+       {step===2&&<div className="landing-state landing-skills-state">{renderSkills(true)}</div>}
+       {step===3&&<div className="landing-state landing-connected-state">{renderSkills(true,true)}<div className="landing-connection-row"><svg className="landing-graph" viewBox="0 0 430 118" role="img" aria-label="SkillGraph conectando as quatro competências à vaga Operador CNC em Caxias do Sul"><path className="graph-line active" d="M34 18 C132 18 142 59 214 59"/><path className="graph-line active" d="M34 100 C132 100 142 59 214 59"/><path className="graph-line active" d="M396 18 C298 18 286 59 214 59"/><path className="graph-line active" d="M396 100 C298 100 286 59 214 59"/><circle className="graph-node" cx="34" cy="18" r="7"/><circle className="graph-node" cx="34" cy="100" r="7"/><circle className="graph-node" cx="396" cy="18" r="7"/><circle className="graph-node" cx="396" cy="100" r="7"/><circle className="graph-core" cx="214" cy="59" r="17"/><text x="214" y="63" textAnchor="middle" fill="#dbeafe" fontSize="8">MATCH</text></svg><div className="landing-job-card"><small>vaga conectada</small><b>Operador CNC</b><span>Caxias do Sul</span></div></div></div>}
+       {step===4&&<div className="landing-state landing-match-state">{renderSkills(true,true)}<div className="landing-match-card"><span className="landing-match-kicker">Compatibilidade explicada</span><b>4 de 5 competências críticas atendidas</b><span className="landing-match-line"><BadgeCheck size={14}/> 3 com evidência</span><span className="landing-match-line gap"><Target size={14}/> falta: <strong>Programação CNC</strong></span><span className="landing-match-line"><GraduationCap size={14}/> treinamento estimado: ~40h</span></div></div>}
       </div>
-      <div className="landing-step-dots" aria-label="Etapas do exemplo">{Array.from({length:maxSteps}).map((_,index)=><button key={index} className={index===step?'active':''} aria-label={'Mostrar etapa '+(index+1)} onClick={event=>{event.stopPropagation();setStep(index)}}/>)}</div>
+      <div className="landing-step-dots" aria-label="Etapas do exemplo">{Array.from({length:5}).map((_,index)=><button key={index} className={index===step?'active':''} aria-label={'Mostrar etapa '+(index+1)} onClick={event=>{event.stopPropagation();if(!reduceMotion)setStep(index)}}/>)}</div>
      </div>
      <div className="landing-floating one" aria-hidden="true"><small>exemplo · evidência</small><b>Certificado SENAI-RS</b></div>
      <div className="landing-floating two" aria-hidden="true"><small>exemplo · validação</small><b>Desafio prático · 92</b></div>
-     <div className="landing-floating three" aria-hidden="true"><small>exemplo · desenvolvimento</small><b>Gap treinável · ~40h</b></div>
     </div>
     <div className="landing-mobile-trust"><div><BadgeCheck size={16}/> Evidências verificadas e validação humana</div><div><ShieldCheck size={16}/> Dados separados por conta e empresa</div></div>
     <div className="landing-mobile-links"><button className="landing-link" onClick={onDemo}>Explorar demonstração</button><a className="landing-link" href="/vagas">Ver vagas abertas</a></div>
