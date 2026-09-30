@@ -41,6 +41,21 @@ jobs:
           exit 1
       - name: Run browser smoke tests
         run: npx playwright test
+      - name: Build production bundle
+        run: npm run build
+      - name: Start production preview
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/talentos-preview.log 2>&1 &
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/talentos-preview.log
+          exit 1
+      - name: Check production public flows
+        run: npx playwright test --config=playwright.production.config.ts
       - name: Show Vite log on failure
         if: failure()
-        run: cat /tmp/talentos-vite.log || true
+        run: cat /tmp/talentos-vite.log /tmp/talentos-preview.log || true
