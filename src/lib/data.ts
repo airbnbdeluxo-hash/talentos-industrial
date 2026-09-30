@@ -26,6 +26,7 @@ export type TrainingRecommendation={
   startedAt?:string|null;completedAt?:string|null;updatedAt?:string|null;outcomeNote?:string|null;
   developmentPlan?:{version:number;skill:{id:string;name:string;category?:string|null;parent?:string|null};objective:{fromLevel:number;targetLevel:number;gapSize:number};evidence:{state:string;sourceType:string;sourceConfidence:number;verified:boolean};steps:Array<{order:number;type:string;title:string;estimatedHours:number}>};
 };
+export type TrainingResource={id:string;title:string;description?:string|null;resourceType:string;provider:string;url:string;durationMinutes?:number|null;difficulty:string;stepOrder:number;mandatory:boolean;reason?:string|null};
 export type CapabilityNode={id:string;nodeType:'familia'|'processo'|'maquina'|'controle'|'competencia'|'cargo'|'contexto';name:string;slug:string;skillId?:string|null;parentId?:string|null;description?:string|null};
 export type CapabilityEdge={fromNodeId:string;toNodeId:string;relationshipType:'inclui'|'exige'|'usa'|'aplicada_em'|'proximo_de'|'desenvolve_para';weight:number;source:string};
 export type OutcomeCheckpoint='30d'|'60d'|'90d'|'saida';
@@ -257,6 +258,13 @@ export async function generateRemoteTrainingRecommendations(candidateId:string,j
  const {data,error}=await supabase.rpc('generate_training_plan_for_job',{p_candidate_id:candidateId,p_job_id:jobId});
  if(error)throw error;
  return (data??[]).map(mapTraining);
+}
+
+export async function getRemoteTrainingResources(recommendationId:string):Promise<TrainingResource[]>{
+ if(!supabase)throw new Error('Supabase não configurado');
+ const {data,error}=await supabase.rpc('get_training_plan_resources',{p_recommendation_id:recommendationId});
+ if(error)throw error;
+ return (data??[]).map((x:any)=>({id:x.resource_id,title:x.title,description:x.description??null,resourceType:x.resource_type,provider:x.provider,url:x.url,durationMinutes:x.duration_minutes==null?null:Number(x.duration_minutes),difficulty:x.difficulty,stepOrder:Number(x.step_order??1),mandatory:Boolean(x.mandatory),reason:x.reason??null}));
 }
 
 export async function updateRemoteTrainingRecommendation(
