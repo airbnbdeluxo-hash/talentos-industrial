@@ -382,3 +382,213 @@
   .landing-active .auth-modal>.primary.wide{position:sticky;bottom:0;z-index:2;min-height:52px;margin-top:14px;box-shadow:0 -12px 22px rgba(255,255,255,.92)}
   .landing-active .auth-modal .close{width:40px;height:40px}
 }
+
+
+/* 2026-09 industrial-first hero refinement */
+.landing-home{--landing-safety:#f5b301;overflow-x:hidden}
+.landing-shell{position:relative;z-index:1;width:min(1240px,calc(100% - 48px));padding:0 0 64px}
+.landing-blueprint{
+  position:absolute;z-index:0;right:-2%;top:68px;width:min(68vw,980px);height:auto;pointer-events:none;
+  color:#7fb1ff;opacity:.075;fill:none;stroke:currentColor;stroke-width:1;
+  -webkit-mask-image:radial-gradient(circle at 58% 42%,#000 0%,rgba(0,0,0,.86) 42%,transparent 78%);
+  mask-image:radial-gradient(circle at 58% 42%,#000 0%,rgba(0,0,0,.86) 42%,transparent 78%)
+}
+.landing-blueprint rect{fill:rgba(127,177,255,.02)}
+.landing-blueprint text{fill:currentColor;stroke:none;font:10px/1 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.08em}
+.landing-blueprint .blueprint-center{stroke-dasharray:8 7;opacity:.8}
+.landing-hero{
+  min-height:calc(100dvh - 60px);
+  grid-template-columns:minmax(500px,.92fr) minmax(0,1.08fr);
+  gap:28px;align-items:center
+}
+.landing-copy{min-width:0;overflow:hidden}
+.landing-eyebrow{margin-bottom:10px}
+.landing-title{max-width:590px;font-size:clamp(40px,5.2vw,68px);line-height:.96}
+.landing-title em{font-style:normal}
+.landing-title .word:nth-child(8){animation-delay:.68s}
+.landing-subtitle{max-width:610px;margin-top:15px;font-size:16px;line-height:1.46}
+.landing-actions{margin-top:17px;gap:12px;flex-wrap:nowrap}
+.landing-actions .landing-primary,.landing-actions .landing-secondary{white-space:nowrap}
+.landing-inline-links{margin-top:5px}
+.landing-trust{margin-top:11px;padding-top:10px}
+.landing-industry-segments{
+  width:100%;min-width:0;margin-top:10px;display:flex;align-items:center;gap:5px;overflow:hidden;
+  white-space:nowrap
+}
+.landing-segment-chip{
+  position:relative;flex:0 0 auto;height:28px;padding:0 5px 2px;border:1px solid rgba(148,163,184,.13);border-radius:8px;
+  display:inline-flex;align-items:center;gap:4px;background:rgba(9,18,33,.55);color:#8295b2;
+  font:800 8.5px/1 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.04em;text-transform:uppercase
+}
+.landing-segment-chip svg{color:#6e89ad}
+.landing-segment-chip.is-active{color:#cbd8e9;border-color:rgba(245,179,1,.22)}
+.landing-segment-chip.is-active::after{content:"";position:absolute;left:7px;right:7px;bottom:-1px;height:2px;border-radius:2px;background:var(--landing-safety)}
+.landing-visual{padding:0;min-width:0}
+.landing-visual-grid{display:grid;grid-template-columns:minmax(0,1fr) 186px;gap:12px;align-items:center;min-width:0}
+.landing-passport{
+  height:438px;min-height:438px;padding:19px 19px 16px;border-radius:26px;
+  background:linear-gradient(180deg,rgba(255,255,255,.035),transparent 18%),rgba(8,18,34,.88)
+}
+.landing-passport::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:4px;z-index:4;
+  background:repeating-linear-gradient(135deg,var(--landing-safety) 0 9px,#151b25 9px 18px);opacity:.78
+}
+.landing-passport-head{margin-bottom:10px}
+.landing-passport-head b{font-size:15px}
+.landing-passport-head span{font-size:9.5px}
+.landing-stage{height:318px;min-height:318px}
+.landing-resume{min-height:258px}
+.landing-skills-state>.landing-chip-grid:not(.condensed){min-height:258px}
+.landing-skill-chip{min-height:72px;padding:10px 11px;gap:5px}
+.landing-chip-grid{gap:8px}
+.landing-chip-grid.condensed{gap:6px}
+.landing-chip-grid.condensed .landing-skill-chip{min-height:42px;padding:6px 8px;gap:2px}
+.landing-chip-grid.condensed .landing-skill-chip>b{font-size:10px}
+.landing-chip-grid.condensed .landing-skill-chip>span{font-size:8px}
+.landing-chip-grid.condensed .landing-badge{padding:2px 5px;font-size:7.5px!important}
+.landing-badge.declared{color:#ffd15c;background:rgba(245,179,1,.1);border-color:rgba(245,179,1,.23)}
+.landing-connected-state,.landing-match-state{gap:9px}
+.landing-connection-row{grid-template-columns:minmax(0,1.3fr) minmax(145px,.7fr);gap:8px}
+.landing-graph{height:108px;min-height:108px}
+.landing-job-card{padding:11px 12px}
+.landing-job-card b{font-size:12px}
+.landing-job-card span{font-size:9.5px}
+.landing-match-state .landing-match-card{padding:10px 12px;gap:6px}
+.landing-match-state .landing-match-card b{font-size:14px}
+.landing-match-state .landing-match-line{font-size:10px!important}
+.landing-featured-jobs{
+  height:438px;min-width:0;padding:12px;border:1px solid rgba(148,163,184,.11);border-radius:20px;
+  background:rgba(7,15,29,.55);display:flex;flex-direction:column;gap:8px
+}
+.landing-featured-jobs h3{
+  margin:0 0 1px;color:#d8e5f7;font:800 10px/1.25 "JetBrains Mono",ui-monospace,monospace;text-transform:uppercase;letter-spacing:.06em
+}
+.landing-featured-jobs h3 span{display:block;margin-top:3px;color:#667994;font-size:8px}
+.landing-featured-job{
+  flex:1;min-height:0;padding:9px;border:1px solid rgba(148,163,184,.11);border-radius:12px;background:rgba(11,25,45,.75);
+  display:flex;flex-direction:column;justify-content:space-between;gap:6px;overflow:hidden
+}
+.landing-featured-job small,.landing-featured-job b,.landing-featured-job span{display:block}
+.landing-featured-job small{color:#667b99;font:700 7.5px/1 "JetBrains Mono",ui-monospace,monospace;text-transform:uppercase}
+.landing-featured-job b{margin-top:4px;color:#e7eef9;font-size:11px;line-height:1.2}
+.landing-featured-job span{margin-top:3px;color:#8294ae;font-size:9px}
+.landing-featured-skills{display:flex;flex-wrap:wrap;gap:4px}
+.landing-featured-skills em{
+  padding:3px 5px;border-radius:999px;border:1px solid rgba(96,165,250,.13);background:rgba(37,99,235,.07);
+  color:#8da9ce;font:700 7px/1.15 "JetBrains Mono",ui-monospace,monospace;font-style:normal
+}
+.landing-featured-job strong{
+  display:flex;align-items:center;gap:4px;color:#f5c542;font:800 7.5px/1.1 "JetBrains Mono",ui-monospace,monospace;text-transform:uppercase
+}
+.landing-ticker{
+  position:relative;z-index:1;width:100%;overflow:hidden;margin-top:-28px;border-top:1px solid rgba(148,163,184,.08);border-bottom:1px solid rgba(148,163,184,.08);
+  background:rgba(5,12,24,.42)
+}
+.landing-ticker-track{
+  width:max-content;display:flex;gap:28px;padding:8px 0;color:#627895;
+  font:700 9px/1 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.16em;white-space:nowrap;
+  animation:landing-ticker-scroll 34s linear infinite
+}
+.landing-ticker:hover .landing-ticker-track{animation-play-state:paused}
+@keyframes landing-ticker-scroll{to{transform:translateX(calc(-50% - 14px))}}
+
+@media(max-width:1180px) and (min-width:1024px){
+  .landing-shell,.landing-top{width:min(100% - 36px,1140px)}
+  .landing-hero{grid-template-columns:minmax(470px,.9fr) minmax(0,1.1fr);gap:22px}
+  .landing-title{font-size:clamp(40px,5vw,62px)}
+  .landing-visual-grid{grid-template-columns:minmax(0,1fr) 168px;gap:9px}
+  .landing-featured-jobs{padding:9px}
+}
+
+@media(min-width:768px) and (max-width:1023px){
+  .landing-shell{padding-top:4px}
+  .landing-hero{min-height:calc(100dvh - 60px);grid-template-columns:minmax(0,1fr) minmax(400px,1fr);gap:20px}
+  .landing-title{font-size:clamp(40px,5vw,50px)}
+  .landing-subtitle{font-size:15px}
+  .landing-visual-grid{display:block}
+  .landing-featured-jobs{display:none}
+  .landing-industry-segments{overflow-x:auto;scrollbar-width:none}
+  .landing-industry-segments::-webkit-scrollbar{display:none}
+}
+
+@media(max-width:767px){
+  .landing-home{padding-bottom:calc(94px + env(safe-area-inset-bottom))}
+  .landing-blueprint{top:92px;right:-64%;width:165vw;opacity:.035}
+  .landing-blueprint .blueprint-dimensions{display:none}
+  .landing-top{height:56px}
+  .landing-shell{width:100%;padding:9px 16px 42px}
+  .landing-hero{min-height:auto;display:block}
+  .landing-copy{padding:0;overflow:hidden}
+  .landing-eyebrow{margin:5px 0 9px;font-size:10px}
+  .landing-title{max-width:100%;font-size:40px;line-height:.98;letter-spacing:-.04em}
+  .landing-subtitle{
+    margin-top:12px;min-height:0;font-size:15px;line-height:1.4;
+    display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden
+  }
+  .landing-segmented{display:flex;height:48px;margin-top:12px}
+  .landing-segmented button{min-height:40px}
+  .landing-actions{margin-top:10px;display:flex;gap:0}
+  .landing-actions .landing-primary{display:inline-flex;width:100%;height:52px;font-size:14px;white-space:normal}
+  .landing-actions .landing-secondary{display:none}
+  .landing-inline-links{display:none}
+  .landing-industry-segments{
+    width:100%;margin-top:10px;padding-bottom:4px;gap:7px;overflow-x:auto;overscroll-behavior-inline:contain;
+    scroll-snap-type:x proximity;scrollbar-width:none
+  }
+  .landing-industry-segments::-webkit-scrollbar{display:none}
+  .landing-segment-chip{scroll-snap-align:start;height:32px;padding:0 9px 2px;font-size:9px}
+  .landing-trust{display:none}
+  .landing-visual{padding:18px 0 0}
+  .landing-visual-grid{display:block}
+  .landing-passport{
+    min-height:390px;height:390px;padding:15px 15px 11px;border-radius:22px;transform:none!important;
+    box-shadow:0 20px 50px rgba(0,0,0,.28)
+  }
+  .landing-passport:hover{transform:none!important}
+  .landing-passport-head{margin-bottom:7px}
+  .landing-passport-head b{font-size:13px}
+  .landing-passport-head span,.landing-example{font-size:12px!important;letter-spacing:.02em}
+  .landing-stage{height:278px;min-height:278px}
+  .landing-resume{min-height:245px;padding:14px;gap:14px}
+  .landing-resume-title{font-size:12px}
+  .landing-mobile-evidence .landing-chip-grid.condensed{grid-template-columns:1fr;gap:5px}
+  .landing-mobile-evidence .landing-chip-grid.condensed .landing-skill-chip{
+    min-height:48px;padding:6px 9px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 7px;align-items:center
+  }
+  .landing-mobile-evidence .landing-chip-grid.condensed .landing-skill-chip>b{font-size:12px}
+  .landing-mobile-evidence .landing-chip-grid.condensed .landing-skill-chip>span{grid-column:1/-1;font-size:12px}
+  .landing-mobile-evidence .landing-chip-grid.condensed .landing-badge{grid-column:2;grid-row:1;padding:3px 5px;font-size:12px!important}
+  .landing-mobile-match{justify-content:center;gap:8px}
+  .landing-mobile-match .landing-match-card{padding:13px;gap:7px}
+  .landing-mobile-match .landing-match-kicker{font-size:12px!important}
+  .landing-mobile-match .landing-match-card b{font-size:15px}
+  .landing-mobile-match .landing-match-line{font-size:12px!important}
+  .landing-mobile-match .landing-job-card{padding:10px 12px}
+  .landing-mobile-match .landing-job-card small,.landing-mobile-match .landing-job-card span{font-size:12px}
+  .landing-mobile-match .landing-job-card b{font-size:13px}
+  .landing-step-dots{height:48px;margin-top:1px;gap:8px;align-items:center}
+  .landing-step-dots button,.landing-step-dots button.active{
+    position:relative;width:48px;height:48px;min-width:48px;background:transparent
+  }
+  .landing-step-dots button::before{
+    content:"";position:absolute;left:50%;top:50%;width:7px;height:7px;border-radius:999px;background:#314158;transform:translate(-50%,-50%)
+  }
+  .landing-step-dots button.active::before{width:20px;background:#3b82f6}
+  .landing-featured-jobs{
+    display:flex;height:auto;margin-top:10px;padding:10px;gap:7px;border-radius:16px
+  }
+  .landing-featured-jobs h3{font-size:12px}
+  .landing-featured-jobs h3 span{display:inline;margin-left:5px;font-size:12px}
+  .landing-featured-job{min-height:122px;padding:11px}
+  .landing-featured-job~.landing-featured-job{display:none}
+  .landing-featured-job small,.landing-featured-job span,.landing-featured-skills em,.landing-featured-job strong{font-size:12px}
+  .landing-featured-job b{font-size:14px}
+  .landing-ticker{margin-top:14px}
+  .landing-ticker-track{padding:8px 0;font-size:9px;animation-duration:42s}
+  .landing-mobile-action .landing-primary{min-height:52px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .landing-ticker-track{animation:none!important;transform:none!important}
+  .landing-ticker-track span[aria-hidden="true"]{display:none}
+}
