@@ -15,3 +15,14 @@ create table if not exists public.notifications (
 );
 create index if not exists notifications_user_created_idx on public.notifications(user_id,created_at desc);
 alter table public.notifications enable row level security;
+
+drop policy if exists notifications_select on public.notifications;
+drop policy if exists notifications_update on public.notifications;
+create policy notifications_select on public.notifications
+for select to authenticated
+using(user_id=(select auth.uid()));
+create policy notifications_update on public.notifications
+for update to authenticated
+using(user_id=(select auth.uid()))
+with check(user_id=(select auth.uid()));
+grant select,update on public.notifications to authenticated;
