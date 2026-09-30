@@ -26,7 +26,7 @@ jobs:
       - run: npm ci
       - name: Install Playwright
         run: |
-          npm install --no-save @playwright/test
+          npm install --no-save @playwright/test @axe-core/playwright
           npx playwright install --with-deps chromium
       - name: Start Vite in E2E mode
         run: |
