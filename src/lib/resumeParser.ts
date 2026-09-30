@@ -1,3 +1,5 @@
+import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+
 export type ResumeDraft = {
   name: string;
   role: string;
@@ -169,6 +171,7 @@ export async function extractResumeText(file: File): Promise<string> {
   if (lowerName.endsWith('.pdf') || file.type === 'application/pdf') {
     const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
     const data = new Uint8Array(await file.arrayBuffer());
+    pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
     const loadingTask = pdfjs.getDocument({ data });
     const pdf = await loadingTask.promise;
     const pages: string[] = [];
