@@ -940,12 +940,11 @@ function LandingPage({onCandidateSignup,onCompanySignup,onLogin,onDemo}:{onCandi
    <div ref={heroRef} className="landing-hero">
     <div className="landing-copy">
      <div className="landing-eyebrow landing-reveal">TALENTOS INDUSTRIAL · SERRA GAÚCHA</div>
-     <h1 className="landing-title landing-reveal" aria-label="A indústria contrata quem prova que sabe fazer.">
-      <span className="word">A</span><span className="word">indústria</span><span className="word">contrata</span><span className="word">quem</span>
-      <em className="word landing-proof-word">prova<svg viewBox="0 0 210 12" aria-hidden="true"><path d="M3 8 C48 3, 128 12, 207 5"/></svg></em>
-      <span className="word">que</span><span className="word">sabe</span><span className="word">fazer.</span>
+     <h1 className="landing-title landing-reveal" aria-label="A indústria contrata quem sabe fazer.">
+      <span className="word">A</span><span className="word">indústria</span><span className="word">contrata</span><br/>
+      <span className="word">quem</span><em className="word landing-proof-word">sabe<svg viewBox="0 0 210 12" aria-hidden="true"><path d="M3 8 C48 3, 128 12, 207 5"/></svg></em><span className="word">fazer.</span>
      </h1>
-     <p className="landing-subtitle landing-reveal">Vagas em usinagem, soldagem, manutenção e automação. Profissionais mostram o que operam e constroem. Empresas contratam com evidência, não com palavra-chave.</p>
+     <p className="landing-subtitle landing-reveal">Vagas em usinagem, soldagem, manutenção e automação. Profissionais mostram o que operam e constroem, com evidência. Empresas contratam com evidência, não com palavra-chave.</p>
      <div className="landing-segmented" role="tablist" aria-label="Escolha como usar o TalentOS">
       <button role="tab" aria-selected={isProfessional} onClick={()=>setAudience('candidato')}>Sou profissional</button>
       <button role="tab" aria-selected={!isProfessional} onClick={()=>setAudience('empresa')}>Sou empresa</button>
