@@ -201,3 +201,58 @@
 .company-simple-empty span{font-size:9px;margin-top:3px}
 @media(max-width:980px){.company-home-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.company-home-columns{grid-template-columns:1fr}.company-job-row{grid-template-columns:minmax(0,1fr) 90px 120px 20px}}
 @media(max-width:650px){.company-home-hero{align-items:flex-start;flex-direction:column;padding:20px 18px}.company-home-actions{width:100%;display:grid;grid-template-columns:1fr}.company-home-actions>*{width:100%;justify-content:center}.company-home-kpis{grid-template-columns:1fr 1fr}.company-attention,.company-quick,.company-jobs-overview{padding:17px}.company-action-row{align-items:flex-start;flex-direction:column}.company-action-row .secondary{width:100%;justify-content:center}.company-job-row{grid-template-columns:minmax(0,1fr) 20px}.company-job-row>div:nth-child(2),.company-job-row>div:nth-child(3){grid-column:1;display:inline-flex;gap:6px;align-items:baseline}.company-job-row>svg{grid-column:2;grid-row:1}.company-simple-empty{align-items:flex-start;flex-wrap:wrap}.company-simple-empty .primary{width:100%;justify-content:center}}
+
+
+/* Recruiter pipeline: action-first cards */
+.recruiting-pipeline{padding:21px 22px}
+.pipeline-topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:15px}
+.pipeline-topbar h2{margin:0 0 4px;font-size:17px}
+.pipeline-topbar p{font-size:10px;color:#7f8c9d;line-height:1.5}
+.pipeline-job-picker{display:flex;align-items:end;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+.pipeline-job-picker label{display:grid;gap:5px;font-size:9px;font-weight:700;color:#6e7a8d}
+.pipeline-job-picker select{height:36px;min-width:210px;border:1px solid #dce3ec;border-radius:9px;background:#fff;padding:0 10px;color:#26344a}
+.pipeline-job-picker>span{padding:8px 10px;border-radius:999px;background:#eef4ff;color:#2457ca;font-size:9px;font-weight:750}
+.pipeline-summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.pipeline-summary button{border:1px solid #e2e7ee;border-radius:10px;background:#fff;padding:10px 11px;text-align:left;cursor:pointer}
+.pipeline-summary button:hover{border-color:#b9cdf1;background:#fbfdff}
+.pipeline-summary b,.pipeline-summary span{display:block}
+.pipeline-summary b{font-size:17px;color:#1f2b40}
+.pipeline-summary span{font-size:8px;color:#8490a2;margin-top:2px}
+.pipeline-clean{gap:10px;overflow-x:auto;padding-bottom:6px;align-items:flex-start}
+.pipeline-clean .stage{min-width:245px;background:#f7f9fc;border:1px solid #e7ebf1;border-radius:12px;padding:10px}
+.stage-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.stage-head h3{margin:0;font-size:11px;color:#3b485d}
+.stage-head span{min-width:23px;height:23px;border-radius:999px;background:#e8edf5;color:#59667a;display:grid;place-items:center;font-size:9px;font-weight:750}
+.pipeline-card-clean{padding:12px;border:1px solid #e1e6ed;border-radius:11px;background:#fff;box-shadow:none;margin-bottom:8px}
+.pipeline-card-clean .pipeline-card-head{gap:8px}
+.pipeline-card-clean .pipeline-card-head b{font-size:11px}
+.pipeline-card-clean .pipeline-card-head span{font-size:8px;color:#8490a2}
+.pipeline-card-clean .pipeline-card-head strong{font-size:9px;padding:5px 7px;border-radius:999px;background:#eef4ff;color:#2457ca;white-space:nowrap}
+.pipeline-card-skills{display:flex;gap:6px;flex-wrap:wrap;margin:9px 0}
+.pipeline-card-skills span{font-size:8px;border-radius:999px;padding:4px 6px;background:#f1f4f8;color:#667386}
+.pipeline-card-skills span.ok{display:flex;gap:4px;align-items:center;background:#edf8f2;color:#18724d}
+.pipeline-card-skills span.attention{background:#fff6e8;color:#986313}
+.pipeline-next-info{display:flex;gap:8px;align-items:flex-start;padding:9px;border-radius:9px;background:#f8fafc;margin:7px 0;color:#69768a}
+.pipeline-next-info svg{flex:0 0 auto;margin-top:1px}
+.pipeline-next-info b,.pipeline-next-info span{display:block}
+.pipeline-next-info b{font-size:9px;color:#3d4a5f}
+.pipeline-next-info span{font-size:8px;color:#8591a2;margin-top:2px;line-height:1.35}
+.pipeline-primary-actions{display:grid;grid-template-columns:1fr auto;gap:7px;margin-top:10px}
+.pipeline-primary-actions .primary,.pipeline-primary-actions .secondary{min-height:34px;justify-content:center;font-size:9px;padding:7px 9px}
+.pipeline-more{margin-top:8px;border-top:1px solid #edf0f4;padding-top:7px}
+.pipeline-more summary{cursor:pointer;font-size:8px;color:#6f7c8e;font-weight:700;list-style:none}
+.pipeline-more summary::-webkit-details-marker{display:none}
+.pipeline-more summary:after{content:' +';color:#9ba6b5}
+.pipeline-more[open] summary:after{content:' –'}
+.pipeline-more-body{display:grid;gap:8px;padding-top:9px}
+.pipeline-status-control{display:grid;gap:4px;font-size:8px;color:#7d899b;font-weight:700}
+.pipeline-status-control select{height:34px;border:1px solid #dce3ec;border-radius:8px;background:#fff;padding:0 9px;color:#314057}
+.pipeline-secondary-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.pipeline-secondary-actions .secondary{justify-content:center;font-size:8px;padding:7px 8px}
+.timeline.compact{display:grid;gap:3px;margin-top:0;padding-top:5px}
+.timeline.compact small{font-size:7px;line-height:1.35}
+.pipeline-outcome-summary{display:grid;gap:3px;margin-top:8px;padding:9px;border-radius:9px;background:#f5f8ff}
+.pipeline-outcome-summary b{font-size:8px;color:#30415c}
+.pipeline-outcome-summary span{font-size:7px;color:#78869a}
+.stage-empty{font-size:8px;color:#9aa5b3;text-align:center;padding:14px 8px}
+@media(max-width:760px){.pipeline-topbar{flex-direction:column}.pipeline-job-picker{width:100%;justify-content:flex-start}.pipeline-job-picker label{width:100%}.pipeline-job-picker select{width:100%;min-width:0}.pipeline-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.pipeline-clean .stage{min-width:225px}.pipeline-primary-actions{grid-template-columns:1fr}.pipeline-secondary-actions{grid-template-columns:1fr}}
