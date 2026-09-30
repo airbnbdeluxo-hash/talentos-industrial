@@ -92,7 +92,7 @@ export async function loadRemoteData(userId:string, role?:'empresa'|'candidato'|
    supabase.from('applications').select('*').order('updated_at',{ascending:false}),
    supabase.from('application_events').select('*').order('created_at',{ascending:true}),
    supabase.from('matches').select('*').order('score',{ascending:false}),
-   supabase.from('training_recommendations').select('id,candidate_id,job_id,skill_id,priority,reason,estimated_hours,status,gap_type,current_proficiency,target_proficiency,started_at,completed_at,updated_at,outcome_note,skills(name)').order('updated_at',{ascending:false}),
+   supabase.from('training_recommendations').select('id,candidate_id,job_id,skill_id,priority,reason,estimated_hours,status,gap_type,current_proficiency,target_proficiency,started_at,completed_at,updated_at,outcome_note,development_plan,skills(name)').order('updated_at',{ascending:false}),
    supabase.from('capability_nodes').select('id,node_type,name,slug,skill_id,parent_id,description').order('node_type',{ascending:true}).order('name',{ascending:true}),
    supabase.from('capability_edges').select('from_node_id,to_node_id,relationship_type,weight,source').order('relationship_type',{ascending:true}),
    supabase.from('employment_outcomes').select('id,application_id,candidate_id,job_id,company_id,checkpoint,performance_score,ramp_up_days,retention_status,skill_feedback,manager_note,created_by,created_at,updated_at').order('created_at',{ascending:false}),
