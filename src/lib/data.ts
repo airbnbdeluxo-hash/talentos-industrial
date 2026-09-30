@@ -420,6 +420,38 @@ export async function getRemoteOutcomeSkillIntelligence():Promise<OutcomeSkillIn
 export async function saveRemoteCandidateConsent(userId:string,consentGiven:boolean,consentVersion='v1'){ if(!supabase)throw new Error('Supabase não configurado'); const {data,error}=await supabase.from('candidate_profiles').update({searchable:consentGiven,visibility_consent_at:consentGiven?new Date().toISOString():null,consent_version:consentVersion}).eq('profile_id',userId).select('profile_id,searchable,visibility_consent_at,consent_version').single(); if(error)throw error; return data; }
 
 
+export type ClientErrorEvent={
+ id:string;
+ actorId?:string|null;
+ source:string;
+ errorReference?:string|null;
+ message:string;
+ path?:string|null;
+ createdAt:string;
+};
+
+const mapClientErrorEvent=(row:any):ClientErrorEvent=>({
+ id:String(row.id),
+ actorId:row.actor_id??null,
+ source:String(row.source??'client'),
+ errorReference:row.error_reference??null,
+ message:String(row.message??'Erro inesperado'),
+ path:row.path??null,
+ createdAt:String(row.created_at)
+});
+
+export async function getRemoteClientErrorEvents(limit=30):Promise<ClientErrorEvent[]>{
+ if(!supabase)throw new Error('Supabase não configurado');
+ const safeLimit=Math.max(1,Math.min(100,Math.floor(limit)));
+ const {data,error}=await supabase
+  .from('client_error_events')
+  .select('id,actor_id,source,error_reference,message,path,created_at')
+  .order('created_at',{ascending:false})
+  .limit(safeLimit);
+ if(error)throw error;
+ return (data??[]).map(mapClientErrorEvent);
+}
+
 export type PrivacyRequest={
  id:string;
  userId:string;
