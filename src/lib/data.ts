@@ -248,7 +248,7 @@ export async function uploadRemoteEvidence(userId:string,skillName:string,file:F
  const {data:skill,error:skillError}=await supabase.from('skills').select('id,name').eq('name',skillName).maybeSingle();
  if(skillError)throw skillError;
  if(!skill)throw new Error('Skill não encontrada');
- const hashBuffer=await crypto.subtle.digest('SHA-256',await file.arrayBuffer());const sameCandidate=await supabase.from('skill_evidence').select('id').eq('candidate_id',userId).eq('file_hash',fileHash).limit(1).maybeSingle();const fileHash=Array.from(new Uint8Array(hashBuffer)).map(b=>b.toString(16).padStart(2,'0')).join('');const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+ const hashBuffer=await crypto.subtle.digest('SHA-256',await file.arrayBuffer());const fileHash=Array.from(new Uint8Array(hashBuffer)).map(b=>b.toString(16).padStart(2,'0')).join('');const sameCandidate=await supabase.from('skill_evidence').select('id').eq('candidate_id',userId).eq('file_hash',fileHash).limit(1).maybeSingle();const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
 if(sameCandidate.error)throw sameCandidate.error;
  const duplicateOther=await supabase.from('skill_evidence').select('id').neq('candidate_id',userId).eq('file_hash',fileHash).limit(1).maybeSingle();if(duplicateOther.error)throw duplicateOther.error;if(sameCandidate.data)throw new Error('Este arquivo já foi enviado neste perfil');const integrityStatus=duplicateOther.data?'revisao':'normal';
  const storagePath=userId+'/'+skill.id+'/'+crypto.randomUUID()+'-'+safe;
