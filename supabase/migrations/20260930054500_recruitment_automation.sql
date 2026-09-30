@@ -117,3 +117,70 @@ begin
 end $$;
 
 select cron.schedule('talentos-recrutamento-lembretes','0 11 * * *','select public.send_recruitment_reminders();');
+
+
+create or replace function public.notify_matching_job_alerts_for_job(p_job_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path=public
+as $$
+declare job_row record; alert_row record;
+begin
+  select j.* into job_row from public.jobs j where j.id=p_job_id;
+  if job_row.id is null or job_row.status<>'aberta' then return; end if;
+  for alert_row in
+    select a.*
+    from public.job_alerts a
+    where a.active
+      and (a.cargo is null or lower(job_row.title) like '%'||lower(a.cargo)||'%')
+      and (a.city is null or lower(job_row.city)=lower(a.city))
+      and (a.min_salary is null or job_row.salary_max>=a.min_salary)
+      and (a.max_salary is null or job_row.salary_min<=a.max_salary)
+      and (a.shift is null or a.shift=job_row.shift)
+      and (
+        a.skill is null
+        or exists(
+          select 1 from public.job_skills js
+          join public.skills s on s.id=js.skill_id
+          where js.job_id=job_row.id and js.required and lower(s.name)=lower(a.skill)
+        )
+      )
+      and not exists(
+        select 1 from public.notifications n
+        where n.user_id=a.candidate_id and n.kind='vaga'
+          and n.body like '%'||job_row.id::text||'%'
+      )
+  loop
+    insert into public.notifications(user_id,kind,title,body,href)
+    values(alert_row.candidate_id,'vaga','Nova vaga compatível',
+      coalesce(job_row.company_public_name,'Empresa')||' publicou '||job_row.title||' em '||job_row.city||'.',
+      '/vagas/'||coalesce(job_row.public_slug,''));
+  end loop;
+end;
+$$;
+
+create or replace function public.trg_notify_matching_job_alerts()
+returns trigger
+language plpgsql
+security definer
+set search_path=public
+as $$
+begin
+  perform public.notify_matching_job_alerts_for_job(coalesce(new.job_id,new.id));
+  return new;
+end;
+$$;
+
+drop trigger if exists job_alert_notification on public.jobs;
+create trigger job_alert_notification
+after insert on public.jobs
+for each row execute function public.trg_notify_matching_job_alerts();
+
+drop trigger if exists job_alert_skill_notification on public.job_skills;
+create trigger job_alert_skill_notification
+after insert on public.job_skills
+for each row execute function public.trg_notify_matching_job_alerts();
+
+revoke all on function public.notify_matching_job_alerts_for_job(uuid) from public;
+revoke all on function public.trg_notify_matching_job_alerts() from public;
