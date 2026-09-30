@@ -659,3 +659,24 @@
 .access-choice-card .textbtn{margin:0 auto}
 .access-choice-help{font-size:9px;line-height:1.45;color:#7b8797;text-align:center}
 @media(max-width:680px){.access-choice-grid{grid-template-columns:1fr}.access-choice-gate{max-height:92vh;overflow:auto}}
+
+.company-team-page{display:grid;gap:14px;max-width:1100px;margin:0 auto 32px}
+.company-team-header{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.company-team-header h2{margin:4px 0 6px}
+.company-team-header p,.company-team-invite .company-section-head p,.company-team-list .company-section-head p{color:#778397;font-size:12px;line-height:1.5;margin:0}
+.company-team-invite-form{display:grid;grid-template-columns:minmax(200px,1.3fr) minmax(200px,1fr) auto;gap:12px;align-items:end;margin-top:14px}
+.team-share-link{display:grid;grid-template-columns:minmax(200px,1fr) auto;gap:8px 12px;align-items:end;margin-top:14px;padding:12px;background:#f7f9fc;border:1px solid #e8edf4;border-radius:12px}
+.team-share-link small{grid-column:1/-1;color:#7b8797;font-size:11px;line-height:1.4}
+.team-member-list,.team-invitation-list{display:grid;gap:8px;margin-top:12px}
+.team-member-row,.team-invitation-row{display:grid;grid-template-columns:minmax(220px,1fr) minmax(130px,180px) auto;gap:12px;align-items:center;padding:12px;border:1px solid #e8edf4;border-radius:12px;background:#fff}
+.team-invitation-row{grid-template-columns:1fr auto}
+.team-member-identity{display:flex;align-items:center;gap:10px;min-width:0}
+.team-member-identity>div:last-child,.team-invitation-row>div{display:grid;gap:3px;min-width:0}
+.team-member-identity b,.team-invitation-row b{font-size:13px;color:#26364b}
+.team-member-identity span,.team-invitation-row span{font-size:11px;color:#78869a;overflow-wrap:anywhere}
+.team-member-permissions select{width:100%;min-height:36px;border:1px solid #dfe5ee;border-radius:8px;padding:0 8px;background:#fff;color:#39485d}
+.team-member-actions{display:flex;justify-content:flex-end;gap:7px;flex-wrap:wrap}
+.team-member-actions .secondary,.team-invitation-row .secondary,.team-share-link .secondary{display:inline-flex;align-items:center;gap:6px}
+.team-role{font-size:12px;font-weight:700;padding:8px 12px;border-radius:999px;background:#eef4ff;color:#315ec2;display:inline-flex;justify-content:center}
+.team-role.owner{background:#e9f5ee;color:#247046}
+@media(max-width:760px){.company-team-invite-form{grid-template-columns:1fr}.company-team-invite-form .primary{width:100%}.team-member-row{grid-template-columns:1fr 1fr}.team-member-identity{grid-column:1/-1}.team-member-actions{grid-column:1/-1;justify-content:flex-start}.team-share-link{grid-template-columns:1fr}.team-share-link small{grid-column:auto}.team-invitation-row{grid-template-columns:1fr}.team-invitation-row button{justify-self:start}}

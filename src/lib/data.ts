@@ -549,3 +549,34 @@ export async function updateRemotePrivacyRequestStatus(
  if(error)throw error;
  return mapPrivacyRequest(data);
 }
+
+export type CompanyTeamMember={userId:string;fullName:string;email:string;role:'owner'|'recruiter'|'viewer';createdAt:string};
+export type CompanyTeamInvitation={id:string;invited_email:string;member_role:'recruiter'|'viewer';status:'pending';created_at:string;expires_at:string};
+export type CompanyTeamSnapshot={members:CompanyTeamMember[];invitations:CompanyTeamInvitation[];canManage:boolean};
+export async function manageRemoteCompanyTeam(input:{action:'list'|'invite'|'revoke-invitation';companyId:string;email?:string;memberRole?:'recruiter'|'viewer';invitationId?:string}):Promise<CompanyTeamSnapshot|{delivery:'email'|'link';invitationId:string;inviteUrl:string;expiresAt:string}|{ok:true}>{
+ if(!supabase)throw new Error('Supabase não configurado');
+ const {data,error}=await supabase.functions.invoke('company-team',{body:input});
+ if(error)throw error;
+ if(data?.error)throw new Error(data.error);
+ return data;
+}
+export async function acceptRemoteCompanyInvitation(invitationId:string){
+ if(!supabase)throw new Error('Supabase não configurado');
+ const {error}=await supabase.rpc('accept_company_invitation',{p_invitation_id:invitationId});
+ if(error)throw error;
+}
+export async function updateRemoteCompanyMemberRole(companyId:string,userId:string,role:'recruiter'|'viewer'){
+ if(!supabase)throw new Error('Supabase não configurado');
+ const {error}=await supabase.rpc('company_team_update_member_role',{p_company_id:companyId,p_user_id:userId,p_member_role:role});
+ if(error)throw error;
+}
+export async function removeRemoteCompanyMember(companyId:string,userId:string){
+ if(!supabase)throw new Error('Supabase não configurado');
+ const {error}=await supabase.rpc('company_team_remove_member',{p_company_id:companyId,p_user_id:userId});
+ if(error)throw error;
+}
+export async function transferRemoteCompanyOwner(companyId:string,newOwnerId:string){
+ if(!supabase)throw new Error('Supabase não configurado');
+ const {error}=await supabase.rpc('company_team_transfer_owner',{p_company_id:companyId,p_new_owner_id:newOwnerId});
+ if(error)throw error;
+}
