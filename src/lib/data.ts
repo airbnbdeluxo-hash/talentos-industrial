@@ -158,7 +158,7 @@ export async function createRemoteJob(userId:string,input:{title:string;descript
  return job;
 }
 
-export async function createRemoteCandidate(userId:string,input:{name:string;role:string;city:string;years:number;salary:number;skills:string[];preferredShifts?:string[];searchable?:boolean;bio?:string}){
+export async function createRemoteCandidate(userId:string,input:{name:string;role:string;city:string;years:number;salary:number;skills:string[];preferredShifts?:string[];searchable?:boolean;bio?:string;resumeFile?:File|null}){
  if(!supabase)throw new Error('Supabase não configurado');
  const consented=input.searchable!==false;
  const {error:profileError}=await supabase.from('candidate_profiles').upsert({profile_id:userId,display_name:input.name,role_title:input.role,city:input.city,years_experience:input.years,desired_salary:input.salary,bio:input.bio?.trim()||null,searchable:consented,visibility_consent_at:consented?new Date().toISOString():null,consent_version:consented?'v1':null}, {onConflict:'profile_id'});
@@ -172,6 +172,27 @@ export async function createRemoteCandidate(userId:string,input:{name:string;rol
    await supabase.from('candidate_skills').delete().eq('candidate_id',userId);
    const r=await supabase.from('candidate_skills').insert(skills.map(s=>({candidate_id:userId,skill_id:s.id,proficiency:3,verified:false,years_experience:input.years})));
    if(r.error)throw r.error;
+ }
+ if(input.resumeFile){
+   const file=input.resumeFile;
+   const allowed=['application/pdf','application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+   if(!allowed.includes(file.type))throw new Error('O currículo precisa ser PDF ou Word (.docx).');
+   if(file.size>10*1024*1024)throw new Error('O currículo deve ter no máximo 10 MB.');
+   const existing=await supabase.from('candidate_resumes').select('storage_path').eq('candidate_id',userId).maybeSingle();
+   if(existing.error)throw existing.error;
+   if(existing.data?.storage_path){
+     const removed=await supabase.storage.from('candidate-resumes').remove([existing.data.storage_path]);
+     if(removed.error)throw removed.error;
+   }
+   const safeName=file.name.replace(/[^a-zA-Z0-9._-]+/g,'-').slice(-120);
+   const storagePath=`${userId}/${crypto.randomUUID()}-${safeName}`;
+   const upload=await supabase.storage.from('candidate-resumes').upload(storagePath,file,{contentType:file.type,upsert:false});
+   if(upload.error)throw upload.error;
+   const saved=await supabase.from('candidate_resumes').upsert({candidate_id:userId,storage_path:storagePath,file_name:file.name,mime_type:file.type,file_size:file.size,updated_at:new Date().toISOString()},{onConflict:'candidate_id'});
+   if(saved.error){
+     await supabase.storage.from('candidate-resumes').remove([storagePath]);
+     throw saved.error;
+   }
  }
 }
 
