@@ -221,6 +221,114 @@ const nav:[Tab,string,any][]=(role==='candidato'
  ? [['dashboard','Visão geral',BarChart3],['jobs','Vagas',BriefcaseBusiness],['talents','Profissionais',Users],['companies','Empresas',Building2],['skills','Mapa de competências',Network],['intelligence','Inteligência',Compass],['passport','Meu currículo e competências',BadgeCheck],['applications','Minhas candidaturas',FileText],['pipeline','Processo seletivo',Target],['validation','Validar competências',ShieldCheck],['settings','Configurações',Settings]]
  : [['dashboard','Visão geral',BarChart3],['jobs','Vagas',BriefcaseBusiness],['talents','Profissionais',Users],['companies','Empresas',Building2],['skills','Mapa de competências',Network],['intelligence','Inteligência',Compass],['passport','Meu currículo e competências',BadgeCheck],['applications','Minhas candidaturas',FileText],['pipeline','Processo seletivo',Target],['validation','Validar competências',ShieldCheck],['settings','Configurações',Settings]]
 );
+const ownSavedJobIds=useMemo(()=>new Set(db.savedJobs.filter(x=>x.candidateId===session?.user?.id).map(x=>x.jobId)),[db.savedJobs,session?.user?.id]);
+const ownAlerts=useMemo(()=>db.jobAlerts.filter(x=>x.candidateId===session?.user?.id),[db.jobAlerts,session?.user?.id]);
+const unreadMessages=useMemo(()=>db.messages.filter(m=>m.recipientId===session?.user?.id&&!m.readAt).length,[db.messages,session?.user?.id]);
+const upcomingInterviews=useMemo(()=>db.interviews.filter(x=>x.status==='agendada'||x.status==='confirmada').sort((a,b)=>a.scheduledAt.localeCompare(b.scheduledAt)).slice(0,5),[db.interviews]);
+const toggleSaveJob=async(targetJobId:string)=>{
+ try{
+  if(!session||role!=='candidato'){setAuthModal(true);setAuthMode('login');return}
+  const exists=ownSavedJobIds.has(targetJobId);
+  if(dataMode==='remote'){
+   if(exists)await removeRemoteSavedJob(session.user.id,targetJobId); else await saveRemoteJob(session.user.id,targetJobId);
+   await reloadRemote();
+  }else{
+   const next=exists?db.savedJobs.filter(x=>!(x.candidateId===session.user.id&&x.jobId===targetJobId)):[...db.savedJobs,{id:'sj'+Date.now(),candidateId:session.user.id,jobId:targetJobId,createdAt:new Date().toISOString()}];
+   persist({...db,savedJobs:next},exists?'Vaga removida das salvas':'Vaga salva para depois');
+  }
+ }catch(err){console.error(err);setToast('Não foi possível atualizar a vaga salva')}
+};
+const openJobAlert=()=>{
+ setJobAlertName('');
+ setModal('jobAlert');
+};
+const createJobAlertHandler=async()=>{
+ if(!session||role!=='candidato')return;
+ try{
+  let city=jobFilters.city.trim();
+  if(city)city=await requireCanonicalCity(city);
+  const name=jobAlertName.trim()||[jobFilters.cargo,jobFilters.skill,city].filter(Boolean).join(' · ')||'Novas vagas compatíveis';
+  if(dataMode==='remote'){
+   await createRemoteJobAlert(session.user.id,{name,cargo:jobFilters.cargo.trim()||undefined,skill:jobFilters.skill.trim()||undefined,city:city||undefined});
+   await reloadRemote();
+  }else{
+   const row={id:'al'+Date.now(),candidateId:session.user.id,name,cargo:jobFilters.cargo||null,skill:jobFilters.skill||null,city:city||null,minSalary:null,maxSalary:null,shift:null,active:true,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
+   persist({...db,jobAlerts:[...db.jobAlerts,row]},'Alerta de vagas criado');
+  }
+  setModal(null);setToast('Alerta de vagas criado');
+ }catch(err){console.error(err);setToast(localizeDisplayedText(err instanceof Error?err.message:'Não foi possível criar o alerta'))}
+};
+const markMessagesRead=async(appId:string)=>{
+ const unread=db.messages.filter(m=>m.applicationId===appId&&m.recipientId===session?.user?.id&&!m.readAt);
+ if(dataMode==='remote'&&unread.length&&supabase){
+  await Promise.all(unread.map(m=>supabase.from('messages').update({read_at:new Date().toISOString()}).eq('id',m.id)));
+  await reloadRemote();
+ }
+};
+const openApplicationMessage=(appId:string)=>{
+ const app=db.applications.find(a=>a.id===appId);if(!app)return;
+ const received=db.messages.filter(m=>m.applicationId===appId&&m.recipientId===session?.user?.id).sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
+ if(role==='candidato'&&!received.length){setToast('A empresa ainda não iniciou a conversa nesta candidatura');return}
+ setMessageApplicationId(appId);setMessageBody('');void markMessagesRead(appId);setModal('message');
+};
+const sendMessageHandler=async()=>{
+ if(!session||!messageApplicationId||!messageBody.trim())return;
+ const app=db.applications.find(a=>a.id===messageApplicationId);if(!app)return;
+ const received=db.messages.filter(m=>m.applicationId===app.id&&m.recipientId===session.user.id).sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
+ const recipientId=role==='empresa'||role==='admin'?app.candidateId:(received[0]?.senderId??'');
+ if(!recipientId){setToast('Não há contato disponível para esta conversa');return}
+ try{
+  if(dataMode==='remote')await sendRemoteMessage(app.id,session.user.id,recipientId,messageBody);
+  else persist({...db,messages:[...db.messages,{id:'msg'+Date.now(),applicationId:app.id,senderId:session.user.id,recipientId,body:messageBody.trim(),createdAt:new Date().toISOString()}]},'Mensagem enviada');
+  if(dataMode==='remote')await reloadRemote();
+  setMessageBody('');setModal(null);setToast('Mensagem enviada');
+ }catch(err){console.error(err);setToast(localizeDisplayedText(err instanceof Error?err.message:'Não foi possível enviar a mensagem'))}
+};
+const openInterview=async(appId:string)=>{
+ if(!session||!['empresa','admin'].includes(role??''))return;
+ setInterviewApplicationId(appId);setInterviewScheduledAt('');setInterviewDuration('45');setInterviewMode('online');setInterviewLocation('');setInterviewMeetingUrl('');setModal('interview');
+};
+const scheduleInterviewHandler=async()=>{
+ if(dataMode!=='remote'||!interviewApplicationId||!interviewScheduledAt)return;
+ try{
+  const item=await scheduleRemoteInterview(interviewApplicationId,new Date(interviewScheduledAt).toISOString(),Number(interviewDuration)||45,interviewMode,interviewLocation,interviewMeetingUrl);
+  await reloadRemote();setModal(null);setToast('Entrevista agendada para '+new Date(item.scheduledAt).toLocaleString('pt-BR'));
+ }catch(err){console.error(err);setToast(localizeDisplayedText(err instanceof Error?err.message:'Não foi possível agendar a entrevista'))}
+};
+const setInterviewStatusHandler=async(interview:Interview,status:InterviewStatus)=>{
+ try{if(dataMode==='remote'){await updateRemoteInterview(interview.id,status);await reloadRemote();setToast('Entrevista atualizada')}}catch(err){console.error(err);setToast('Não foi possível atualizar a entrevista')}
+};
+const openScorecard=async(appId:string)=>{
+ const target=db.jobs.find(j=>j.id===db.applications.find(a=>a.id===appId)?.jobId);
+ if(!target)return;
+ const forms:Record<string,{rating:string;note:string}>={};
+ target.skills.forEach(skill=>{const existing=db.scorecards.find(s=>s.applicationId===appId&&s.interviewerId===session?.user?.id&&s.competency===skill);forms[skill]={rating:existing?String(existing.rating):'',note:existing?.evidenceNote??''}});
+ setScorecardApplicationId(appId);setScorecardForms(forms);setModal('scorecard');
+};
+const saveScorecardHandler=async()=>{
+ if(dataMode!=='remote'||!scorecardApplicationId||!session)return;
+ try{
+  for(const [competency,form] of Object.entries(scorecardForms)){const rating=Number(form.rating);if(!Number.isFinite(rating)||rating<1||rating>5)throw new Error('Avalie todas as competências de 1 a 5');await saveRemoteScorecard(scorecardApplicationId,session.user.id,competency,rating,form.note)}
+  await reloadRemote();setModal(null);setToast('Avaliação estruturada salva');
+ }catch(err){console.error(err);setToast(localizeDisplayedText(err instanceof Error?err.message:'Não foi possível salvar a avaliação'))}
+};
+const openPool=async(candidateId?:string)=>{setPoolName('');setPoolDescription('');setPoolCandidateId(candidateId??talentId);setModal('pool')};
+const createPoolHandler=async()=>{
+ if(dataMode!=='remote'||!session||!['empresa','admin'].includes(role??''))return;
+ try{const company=db.companies[0];if(!company)throw new Error('Cadastre uma empresa antes de criar um banco de talentos');if(!poolName.trim())throw new Error('Informe o nome do banco de talentos');const pool=await createRemoteTalentPool(session.user.id,company.id,poolName,poolDescription);if(poolCandidateId)await addRemoteTalentPoolMember(pool.id,poolCandidateId);await reloadRemote();setModal(null);setToast('Banco de talentos criado');}
+ catch(err){console.error(err);setToast(localizeDisplayedText(err instanceof Error?err.message:'Não foi possível criar o banco de talentos'))}
+};
+const openOffer=async(appId:string)=>{
+ setOfferApplicationId(appId);setOfferSalary('');setOfferStartDate('');setOfferMessage('');setModal('offer');
+};
+const createOfferHandler=async()=>{
+ if(dataMode!=='remote'||!offerApplicationId||!session)return;
+ try{const salary=Number(offerSalary);if(!Number.isFinite(salary)||salary<=0)throw new Error('Informe o salário da proposta');if(!offerStartDate)throw new Error('Informe a data de início');await createRemoteOffer(offerApplicationId,session.user.id,salary,offerStartDate,offerMessage);await reloadRemote();setModal(null);setToast('Proposta enviada ao candidato');}
+ catch(err){console.error(err);setToast(localizeDisplayedText(err instanceof Error?err.message:'Não foi possível enviar a proposta'))}
+};
+const respondOfferHandler=async(offerId:string,status:'aceita'|'recusada')=>{
+ try{if(dataMode==='remote'){await respondRemoteOffer(offerId,status);if(status==='aceita'){const offerApp=db.offers.find(o=>o.id===offerId)?.applicationId;if(offerApp)await updateRemoteApplication(offerApp,'contratado')}await reloadRemote();setToast(status==='aceita'?'Proposta aceita':'Proposta recusada')}}catch(err){console.error(err);setToast('Não foi possível responder à proposta')}
+};
 const loadBrazilCities=async()=>{if(brazilCitiesRef.current)return brazilCitiesRef.current;if(brazilCitiesLoadRef.current)return brazilCitiesLoadRef.current;if(!supabase)throw new Error('Supabase não configurado');const loadPromise=getRemoteBrazilCities().then(rows=>{const mapped=rows.map(x=>({name:x.name,uf:x.uf}));brazilCitiesRef.current=mapped;return mapped}).finally(()=>{brazilCitiesLoadRef.current=null});brazilCitiesLoadRef.current=loadPromise;return loadPromise};
 const updateCitySuggestions=async(value:string)=>{const prefix=value.trim();const req=++citySearchRequestRef.current;if(!prefix){setCityOptions([]);return}try{const rows=await loadBrazilCities();if(req!==citySearchRequestRef.current)return;const q=normalizeCityText(prefix);const suggestions=rows.filter(city=>normalizeCityText(city.name).startsWith(q)).sort((a,b)=>a.name.localeCompare(b.name,'pt-BR')||a.uf.localeCompare(b.uf,'pt-BR')).map(city=>cityLabel(city.name,city.uf));setCityOptions(suggestions)}catch(err){console.error('city autocomplete',err);setCityOptions([]);setToast('Não foi possível carregar a lista oficial de municípios')}};
 const requireCanonicalCity=async(value:string)=>{const rows=await loadBrazilCities();const canonical=canonicalizeCity(value,rows);if(!canonical)throw new Error('Selecione uma cidade da lista oficial de municípios.');return canonical};
