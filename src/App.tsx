@@ -6,7 +6,7 @@ import {matchSkillToCatalog,parseResumeFile,type ResumeDraft} from './lib/resume
 
 type Tab='dashboard'|'jobs'|'talents'|'companies'|'skills'|'intelligence'|'passport'|'applications'|'pipeline'|'validation'|'settings';
 type Status='novo'|'triagem'|'entrevista'|'aprovado'|'rejeitado'|'contratado';
-type Evidence={id:string;skill:string;type:string;title:string;issuer:string;verified:boolean;expires?:string;score?:number;storagePath?:string;fileName?:string;mimeType?:string;fileSize?:number;validationStatus?:'pendente'|'aprovada'|'reprovada';reviewedBy?:string;reviewedAt?:string;reviewNote?:string};
+type Evidence={id:string;skill:string;type:string;title:string;issuer:string;verified:boolean;expires?:string;score?:number;storagePath?:string;fileName?:string;mimeType?:string;fileSize?:number;validationStatus?:'pendente'|'aprovada'|'reprovada';reviewedBy?:string;reviewedAt?:string;reviewNote?:string;fileHash?:string;integrityStatus?:'normal'|'duplicado'|'revisao'};
 type Candidate={id:string;name:string;city:string;role:string;years:number;salary:number;skills:string[];verified:string[];evidence:Evidence[];shifts:string[];consentGiven?:boolean;bio?:string};
 type Company={id:string;name:string;city:string;industry:string};
 type Job={id:string;title:string;description?:string|null;companyId:string;companyName?:string;city:string;min:number;max:number;skills:string[];status:'aberta'|'pausada'|'fechada';shift:string;createdAt?:string|null;qualifiedCandidateAt?:string|null;publicSlug?:string|null;screeningQuestions:string[];employmentType?:string;workModel?:string;benefits?:string[];travelRequired?:boolean;interviewQuestions:string[]};
