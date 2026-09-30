@@ -71,3 +71,14 @@
 .application-card strong{font-size:11px;text-transform:capitalize}
 @media(max-width:1000px){.jobs-filter-grid{grid-template-columns:1fr 1fr}.application-card{grid-template-columns:1fr 1fr}}
 @media(max-width:720px){.jobs-filter-title{align-items:flex-start;flex-direction:column}.jobs-filter-grid{grid-template-columns:1fr}.application-card{grid-template-columns:1fr}}
+
+.city-field{position:relative}
+.city-input-wrap{position:relative}
+.city-input-wrap input{width:100%}
+.city-suggestions{position:absolute;left:0;right:0;top:calc(100% - 2px);z-index:80;display:flex;flex-direction:column;max-height:280px;overflow:auto;background:var(--card,#fff);border:1px solid var(--border,#d9dee7);border-radius:12px;box-shadow:0 14px 30px rgba(16,24,40,.12);padding:6px}
+.city-suggestion{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;border:0;background:transparent;padding:10px 11px;border-radius:8px;text-align:left;cursor:pointer;color:inherit;font:inherit}
+.city-suggestion:hover{background:rgba(15,23,42,.06)}
+.city-suggestion span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.city-suggestion b{flex:0 0 auto;font-size:11px;letter-spacing:.08em;opacity:.65}
+.city-suggestion.muted{justify-content:flex-start;cursor:default;opacity:.68}
+@media (max-width:700px){.city-suggestions{max-height:220px}}
