@@ -466,3 +466,29 @@ export async function getRemotePrivacyRequests(userId:string):Promise<PrivacyReq
  if(error)throw error;
  return (data??[]).map(mapPrivacyRequest);
 }
+
+
+export async function getRemoteAllPrivacyRequests():Promise<PrivacyRequest[]>{
+ if(!supabase)throw new Error('Supabase não configurado');
+ const {data,error}=await supabase
+  .from('privacy_requests')
+  .select('id,user_id,request_type,status,requested_at,updated_at,resolved_at,admin_note')
+  .order('requested_at',{ascending:false});
+ if(error)throw error;
+ return (data??[]).map(mapPrivacyRequest);
+}
+
+export async function updateRemotePrivacyRequestStatus(
+ requestId:string,
+ status:'in_review'|'completed'|'rejected'|'cancelled',
+ adminNote?:string
+):Promise<PrivacyRequest>{
+ if(!supabase)throw new Error('Supabase não configurado');
+ const {data,error}=await supabase.rpc('update_privacy_request_status',{
+  p_request_id:requestId,
+  p_status:status,
+  p_admin_note:adminNote?.trim()||null
+ });
+ if(error)throw error;
+ return mapPrivacyRequest(data);
+}

@@ -551,3 +551,25 @@
 .privacy-delete-button{border:1px solid #e3e7ed;background:#f7f8fa;color:#4b5565}
 .privacy-delete-button:hover{background:#f1f3f6}
 @media(max-width:600px){.setting{flex-direction:column;gap:8px}.privacy-data-setting .secondary,.privacy-delete-setting .secondary{width:100%;justify-content:center}}
+
+
+/* Admin privacy requests */
+.admin-privacy-setting>div{align-items:flex-start;flex-direction:column;min-width:0}
+.admin-privacy-setting>div>small{max-width:700px;line-height:1.5;color:#7c899a;font-size:10px}
+.admin-privacy-list{display:grid;gap:10px;width:100%;margin-top:10px}
+.admin-privacy-row{padding:13px 14px;border:1px solid #e3e8ef;border-radius:11px;background:#fff}
+.admin-privacy-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.admin-privacy-head b,.admin-privacy-head span{display:block}
+.admin-privacy-head b{font-size:11px;color:#26344a}
+.admin-privacy-head span{font-size:8px;color:#8a96a7;margin-top:3px}
+.admin-privacy-head em{font-style:normal;font-size:8px;font-weight:750;padding:4px 7px;border-radius:999px;white-space:nowrap}
+.privacy-status.pending{background:#fff7e6;color:#8b5f13}
+.privacy-status.in_review{background:#eef4ff;color:#2857aa}
+.privacy-status.completed{background:#e9f8f0;color:#0f7a4f}
+.privacy-status.rejected,.privacy-status.cancelled{background:#eef1f5;color:#667085}
+.admin-privacy-row>p{font-size:9px;color:#718095;line-height:1.45;margin:9px 0 0}
+.admin-privacy-row .field-label{margin:11px 0 8px}
+.admin-privacy-row textarea{min-height:64px}
+.admin-privacy-actions{display:flex;gap:7px;flex-wrap:wrap}
+.admin-privacy-empty{display:flex;align-items:center;gap:8px;margin-top:10px;padding:12px;border:1px dashed #d9e0e8;border-radius:10px;color:#557363;font-size:9px}
+@media(max-width:650px){.admin-privacy-head{flex-direction:column}.admin-privacy-actions{display:grid;grid-template-columns:1fr;width:100%}.admin-privacy-actions>*{width:100%;justify-content:center}}
