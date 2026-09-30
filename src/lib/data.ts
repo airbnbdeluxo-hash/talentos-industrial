@@ -148,11 +148,27 @@ export async function getRemoteSkills():Promise<string[]>{
 
 export async function createRemoteCompany(userId:string, input:{name:string;city:string;industry:string}){
  if(!supabase)throw new Error('Supabase não configurado');
- const {data:company,error}=await supabase.from('companies').insert({name:input.name,city:input.city,state:'RS',industry:input.industry,created_by:userId}).select('*').single();
+ const cityMatch=input.city.match(/^(.+?)\s+—\s+([A-Z]{2})$/);
+ if(!cityMatch)throw new Error('Selecione uma cidade da lista oficial de municípios.');
+ const cityName=cityMatch[1].trim(),state=cityMatch[2].toUpperCase();
+ const cityLookup=await supabase.from('brazil_cities').select('ibge_code,name,uf').eq('name',cityName).eq('uf',state).maybeSingle();
+ if(cityLookup.error)throw cityLookup.error;
+ if(!cityLookup.data)throw new Error('Cidade não encontrada na base oficial.');
+ const canonicalCity=`${cityLookup.data.name} — ${String(cityLookup.data.uf).trim()}`;
+ const {data:company,error}=await supabase.from('companies').insert({name:input.name,city:canonicalCity,state:String(cityLookup.data.uf).trim(),city_ibge_code:cityLookup.data.ibge_code,industry:input.industry,created_by:userId}).select('*').single();
  if(error)throw error;
  const member=await supabase.from('company_members').insert({company_id:company.id,user_id:userId,member_role:'owner'});
  if(member.error)throw member.error;
  return company;
+}
+
+export async function createRemoteCompanyAccount(input:{name:string;city:string;industry:string}){
+ if(!supabase)throw new Error('Supabase não configurado');
+ const {data,error}=await supabase.functions.invoke('company-team',{body:{action:'create-company',...input}});
+ if(error)throw error;
+ if(data?.error)throw new Error(data.error);
+ if(!data?.company)throw new Error('Não foi possível cadastrar a empresa.');
+ return data.company;
 }
 
 export async function createRemoteJob(userId:string,input:{title:string;description?:string;companyId:string;city:string;min:number;max:number;shift:string;skills:string[];screeningQuestions?:string[];employmentType?:string;workModel?:string;benefits?:string[];travelRequired?:boolean;interviewQuestions?:string[]}){
@@ -553,30 +569,33 @@ export async function updateRemotePrivacyRequestStatus(
 export type CompanyTeamMember={userId:string;fullName:string;email:string;role:'owner'|'recruiter'|'viewer';createdAt:string};
 export type CompanyTeamInvitation={id:string;invited_email:string;member_role:'recruiter'|'viewer';status:'pending';created_at:string;expires_at:string};
 export type CompanyTeamSnapshot={members:CompanyTeamMember[];invitations:CompanyTeamInvitation[];canManage:boolean};
-export async function manageRemoteCompanyTeam(input:{action:'list'|'invite'|'revoke-invitation';companyId:string;email?:string;memberRole?:'recruiter'|'viewer';invitationId?:string}):Promise<CompanyTeamSnapshot|{delivery:'email'|'link';invitationId:string;inviteUrl:string;expiresAt:string}|{ok:true}>{
+type CompanyTeamActionInput={
+ action:'list'|'invite'|'revoke-invitation'|'accept-invitation'|'update-role'|'remove-member'|'transfer-owner';
+ companyId?:string;
+ email?:string;
+ memberRole?:'recruiter'|'viewer';
+ invitationId?:string;
+ userId?:string;
+};
+async function invokeCompanyTeam(input:CompanyTeamActionInput){
  if(!supabase)throw new Error('Supabase não configurado');
  const {data,error}=await supabase.functions.invoke('company-team',{body:input});
  if(error)throw error;
  if(data?.error)throw new Error(data.error);
  return data;
 }
+export async function manageRemoteCompanyTeam(input:{action:'list'|'invite'|'revoke-invitation';companyId:string;email?:string;memberRole?:'recruiter'|'viewer';invitationId?:string}):Promise<CompanyTeamSnapshot|{delivery:'email'|'link';invitationId:string;inviteUrl:string;expiresAt:string}|{ok:true}>{
+ return invokeCompanyTeam(input);
+}
 export async function acceptRemoteCompanyInvitation(invitationId:string){
- if(!supabase)throw new Error('Supabase não configurado');
- const {error}=await supabase.rpc('accept_company_invitation',{p_invitation_id:invitationId});
- if(error)throw error;
+ await invokeCompanyTeam({action:'accept-invitation',invitationId});
 }
 export async function updateRemoteCompanyMemberRole(companyId:string,userId:string,role:'recruiter'|'viewer'){
- if(!supabase)throw new Error('Supabase não configurado');
- const {error}=await supabase.rpc('company_team_update_member_role',{p_company_id:companyId,p_user_id:userId,p_member_role:role});
- if(error)throw error;
+ await invokeCompanyTeam({action:'update-role',companyId,userId,memberRole:role});
 }
 export async function removeRemoteCompanyMember(companyId:string,userId:string){
- if(!supabase)throw new Error('Supabase não configurado');
- const {error}=await supabase.rpc('company_team_remove_member',{p_company_id:companyId,p_user_id:userId});
- if(error)throw error;
+ await invokeCompanyTeam({action:'remove-member',companyId,userId});
 }
 export async function transferRemoteCompanyOwner(companyId:string,newOwnerId:string){
- if(!supabase)throw new Error('Supabase não configurado');
- const {error}=await supabase.rpc('company_team_transfer_owner',{p_company_id:companyId,p_new_owner_id:newOwnerId});
- if(error)throw error;
+ await invokeCompanyTeam({action:'transfer-owner',companyId,userId:newOwnerId});
 }
