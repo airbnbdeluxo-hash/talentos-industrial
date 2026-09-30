@@ -168,6 +168,13 @@ export async function createRemoteJob(userId:string,input:{title:string;descript
  return job;
 }
 
+export async function updateRemoteJobStatus(jobId:string,status:'aberta'|'pausada'|'fechada'){
+ if(!supabase)throw new Error('Supabase não configurado');
+ const {data,error}=await supabase.from('jobs').update({status}).eq('id',jobId).select('id,status').single();
+ if(error)throw error;
+ return data;
+}
+
 export async function createRemoteCandidate(userId:string,input:{name:string;role:string;city:string;years:number;salary:number;skills:string[];preferredShifts?:string[];searchable?:boolean;bio?:string;resumeFile?:File|null;skillMentions?:Array<{skill:string;excerpt:string;confidence:number}>}){
  if(!supabase)throw new Error('Supabase não configurado');
  const client=supabase;

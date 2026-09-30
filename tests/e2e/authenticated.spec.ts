@@ -156,6 +156,29 @@ test.describe('TalentOS authenticated journeys', () => {
     await expectPlainLanguage(page);
   });
 
+  test('empresa pausa, reabre e encerra uma vaga mantendo o histórico', async ({ page }) => {
+    await page.goto('/?e2eRole=empresa');
+    await page.getByRole('button', { name: 'Vagas', exact: true }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Minhas vagas' })).toBeVisible();
+
+    const job = page.locator('article.company-managed-job').filter({ hasText: 'Operador CNC' });
+    await expect(job).toBeVisible();
+    await expect(job.getByText('Aberta', { exact: true })).toBeVisible();
+
+    await job.getByRole('button', { name: 'Pausar vaga', exact: true }).click();
+    await expect(job.getByText('Pausada', { exact: true })).toBeVisible();
+    await expect(job.getByRole('button', { name: 'Reabrir vaga', exact: true })).toBeVisible();
+
+    await job.getByRole('button', { name: 'Reabrir vaga', exact: true }).click();
+    await expect(job.getByText('Aberta', { exact: true })).toBeVisible();
+
+    page.once('dialog', dialog => dialog.accept());
+    await job.getByRole('button', { name: 'Encerrar vaga', exact: true }).click();
+    await expect(job.getByText('Encerrada', { exact: true })).toBeVisible();
+    await expect(job.getByRole('button', { name: 'Reabrir vaga', exact: true })).toBeVisible();
+    await expect(job.getByRole('button', { name: 'Processo seletivo', exact: true })).toBeVisible();
+  });
+
   test('empresa percorre gestão de recrutamento e abre criação de vaga', async ({ page }) => {
     await page.goto('/?e2eRole=empresa');
 
