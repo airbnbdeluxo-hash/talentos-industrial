@@ -11,6 +11,19 @@ const json = (body: unknown, status = 200, origin = 'https://talentos-industrial
   new Response(JSON.stringify(body), { status, headers: { ...cors(origin), 'Content-Type': 'application/json' } });
 
 const normalizeEmail = (value: unknown) => String(value ?? '').trim().toLowerCase();
+const isUuid = (value: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+const normalizeCnpj = (value: unknown) => String(value ?? '').replace(/\D/g, '');
+const isValidCnpj = (value: string) => {
+  if (!/^\d{14}$/.test(value) || /^(\d)\1{13}$/.test(value)) return false;
+  const calc = (digits: string, weights: number[]) => {
+    const sum = digits.split('').reduce((total, digit, index) => total + Number(digit) * weights[index], 0);
+    const remainder = sum % 11;
+    return remainder < 2 ? 0 : 11 - remainder;
+  };
+  const first = calc(value.slice(0, 12), [5,4,3,2,9,8,7,6,5,4,3,2]);
+  const second = calc(value.slice(0, 12) + String(first), [6,5,4,3,2,9,8,7,6,5,4,3,2]);
+  return value.endsWith(String(first) + String(second));
+};
 
 Deno.serve(async (request) => {
   const appUrl = Deno.env.get('APP_URL') ?? 'https://talentos-industrial.vercel.app';
@@ -38,8 +51,58 @@ Deno.serve(async (request) => {
   try {
     const body = await request.json();
     const action = String(body.action ?? '');
+
+    if (action === 'create-company') {
+      if (!caller.email_confirmed_at) return json({ error: 'Confirme seu e-mail antes de cadastrar a empresa.' }, 403, origin);
+      const name = String(body.name ?? '').trim();
+      const cnpj = normalizeCnpj(body.cnpj);
+      const industry = String(body.industry ?? '').trim();
+      const cityLabel = String(body.city ?? '').trim();
+      if (!name || name.length > 160) return json({ error: 'Informe o nome da empresa.' }, 400, origin);
+      if (!isValidCnpj(cnpj)) return json({ error: 'Informe um CNPJ válido.' }, 400, origin);
+      if (industry.length > 120) return json({ error: 'Segmento inválido.' }, 400, origin);
+      const cityMatch = cityLabel.match(/^(.+?)\s+—\s+([A-Z]{2})$/);
+      if (!cityMatch) return json({ error: 'Selecione uma cidade da lista oficial de municípios.' }, 400, origin);
+      const cityName = cityMatch[1].trim();
+      const state = cityMatch[2].toUpperCase();
+      const { data: city, error: cityError } = await admin
+        .from('brazil_cities')
+        .select('ibge_code,name,uf')
+        .eq('name', cityName)
+        .eq('uf', state)
+        .maybeSingle();
+      if (cityError) throw cityError;
+      if (!city) return json({ error: 'Cidade não encontrada na base oficial.' }, 400, origin);
+
+      const { data: company, error } = await admin.rpc('company_team_create_company_service', {
+        p_actor_id: caller.id,
+        p_name: name,
+        p_cnpj: cnpj,
+        p_city: `${city.name} — ${String(city.uf).trim()}`,
+        p_state: String(city.uf).trim(),
+        p_city_ibge_code: city.ibge_code,
+        p_industry: industry || null,
+      });
+      if (error) throw error;
+      return json({ company }, 200, origin);
+    }
+
+    if (action === 'accept-invitation') {
+      const invitationId = String(body.invitationId ?? '');
+      if (!isUuid(invitationId)) return json({ error: 'Convite inválido.' }, 400, origin);
+      const email = normalizeEmail(caller.email);
+      if (!email) return json({ error: 'Sua conta precisa ter um e-mail válido.' }, 400, origin);
+      const { error } = await admin.rpc('company_team_accept_invitation_service', {
+        p_actor_id: caller.id,
+        p_actor_email: email,
+        p_invitation_id: invitationId,
+      });
+      if (error) throw error;
+      return json({ ok: true }, 200, origin);
+    }
+
     const companyId = String(body.companyId ?? '');
-    if (!companyId || !/^[0-9a-f-]{36}$/i.test(companyId)) return json({ error: 'Empresa inválida.' }, 400, origin);
+    if (!isUuid(companyId)) return json({ error: 'Empresa inválida.' }, 400, origin);
 
     const { data: membership, error: membershipError } = await admin
       .from('company_members').select('member_role').eq('company_id', companyId).eq('user_id', caller.id).maybeSingle();
@@ -68,6 +131,7 @@ Deno.serve(async (request) => {
     }
 
     if (!isOwner) return json({ error: 'Somente a pessoa proprietária pode administrar a equipe.' }, 403, origin);
+
     if (action === 'invite') {
       const email = normalizeEmail(body.email);
       const role = String(body.memberRole ?? '');
@@ -89,8 +153,6 @@ Deno.serve(async (request) => {
         return json({ delivery: 'email', invitationId: invitation.id, inviteUrl, expiresAt: invitation.expires_at }, 200, origin);
       }
 
-      // Existing accounts cannot be re-invited by Auth. Give the owner a
-      // company-scoped claim link; acceptance still checks the signed-in email.
       let existingUser: { id: string } | null = null;
       for (let page = 1; page <= 100; page += 1) {
         const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
@@ -116,14 +178,48 @@ Deno.serve(async (request) => {
 
     if (action === 'revoke-invitation') {
       const invitationId = String(body.invitationId ?? '');
+      if (!isUuid(invitationId)) return json({ error: 'Convite inválido.' }, 400, origin);
       const { data, error } = await admin.from('company_invitations').update({ status: 'revoked' }).eq('id', invitationId).eq('company_id', companyId).eq('status', 'pending').select('id').maybeSingle();
       if (error) throw error;
       if (!data) return json({ error: 'Convite pendente não encontrado.' }, 404, origin);
       return json({ ok: true }, 200, origin);
     }
+
+    if (action === 'update-role') {
+      const userId = String(body.userId ?? '');
+      const role = String(body.memberRole ?? '');
+      if (!isUuid(userId) || (role !== 'recruiter' && role !== 'viewer')) return json({ error: 'Dados do integrante inválidos.' }, 400, origin);
+      const { error } = await admin.rpc('company_team_update_member_role_service', {
+        p_actor_id: caller.id, p_company_id: companyId, p_user_id: userId, p_member_role: role,
+      });
+      if (error) throw error;
+      return json({ ok: true }, 200, origin);
+    }
+
+    if (action === 'remove-member') {
+      const userId = String(body.userId ?? '');
+      if (!isUuid(userId)) return json({ error: 'Integrante inválido.' }, 400, origin);
+      const { error } = await admin.rpc('company_team_remove_member_service', {
+        p_actor_id: caller.id, p_company_id: companyId, p_user_id: userId,
+      });
+      if (error) throw error;
+      return json({ ok: true }, 200, origin);
+    }
+
+    if (action === 'transfer-owner') {
+      const newOwnerId = String(body.userId ?? '');
+      if (!isUuid(newOwnerId)) return json({ error: 'Novo proprietário inválido.' }, 400, origin);
+      const { error } = await admin.rpc('company_team_transfer_owner_service', {
+        p_actor_id: caller.id, p_company_id: companyId, p_new_owner_id: newOwnerId,
+      });
+      if (error) throw error;
+      return json({ ok: true }, 200, origin);
+    }
+
     return json({ error: 'Ação desconhecida.' }, 400, origin);
   } catch (error) {
     console.error('company-team', error);
-    return json({ error: error instanceof Error ? error.message : 'Não foi possível atualizar a equipe.' }, 400, origin);
+    const message = error instanceof Error ? error.message : 'Não foi possível atualizar a equipe.';
+    return json({ error: message }, 400, origin);
   }
 });
