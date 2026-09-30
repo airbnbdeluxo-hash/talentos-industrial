@@ -162,7 +162,7 @@ export async function createRemoteCompany(userId:string, input:{name:string;city
  return company;
 }
 
-export async function createRemoteCompanyAccount(input:{name:string;city:string;industry:string}){
+export async function createRemoteCompanyAccount(input:{name:string;cnpj:string;city:string;industry:string}){
  if(!supabase)throw new Error('Supabase não configurado');
  const {data,error}=await supabase.functions.invoke('company-team',{body:{action:'create-company',...input}});
  if(error)throw error;
