@@ -180,10 +180,6 @@ export async function createRemoteCandidate(userId:string,input:{name:string;rol
    if(file.size>10*1024*1024)throw new Error('O currículo deve ter no máximo 10 MB.');
    const existing=await supabase.from('candidate_resumes').select('storage_path').eq('candidate_id',userId).maybeSingle();
    if(existing.error)throw existing.error;
-   if(existing.data?.storage_path){
-     const removed=await supabase.storage.from('candidate-resumes').remove([existing.data.storage_path]);
-     if(removed.error)throw removed.error;
-   }
    const safeName=file.name.replace(/[^a-zA-Z0-9._-]+/g,'-').slice(-120);
    const storagePath=`${userId}/${crypto.randomUUID()}-${safeName}`;
    const upload=await supabase.storage.from('candidate-resumes').upload(storagePath,file,{contentType:file.type,upsert:false});
@@ -192,6 +188,10 @@ export async function createRemoteCandidate(userId:string,input:{name:string;rol
    if(saved.error){
      await supabase.storage.from('candidate-resumes').remove([storagePath]);
      throw saved.error;
+   }
+   if(existing.data?.storage_path && existing.data.storage_path !== storagePath){
+     const removed=await supabase.storage.from('candidate-resumes').remove([existing.data.storage_path]);
+     if(removed.error)console.warn('Não foi possível remover o currículo anterior',removed.error); 
    }
  }
 }
