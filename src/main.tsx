@@ -4,6 +4,7 @@ import App from "./App";
 import {ErrorBoundary} from "./ErrorBoundary";
 import {reportClientError} from "./lib/observability";
 import "./styles.css";
+import "./landing.css";
 
 window.addEventListener('error', event => {
   void reportClientError({source:'window_error', error:event.error ?? event.message});
