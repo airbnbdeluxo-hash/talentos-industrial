@@ -336,3 +336,45 @@
 .company-managed-job-actions .secondary,.company-managed-job-actions .primary{display:inline-flex;align-items:center;gap:6px;text-decoration:none}
 @media(max-width:820px){.company-jobs-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.company-managed-job-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:600px){.company-jobs-header{align-items:flex-start;flex-direction:column;padding:18px}.company-jobs-header .primary{width:100%;justify-content:center}.company-jobs-list-card{padding:16px}.company-jobs-toolbar{align-items:stretch;flex-direction:column}.company-jobs-toolbar .search{max-width:none}.company-managed-job-title{flex-direction:column}.company-managed-job-title>strong{white-space:normal}.company-managed-job-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.company-managed-job-actions{display:grid;grid-template-columns:1fr}.company-managed-job-actions>*{width:100%;justify-content:center}}
+
+
+/* Company candidate comparison */
+.company-candidates-page{display:grid;gap:16px}
+.company-candidates-header{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:22px 24px}
+.company-candidates-header h2{font-size:21px;margin:3px 0 4px}
+.company-candidates-header p{font-size:10px;color:#7c899a;line-height:1.5}
+.company-candidates-header label{display:grid;gap:5px;min-width:260px;font-size:9px;font-weight:700;color:#69778b}
+.company-candidates-header select{height:40px;border:1px solid #dce3ec;border-radius:9px;background:#fff;padding:0 10px;color:#243149}
+.company-candidates-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.company-candidates-summary>.card{padding:14px 15px}
+.company-candidates-summary span,.company-candidates-summary strong{display:block}
+.company-candidates-summary span{font-size:9px;color:#7e8a9c}
+.company-candidates-summary strong{font-size:21px;margin-top:5px;color:#1e2c44}
+.company-candidates-list,.company-talent-pools{padding:20px 22px}
+.company-candidates-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px}
+.company-candidates-toolbar .search{max-width:540px;flex:1}
+.company-candidates-toolbar>span{font-size:9px;color:#8792a3}
+.company-candidate-cards{display:grid;gap:11px}
+.company-candidate-card{border:1px solid #e3e8ef;border-radius:13px;background:#fff;padding:15px}
+.company-candidate-top{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:11px;align-items:center}
+.company-candidate-name{min-width:0}
+.company-candidate-name b,.company-candidate-name span,.company-candidate-name em{display:block}
+.company-candidate-name b{font-size:12px;color:#233149}
+.company-candidate-name span{font-size:9px;color:#7e8a9c;margin-top:2px}
+.company-candidate-name em{font-style:normal;font-size:8px;color:#2457ca;margin-top:5px}
+.company-candidate-match{text-align:right}
+.company-candidate-match strong,.company-candidate-match span{display:block}
+.company-candidate-match strong{font-size:19px;color:#1d4ed8}
+.company-candidate-match span{font-size:8px;color:#8b96a6;margin-top:1px}
+.company-candidate-skills{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:13px;padding-top:13px;border-top:1px solid #edf0f4}
+.company-candidate-skills>div>span{display:block;font-size:8px;font-weight:700;color:#8a96a7;margin-bottom:6px}
+.company-candidate-skills p{font-size:9px;color:#7d899a;line-height:1.45;margin:0}
+.company-candidate-skills p.ok{display:flex;align-items:center;gap:5px;color:#207653}
+.company-candidate-skills small{font-size:9px;color:#8b96a7}
+.company-candidate-facts{display:flex;gap:15px;flex-wrap:wrap;margin:12px 0;font-size:8px;color:#7c8899}
+.company-candidate-facts b{color:#34435a}
+.company-candidate-actions{display:flex;gap:7px;flex-wrap:wrap;padding-top:12px;border-top:1px solid #edf0f4}
+.company-candidate-actions .primary,.company-candidate-actions .secondary{display:inline-flex;align-items:center;gap:6px}
+.company-talent-pools .company-section-head{margin-bottom:12px}
+@media(max-width:850px){.company-candidates-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.company-candidate-skills{grid-template-columns:1fr}}
+@media(max-width:620px){.company-candidates-header{align-items:flex-start;flex-direction:column;padding:18px}.company-candidates-header label{min-width:0;width:100%}.company-candidates-list,.company-talent-pools{padding:16px}.company-candidates-toolbar{align-items:stretch;flex-direction:column}.company-candidates-toolbar .search{max-width:none}.company-candidate-top{grid-template-columns:38px minmax(0,1fr)}.company-candidate-match{grid-column:2;text-align:left;display:flex;gap:6px;align-items:baseline}.company-candidate-match strong,.company-candidate-match span{display:inline}.company-candidate-actions{display:grid;grid-template-columns:1fr}.company-candidate-actions>*{width:100%;justify-content:center}}
