@@ -107,6 +107,15 @@ test.describe('TalentOS authenticated journeys', () => {
     await expectPlainLanguage(page);
   });
 
+  test('empresa encontra a gestão da equipe e os papéis de acesso', async ({ page }) => {
+    await page.goto('/?e2eRole=empresa');
+    await page.getByRole('button', { name: 'Equipe', exact: true }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Equipe da empresa' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 2, name: 'Equipe da empresa' })).toBeVisible();
+    await expect(page.getByText('Convide recrutadores, limite acessos e transfira a propriedade.', { exact: false })).toBeVisible();
+    await expect(page.locator('.overlay')).toHaveCount(0);
+  });
+
   test('empresa conduz candidato até proposta e candidato aceita contratação', async ({ page }) => {
     await page.goto('/?e2eRole=empresa');
     await page.getByRole('button', { name: 'Processo seletivo', exact: true }).click();
