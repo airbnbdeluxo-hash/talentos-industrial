@@ -505,7 +505,7 @@ const requireCanonicalCity=async(value:string)=>{const rows=await loadBrazilCiti
 useEffect(()=>{if(!session||!role)return;const allowed:Tab[]=role==='candidato'?['jobs','passport','applications','skills','settings']:role==='empresa'?['dashboard','jobs','talents','passport','pipeline','validation','skills','intelligence','settings']:['dashboard','jobs','talents','companies','skills','intelligence','passport','applications','pipeline','validation','settings'];if(!allowed.includes(tab))setTab('jobs')},[session,role,tab]);
 const createJob=async()=>{try{
  const skills=f.skills.split(',').map(x=>x.trim()).filter(Boolean);
- const city=await requireCanonicalCity(f.city);
+ const city=dataMode==='remote'?await requireCanonicalCity(f.city):f.city.trim();
  const screeningQuestions=f.screeningQuestions.split('\n').map(x=>x.trim()).filter(Boolean).slice(0,8);
  const interviewQuestions=f.interviewQuestions.split('\n').map(x=>x.trim()).filter(Boolean).slice(0,10);
  const benefits=f.benefits.split(',').map(x=>x.trim()).filter(Boolean);
