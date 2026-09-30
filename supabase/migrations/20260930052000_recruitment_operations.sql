@@ -20,6 +20,7 @@ create table if not exists public.job_alerts (
   min_salary numeric(12,2),
   max_salary numeric(12,2),
   shift text,
+  work_model text,
   active boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -243,3 +244,5 @@ grant select,insert,update on public.interview_scorecards to authenticated;
 grant select,insert,update,delete on public.talent_pools to authenticated;
 grant select,insert,delete on public.talent_pool_members to authenticated;
 grant select,insert,update on public.offers to authenticated;
+
+create index if not exists job_alerts_candidate_filter_idx on public.job_alerts(candidate_id,active,city,shift,work_model);
