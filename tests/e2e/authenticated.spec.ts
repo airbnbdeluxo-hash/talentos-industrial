@@ -107,6 +107,55 @@ test.describe('TalentOS authenticated journeys', () => {
     await expectPlainLanguage(page);
   });
 
+  test('empresa conduz candidato até proposta e candidato aceita contratação', async ({ page }) => {
+    await page.goto('/?e2eRole=empresa');
+    await page.getByRole('button', { name: 'Processo seletivo', exact: true }).click();
+
+    const candidate = page.locator('article.pipeline-card').filter({ hasText: 'Marcos Silva' });
+    await expect(candidate).toBeVisible();
+    await expect(candidate.getByRole('button', { name: 'Agendar entrevista', exact: true })).toBeVisible();
+
+    await candidate.getByRole('button', { name: 'Agendar entrevista', exact: true }).click();
+    await page.getByLabel('Data e hora').fill('2026-10-05T10:00');
+    await page.getByLabel('Duração (minutos)').fill('45');
+    await page.getByRole('button', { name: 'Agendar', exact: true }).click();
+
+    await expect(page.locator('.overlay')).toHaveCount(0);
+    await expect(candidate.getByRole('button', { name: 'Registrar avaliação', exact: true })).toBeVisible();
+    await expect(candidate.getByText('Próxima entrevista')).toBeVisible();
+
+    await candidate.getByRole('button', { name: 'Registrar avaliação', exact: true }).click();
+    const ratings = page.locator('.scorecard-row select');
+    const ratingCount = await ratings.count();
+    expect(ratingCount).toBeGreaterThan(0);
+    for (let i = 0; i < ratingCount; i++) await ratings.nth(i).selectOption('4');
+    await page.getByRole('button', { name: 'Salvar avaliação', exact: true }).click();
+    await expect(page.locator('.overlay')).toHaveCount(0);
+
+    await candidate.locator('summary').click();
+    await candidate.locator('.pipeline-status-control select').selectOption('aprovado');
+    await expect(candidate.getByRole('button', { name: 'Enviar proposta', exact: true })).toBeVisible();
+
+    await candidate.getByRole('button', { name: 'Enviar proposta', exact: true }).click();
+    await page.getByLabel('Salário').fill('4300');
+    await page.getByLabel('Data de início').fill('2026-10-15');
+    await page.getByLabel('Mensagem').fill('Proposta de demonstração para validação do fluxo.');
+    await page.locator('.overlay').getByRole('button', { name: 'Enviar proposta', exact: true }).click();
+    await expect(page.locator('.overlay')).toHaveCount(0);
+    await expect(candidate.getByText(/Proposta enviada/i)).toBeVisible();
+
+    await page.goto('/?e2eRole=candidato');
+    await page.getByRole('button', { name: 'Minhas candidaturas', exact: true }).click();
+    await expect(page.getByText('Operador CNC', { exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Aceitar proposta', exact: true })).toBeVisible();
+
+    await page.getByRole('button', { name: 'Aceitar proposta', exact: true }).click();
+    await expect(page.getByText('Contratado', { exact: true })).toBeVisible();
+    await expect(page.locator('.toast').getByText(/Proposta aceita/i)).toBeVisible();
+    await expect(page.locator('.overlay')).toHaveCount(0);
+    await expectPlainLanguage(page);
+  });
+
   test('empresa percorre gestão de recrutamento e abre criação de vaga', async ({ page }) => {
     await page.goto('/?e2eRole=empresa');
 
