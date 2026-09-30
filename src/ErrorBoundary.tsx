@@ -1,4 +1,5 @@
 import React from 'react';
+import {reportClientError} from './lib/observability';
 
 type State = { hasError: boolean; reference: string };
 
@@ -18,6 +19,11 @@ export class ErrorBoundary extends React.Component<React.PropsWithChildren, Stat
       reference: this.state.reference,
       message: error.message,
       componentStack: info.componentStack,
+    });
+    void reportClientError({
+      source: 'react_error_boundary',
+      error,
+      reference: this.state.reference,
     });
   }
 
