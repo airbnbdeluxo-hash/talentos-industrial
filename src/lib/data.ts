@@ -5,7 +5,7 @@ export type Evidence={id:string;skill:string;type:string;title:string;issuer:str
 export type Candidate={id:string;name:string;city:string;role:string;years:number;salary:number;skills:string[];verified:string[];evidence:Evidence[];shifts:string[];consentGiven?:boolean;bio?:string};
 export type Company={id:string;name:string;city:string;industry:string};
 export type Job={id:string;title:string;description?:string|null;companyId:string;companyName?:string;city:string;min:number;max:number;skills:string[];status:'aberta'|'pausada'|'fechada';shift:string;createdAt?:string|null;qualifiedCandidateAt?:string|null;publicSlug?:string|null;screeningQuestions:string[]};
-export type AppRow={id:string;jobId:string;candidateId:string;status:Status;screeningAnswers?:Record<string,string>};
+export type AppRow={id:string;jobId:string;candidateId:string;status:Status;source?:string|null;sourceDetail?:string|null;screeningAnswers?:Record<string,string>};
 export type SavedJob={id:string;candidateId:string;jobId:string;createdAt:string};
 export type JobAlert={id:string;candidateId:string;name:string;cargo?:string|null;skill?:string|null;city?:string|null;minSalary?:number|null;maxSalary?:number|null;shift?:string|null;active:boolean;createdAt:string;updatedAt:string};
 export type Message={id:string;applicationId:string;senderId:string;recipientId:string;body:string;readAt?:string|null;createdAt:string};
@@ -45,7 +45,7 @@ const mapCandidate=(c:any):Candidate=>{
 };
 const mapCompany=(c:any):Company=>({id:c.id,name:c.name,city:c.city,industry:c.industry??'Indústria'});
 const mapJob=(j:any):Job=>({id:j.id,title:j.title,description:j.description??null,companyId:j.company_id,companyName:j.company_public_name??undefined,city:j.city,min:Number(j.salary_min??0),max:Number(j.salary_max??0),skills:[],status:j.status,shift:j.shift??'1º turno',createdAt:j.created_at??null,qualifiedCandidateAt:j.qualified_candidate_at??null,publicSlug:j.public_slug??null,screeningQuestions:Array.isArray(j.screening_questions)?j.screening_questions.map(String):[]});
-const mapApplication=(a:any):AppRow=>({id:a.id,jobId:a.job_id,candidateId:a.candidate_id,status:a.status as Status,screeningAnswers:(a.screening_answers&&typeof a.screening_answers==='object')?a.screening_answers:undefined});
+const mapApplication=(a:any):AppRow=>({id:a.id,jobId:a.job_id,candidateId:a.candidate_id,status:a.status as Status,source:a.source??null,sourceDetail:a.source_detail??null,screeningAnswers:(a.screening_answers&&typeof a.screening_answers==='object')?a.screening_answers:undefined});
 const mapEvent=(e:any):AppEvent=>({id:e.id,applicationId:e.application_id,fromStatus:(e.from_status??undefined) as Status|undefined,toStatus:e.to_status as Status,at:e.created_at,note:e.note??undefined});
 const mapSavedJob=(x:any):SavedJob=>({id:x.id,candidateId:x.candidate_id,jobId:x.job_id,createdAt:x.created_at});
 const mapJobAlert=(x:any):JobAlert=>({id:x.id,candidateId:x.candidate_id,name:x.name,cargo:x.cargo??null,skill:x.skill??null,city:x.city??null,minSalary:x.min_salary==null?null:Number(x.min_salary),maxSalary:x.max_salary==null?null:Number(x.max_salary),shift:x.shift??null,active:Boolean(x.active),createdAt:x.created_at,updatedAt:x.updated_at});
