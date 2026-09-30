@@ -28,9 +28,9 @@ jobs:
         run: |
           npm install --no-save @playwright/test
           npx playwright install --with-deps chromium
-      - name: Start Vite in demo mode
+      - name: Start Vite in E2E mode
         run: |
-          npm run dev -- --host 127.0.0.1 > /tmp/talentos-vite.log 2>&1 &
+          VITE_E2E=true npm run dev -- --host 127.0.0.1 > /tmp/talentos-vite.log 2>&1 &
           for i in {1..30}; do
             if curl -fsS http://127.0.0.1:5173/ >/dev/null; then
               exit 0
