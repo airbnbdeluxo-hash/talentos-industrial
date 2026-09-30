@@ -24,6 +24,7 @@ export type TrainingRecommendation={
   priority:number;reason:string;estimatedHours?:number|null;status:TrainingStatus;
   gapType:'ausente'|'nivel';currentProficiency?:number|null;targetProficiency:number;
   startedAt?:string|null;completedAt?:string|null;updatedAt?:string|null;outcomeNote?:string|null;
+  developmentPlan?:{version:number;skill:{id:string;name:string;category?:string|null;parent?:string|null};objective:{fromLevel:number;targetLevel:number;gapSize:number};evidence:{state:string;sourceType:string;sourceConfidence:number;verified:boolean};steps:Array<{order:number;type:string;title:string;estimatedHours:number}>};
 };
 export type CapabilityNode={id:string;nodeType:'familia'|'processo'|'maquina'|'controle'|'competencia'|'cargo'|'contexto';name:string;slug:string;skillId?:string|null;parentId?:string|null;description?:string|null};
 export type CapabilityEdge={fromNodeId:string;toNodeId:string;relationshipType:'inclui'|'exige'|'usa'|'aplicada_em'|'proximo_de'|'desenvolve_para';weight:number;source:string};
@@ -62,7 +63,8 @@ const mapTraining=(t:any):TrainingRecommendation=>({
   status:t.status as TrainingStatus,gapType:(t.gap_type??'nivel') as 'ausente'|'nivel',
   currentProficiency:t.current_proficiency==null?null:Number(t.current_proficiency),
   targetProficiency:Number(t.target_proficiency??3),startedAt:t.started_at??null,
-  completedAt:t.completed_at??null,updatedAt:t.updated_at??null,outcomeNote:t.outcome_note??null
+  completedAt:t.completed_at??null,updatedAt:t.updated_at??null,outcomeNote:t.outcome_note??null,
+  developmentPlan:t.development_plan&&typeof t.development_plan==='object'?t.development_plan:undefined
 });
 const mapChallenge=(c:any):Challenge=>({id:c.id,skillId:c.skill_id,skill:c.skills?.name??'Skill',title:c.title,description:c.description,difficulty:c.difficulty,timeLimitMinutes:Number(c.time_limit_minutes??10),questions:Array.isArray(c.questions)?c.questions.map((q:any)=>({id:String(q.id),text:String(q.text),options:Array.isArray(q.options)?q.options.map(String):[]})):[]});
 const mapCapabilityNode=(n:any):CapabilityNode=>({id:n.id,nodeType:n.node_type,name:n.name,slug:n.slug,skillId:n.skill_id??null,parentId:n.parent_id??null,description:n.description??null});
