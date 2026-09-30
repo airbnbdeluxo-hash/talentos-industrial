@@ -57,6 +57,56 @@ test.describe('TalentOS authenticated journeys', () => {
     }
   });
 
+  test('candidato altera privacidade e continua navegando sem reabrir a decisão', async ({ page }) => {
+    await page.goto('/?e2eRole=candidato');
+
+    await page.getByRole('button', { name: 'Configurações', exact: true }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Configurações da conta' })).toBeVisible();
+
+    await page.getByRole('button', { name: 'Gerenciar visibilidade', exact: true }).click();
+    await expect(page.getByRole('heading', { level: 2, name: 'Você decide quem encontra seu perfil' })).toBeVisible();
+
+    await page.getByRole('button', { name: 'Manter privado', exact: true }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Vagas' })).toBeVisible();
+    await expect(page.locator('.overlay')).toHaveCount(0);
+
+    await page.getByRole('button', { name: 'Meu currículo', exact: true }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Meu currículo' })).toBeVisible();
+    await expect(page.locator('.overlay')).toHaveCount(0);
+
+    await page.getByRole('button', { name: 'Configurações', exact: true }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Configurações da conta' })).toBeVisible();
+    await expect(page.locator('.overlay')).toHaveCount(0);
+    await expectPlainLanguage(page);
+  });
+
+  test('empresa avança candidato e abre agendamento de entrevista', async ({ page }) => {
+    await page.goto('/?e2eRole=empresa');
+
+    await page.getByRole('button', { name: 'Processo seletivo', exact: true }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Processo seletivo' })).toBeVisible();
+
+    const jobSelect = page.locator('.pipeline-job-picker select');
+    await jobSelect.selectOption({ label: 'Técnico de Manutenção' });
+
+    const candidate = page.locator('article.pipeline-card').filter({ hasText: 'Juliana Costa' });
+    await expect(candidate).toBeVisible();
+    await expect(candidate.getByRole('button', { name: 'Iniciar triagem', exact: true })).toBeVisible();
+
+    await candidate.getByRole('button', { name: 'Iniciar triagem', exact: true }).click();
+    await expect(candidate.getByRole('button', { name: 'Agendar entrevista', exact: true })).toBeVisible();
+
+    await candidate.getByRole('button', { name: 'Agendar entrevista', exact: true }).click();
+    await expect(page.getByRole('heading', { level: 2, name: 'Agendar entrevista' })).toBeVisible();
+    await expect(page.getByLabel('Data e hora')).toBeVisible();
+    await expect(page.getByLabel('Duração (minutos)')).toBeVisible();
+    await page.getByRole('button', { name: 'Fechar' }).click();
+
+    await expect(page.locator('.overlay')).toHaveCount(0);
+    await expect(candidate.getByRole('button', { name: 'Agendar entrevista', exact: true })).toBeVisible();
+    await expectPlainLanguage(page);
+  });
+
   test('empresa percorre gestão de recrutamento e abre criação de vaga', async ({ page }) => {
     await page.goto('/?e2eRole=empresa');
 
