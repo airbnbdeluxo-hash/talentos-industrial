@@ -443,3 +443,46 @@
 .recruiter-development>.secondary{justify-self:start;margin-top:12px}
 @media(max-width:850px){.recruiter-profile-grid{grid-template-columns:1fr}.recruiter-fit-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.recruiter-profile-hero{align-items:flex-start;flex-direction:column;padding:18px}.recruiter-profile-actions{display:grid;grid-template-columns:1fr;width:100%}.recruiter-profile-actions>*{width:100%;justify-content:center}.recruiter-job-fit,.recruiter-profile-section{padding:17px}.recruiter-job-fit-head{flex-direction:column}.recruiter-job-fit-head label{min-width:0;width:100%}.recruiter-facts{grid-template-columns:1fr}.recruiter-proof-row{grid-template-columns:32px minmax(0,1fr)}.recruiter-proof-icon{width:32px;height:32px}.recruiter-proof-row .textbtn{grid-column:2;justify-self:start}}
+
+
+/* Company skills overview */
+.company-skills-page{display:grid;gap:16px}
+.company-skills-header{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:22px 24px}
+.company-skills-header h2{font-size:21px;margin:3px 0 4px}
+.company-skills-header p{font-size:10px;color:#7d899a;line-height:1.5}
+.company-skills-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.company-skills-summary>.card{padding:14px 15px}
+.company-skills-summary span,.company-skills-summary strong,.company-skills-summary small{display:block}
+.company-skills-summary span{font-size:9px;color:#7f8b9d}
+.company-skills-summary strong{font-size:21px;color:#223047;margin:5px 0 3px}
+.company-skills-summary small{font-size:8px;color:#97a1b0}
+.company-skills-table-card,.company-skills-development{padding:20px 22px}
+.company-skills-table{overflow-x:auto}
+.company-skills-table-head,.company-skill-row{display:grid;grid-template-columns:minmax(190px,1.5fr) repeat(4,minmax(90px,.65fr));gap:10px;align-items:center;min-width:650px}
+.company-skills-table-head{padding:8px 11px;border-bottom:1px solid #e6ebf1;font-size:8px;font-weight:700;color:#8a95a6;text-transform:uppercase}
+.company-skill-row{width:100%;border:0;border-bottom:1px solid #edf0f4;background:#fff;padding:11px;text-align:left;cursor:pointer;color:#344258}
+.company-skill-row:hover{background:#fbfcfe}
+.company-skill-row>div b,.company-skill-row>div small{display:block}
+.company-skill-row>div b{font-size:10px;color:#26344a}
+.company-skill-row>div small{font-size:8px;color:#97a1b0;margin-top:2px}
+.company-skill-row>strong{font-size:11px;color:#35445b}
+.company-development-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.company-development-kpis>div{padding:11px 12px;border:1px solid #e8ecf2;border-radius:9px;background:#fafbfd}
+.company-development-kpis span,.company-development-kpis strong{display:block}
+.company-development-kpis span{font-size:8px;color:#8793a4}
+.company-development-kpis strong{font-size:15px;color:#2b3950;margin-top:3px}
+.company-development-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+.company-development-list>div{padding:10px 11px;border:1px solid #e7ebf1;border-radius:9px}
+.company-development-list b,.company-development-list span{display:block}
+.company-development-list b{font-size:10px;color:#2c394e}
+.company-development-list span{font-size:8px;color:#8490a1;margin-top:2px}
+.company-technical-map{padding:0;overflow:hidden}
+.company-technical-map>summary{display:flex;align-items:center;gap:8px;padding:16px 18px;cursor:pointer;font-size:10px;font-weight:750;color:#344258;list-style:none}
+.company-technical-map>summary::-webkit-details-marker{display:none}
+.company-technical-map[open]>summary{border-bottom:1px solid #e8edf3}
+.company-technical-map-body{padding:18px}
+.company-technical-map-body>p{font-size:9px;color:#7e8a9b;margin-bottom:12px}
+.company-technical-map-body>label{display:grid;gap:5px;max-width:360px;font-size:8px;font-weight:700;color:#718095}
+.company-technical-map-body>label select{height:39px;border:1px solid #dbe2eb;border-radius:9px;background:#fff;padding:0 10px}
+@media(max-width:850px){.company-skills-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.company-development-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.company-skills-header{align-items:flex-start;flex-direction:column;padding:18px}.company-skills-header .secondary{width:100%;justify-content:center}.company-skills-table-card,.company-skills-development{padding:16px}.company-development-list{grid-template-columns:1fr}}
