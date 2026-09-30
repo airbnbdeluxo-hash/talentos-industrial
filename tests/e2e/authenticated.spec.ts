@@ -80,6 +80,38 @@ test.describe('TalentOS authenticated journeys', () => {
     await expectPlainLanguage(page);
   });
 
+  test('candidato libera perfil, envia candidatura e informa disponibilidade', async ({ page }) => {
+    await page.goto('/?e2eRole=candidato');
+
+    await page.getByRole('button', { name: 'Configurações', exact: true }).click();
+    await page.getByRole('button', { name: 'Gerenciar visibilidade', exact: true }).click();
+    await page.getByRole('button', { name: 'Permitir que empresas encontrem meu perfil', exact: true }).click();
+
+    await expect(page.getByRole('heading', { level: 1, name: 'Vagas' })).toBeVisible();
+    const targetJob = page.locator('.jobrow').filter({ hasText: 'Técnico de Manutenção' });
+    await expect(targetJob).toBeVisible();
+    await targetJob.getByRole('button', { name: 'Candidatar-me', exact: true }).click();
+
+    await expect(page.getByRole('heading', { level: 1, name: 'Minhas candidaturas' })).toBeVisible();
+    const application = page.locator('.application-card').filter({ hasText: 'Técnico de Manutenção' });
+    await expect(application).toBeVisible();
+    await expect(application.getByText('Nova', { exact: true })).toBeVisible();
+
+    await page.getByRole('button', { name: 'Definir horário', exact: true }).click();
+    await expect(page.getByRole('heading', { level: 2, name: 'Definir horário semanal' })).toBeVisible();
+    await page.getByLabel('Dia').selectOption('1');
+    await page.getByLabel('Início').fill('09:00');
+    await page.getByLabel('Fim').fill('12:00');
+    await page.getByRole('button', { name: 'Adicionar horário', exact: true }).click();
+    await page.getByRole('button', { name: 'Fechar' }).click();
+
+    await expect(page.getByText('Segunda · 09:00–12:00', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Remover', exact: true }).click();
+    await expect(page.getByText('Nenhum horário padrão informado.', { exact: true })).toBeVisible();
+    await expect(page.locator('.overlay')).toHaveCount(0);
+    await expectPlainLanguage(page);
+  });
+
   test('empresa avança candidato e abre agendamento de entrevista', async ({ page }) => {
     await page.goto('/?e2eRole=empresa');
 
