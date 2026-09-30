@@ -156,6 +156,32 @@ test.describe('TalentOS authenticated journeys', () => {
     await expectPlainLanguage(page);
   });
 
+  test('empresa edita e duplica uma vaga sem perder o processo', async ({ page }) => {
+    await page.goto('/?e2eRole=empresa');
+    await page.getByRole('button', { name: 'Vagas', exact: true }).click();
+
+    let job = page.locator('article.company-managed-job').filter({ hasText: 'Operador CNC' }).first();
+    await expect(job).toBeVisible();
+    await expect(job.getByText('2', { exact: true }).first()).toBeVisible();
+
+    await job.getByRole('button', { name: 'Editar vaga', exact: true }).click();
+    await expect(page.getByRole('heading', { level: 2, name: 'Editar vaga' })).toBeVisible();
+    await page.getByLabel('Cargo').fill('Operador CNC Sênior');
+    await page.getByRole('button', { name: 'Salvar alterações', exact: true }).click();
+
+    job = page.locator('article.company-managed-job').filter({ hasText: 'Operador CNC Sênior' }).first();
+    await expect(job).toBeVisible();
+    await expect(job.getByText('2', { exact: true }).first()).toBeVisible();
+
+    await job.getByRole('button', { name: 'Duplicar vaga', exact: true }).click();
+    await expect(page.getByRole('heading', { level: 2, name: 'Estruturar nova vaga' })).toBeVisible();
+    await expect(page.getByLabel('Cargo')).toHaveValue('Operador CNC Sênior (cópia)');
+    await page.getByRole('button', { name: 'Criar vaga', exact: true }).click();
+
+    await expect(page.locator('article.company-managed-job').filter({ hasText: 'Operador CNC Sênior (cópia)' })).toBeVisible();
+    await expect(page.locator('article.company-managed-job')).toHaveCount(4);
+  });
+
   test('empresa registra motivo estruturado ao rejeitar candidato', async ({ page }) => {
     await page.goto('/?e2eRole=empresa');
     await page.getByRole('button', { name: 'Processo seletivo', exact: true }).click();
