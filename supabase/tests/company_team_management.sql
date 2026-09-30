@@ -46,7 +46,7 @@ begin
     end if;
   end loop;
 
-  if has_function_privilege('authenticated','public.company_team_create_company_service(uuid,text,text,text,integer,text)','execute')
+  if has_function_privilege('authenticated','public.company_team_create_company_service(uuid,text,text,text,text,integer,text)','execute')
      or has_function_privilege('authenticated','public.company_team_accept_invitation_service(uuid,text,uuid)','execute')
      or has_function_privilege('authenticated','public.company_team_update_member_role_service(uuid,uuid,uuid,text)','execute')
      or has_function_privilege('authenticated','public.company_team_remove_member_service(uuid,uuid,uuid)','execute')
