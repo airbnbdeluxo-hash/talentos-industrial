@@ -826,3 +826,28 @@
 .landing-home.motion-paused .landing-graph .graph-line.active{
   animation-play-state:paused!important
 }
+
+
+/* Motion opacity + mobile touch-target correction */
+.landing-machining-decor{opacity:1}
+.landing-machining-profile>circle:not(.landing-cnc-tool),
+.landing-machining-profile>line{opacity:.09}
+.landing-machining-dims{opacity:.09}
+.landing-machining-gear{opacity:.07}
+@keyframes landing-machining-draw{
+  0%{stroke-dashoffset:1180;opacity:0}
+  8%{opacity:.09}
+  78%{stroke-dashoffset:0;opacity:.09}
+  92%,100%{stroke-dashoffset:0;opacity:0}
+}
+.landing-cnc-tool{opacity:.6}
+@media(max-width:767px){
+  .landing-ghost{min-height:48px}
+  .landing-segmented{height:56px}
+  .landing-segmented button{min-height:48px}
+}
+@media(prefers-reduced-motion:reduce){
+  .landing-machining-decor{opacity:1}
+  .landing-machining-path{opacity:.07!important}
+  .landing-machining-gear{opacity:.05!important}
+}
