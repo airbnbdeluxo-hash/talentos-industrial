@@ -604,3 +604,215 @@
   .landing-shell{padding-left:9px;padding-right:9px}
   .landing-title{letter-spacing:-.08em}
 }
+
+
+/* 2026-09 alignment + industrial motion pass */
+.landing-blueprint,.landing-featured-jobs{display:none!important}
+.landing-top,.landing-shell{
+  width:100%;max-width:1280px;margin-inline:auto;
+  padding-left:clamp(20px,4vw,56px);padding-right:clamp(20px,4vw,56px);
+  box-sizing:border-box
+}
+.landing-shell{padding-top:0;padding-bottom:64px}
+.landing-hero{
+  position:relative;overflow:hidden;
+  min-height:0;
+  padding-top:clamp(18px,3vh,28px);padding-bottom:clamp(18px,3vh,28px);
+  display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);
+  gap:clamp(32px,4vw,64px);align-items:stretch
+}
+.landing-copy{
+  min-width:0;overflow:visible;display:flex;flex-direction:column;align-self:stretch
+}
+.landing-eyebrow{margin-top:0}
+.landing-title{max-width:100%}
+.landing-trust{margin-top:12px}
+.landing-visual{position:relative;min-width:0;padding:0;display:flex;align-self:stretch;isolation:isolate}
+.landing-visual-grid{position:relative;z-index:2;display:block;width:100%;height:100%;min-width:0}
+.landing-passport{
+  width:100%;height:100%;min-height:480px;
+  padding:20px 20px 14px;display:flex;flex-direction:column;justify-content:space-between;
+  border-radius:26px;overflow:hidden;box-sizing:border-box
+}
+.landing-passport-head{flex:0 0 auto;margin-bottom:8px}
+.landing-stage{
+  position:relative;flex:1 1 auto;height:auto;min-height:0;
+  display:flex;align-items:stretch;justify-content:stretch;overflow:hidden
+}
+.landing-state{
+  flex:1 1 auto;width:100%;height:auto;min-height:0;
+  display:flex;flex-direction:column;justify-content:center;gap:12px
+}
+.landing-resume{width:100%;min-height:0}
+.landing-skills-state>.landing-chip-grid:not(.condensed){min-height:0}
+.landing-chip-grid,.landing-chip-grid.condensed{
+  width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;align-content:center
+}
+.landing-skill-chip,.landing-chip-grid.condensed .landing-skill-chip{
+  min-width:0;min-height:78px;padding:10px 11px;gap:5px;
+  display:flex;flex-direction:column;justify-content:center
+}
+.landing-chip-grid.condensed .landing-skill-chip{min-height:58px;padding:7px 9px}
+.landing-chip-grid.condensed .landing-skill-chip>b{font-size:10px}
+.landing-chip-grid.condensed .landing-skill-chip>span{font-size:8px}
+.landing-skill-chip.is-gap{
+  border-style:dashed;border-color:rgba(245,179,1,.5);
+  background:rgba(245,179,1,.035)
+}
+.landing-skill-chip.is-gap>b{color:#f7d56a}
+.landing-skill-chip.is-scanned{
+  border-color:rgba(34,197,94,.33);
+  box-shadow:inset 0 0 0 1px rgba(34,197,94,.04)
+}
+.landing-badge.verified{position:relative;padding-left:17px}
+.landing-badge.verified::before{
+  content:"";position:absolute;left:6px;top:50%;width:6px;height:6px;border-radius:50%;
+  background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,.5);transform:translateY(-50%);
+  animation:landing-led-pulse 2.4s ease-in-out infinite
+}
+.landing-scan-zone{position:relative;overflow:hidden}
+.landing-scan-line{
+  position:absolute;z-index:3;left:3%;right:3%;top:0;height:1px;pointer-events:none;
+  background:#22d3ee;box-shadow:0 0 8px rgba(34,211,238,.7);
+  opacity:0;animation:landing-metrology-scan 5s linear infinite
+}
+.landing-step-dots{flex:0 0 auto;margin-top:4px;padding-bottom:1px}
+.landing-passport::after{
+  background-size:24px 4px;
+  animation:landing-hazard-conveyor 40s linear infinite
+}
+.landing-connected-state,.landing-match-state{justify-content:center;gap:10px}
+.landing-connection-row{grid-template-columns:minmax(0,1.2fr) minmax(150px,.8fr);gap:10px}
+.landing-graph{height:118px;min-height:118px}
+.landing-match-state .landing-match-card{padding:11px 13px}
+.landing-machining-decor{
+  position:absolute;z-index:0;right:0;bottom:0;width:94%;height:auto;pointer-events:none;overflow:visible;
+  fill:none;stroke:#7fb1ff;stroke-width:1;opacity:.1
+}
+.landing-machining-decor text{
+  fill:#7f9dc4;stroke:none;font:9px/1 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.07em
+}
+.landing-machining-center{stroke-dasharray:7 7;opacity:.65}
+.landing-machining-dims{opacity:.8}
+.landing-machining-path{
+  stroke-dasharray:1180;stroke-dashoffset:1180;
+  animation:landing-machining-draw 8s ease-in-out infinite
+}
+.landing-machining-gear{
+  opacity:.72;transform-box:fill-box;transform-origin:center;
+  animation:landing-gear-rotate 90s linear infinite
+}
+.landing-machining-gear rect{fill:rgba(127,177,255,.025)}
+.landing-cnc-tool{
+  fill:#f5b301;stroke:none;opacity:.6;
+  filter:drop-shadow(0 0 5px rgba(245,179,1,.55));
+  animation:landing-cnc-travel 8s linear infinite
+}
+.landing-ticker{display:none!important}
+.landing-home.motion-paused .landing-scan-line,
+.landing-home.motion-paused .landing-passport::after,
+.landing-home.motion-paused .landing-machining-path,
+.landing-home.motion-paused .landing-machining-gear,
+.landing-home.motion-paused .landing-cnc-tool,
+.landing-home.motion-paused .landing-badge.verified::before,
+.landing-home.card-paused .landing-scan-line{animation-play-state:paused!important}
+@keyframes landing-metrology-scan{
+  0%{transform:translateY(0);opacity:0}
+  4%{opacity:.8}
+  80%{transform:translateY(250px);opacity:.8}
+  82%,100%{transform:translateY(250px);opacity:0}
+}
+@keyframes landing-led-pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes landing-hazard-conveyor{to{background-position:240px 0}}
+@keyframes landing-machining-draw{
+  0%{stroke-dashoffset:1180;opacity:0}
+  8%{opacity:.9}
+  78%{stroke-dashoffset:0;opacity:.9}
+  92%,100%{stroke-dashoffset:0;opacity:0}
+}
+@keyframes landing-gear-rotate{to{transform:rotate(360deg)}}
+@keyframes landing-cnc-travel{
+  0%{transform:translate(70px,240px);opacity:0}
+  7%{opacity:.6}
+  16%{transform:translate(70px,182px)}
+  28%{transform:translate(136px,164px)}
+  44%{transform:translate(264px,182px)}
+  58%{transform:translate(432px,202px)}
+  70%{transform:translate(432px,260px)}
+  82%{transform:translate(264px,280px)}
+  92%{transform:translate(118px,280px);opacity:.6}
+  100%{transform:translate(70px,240px);opacity:0}
+}
+
+@media(max-width:1023px) and (min-width:768px){
+  .landing-hero{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px}
+  .landing-passport{min-height:480px}
+  .landing-chip-grid,.landing-chip-grid.condensed{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .landing-machining-decor{width:100%;opacity:.065}
+}
+
+@media(max-width:767px){
+  .landing-top,.landing-shell{
+    max-width:none;width:100%;
+    padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))
+  }
+  .landing-shell{padding-bottom:42px}
+  .landing-hero{display:block;padding-top:9px;padding-bottom:18px;overflow:hidden}
+  .landing-copy{display:block}
+  .landing-visual{margin-top:18px;display:block}
+  .landing-machining-decor{display:none!important}
+  .landing-passport{
+    width:100%;height:340px;min-height:340px;padding:14px 14px 10px;border-radius:22px;
+    transform:none!important
+  }
+  .landing-stage{flex:1;min-height:0;height:auto}
+  .landing-state{gap:8px}
+  .landing-resume{min-height:0;padding:13px;gap:11px}
+  .landing-chip-grid,.landing-chip-grid.condensed,
+  .landing-mobile-evidence .landing-chip-grid.condensed{
+    grid-template-columns:repeat(2,minmax(0,1fr));gap:6px
+  }
+  .landing-skill-chip,.landing-chip-grid.condensed .landing-skill-chip,
+  .landing-mobile-evidence .landing-chip-grid.condensed .landing-skill-chip{
+    min-height:58px;padding:6px 8px;display:flex;gap:3px;align-items:flex-start
+  }
+  .landing-skill-chip>b,.landing-chip-grid.condensed .landing-skill-chip>b,
+  .landing-mobile-evidence .landing-chip-grid.condensed .landing-skill-chip>b{font-size:10px}
+  .landing-skill-chip>span,.landing-chip-grid.condensed .landing-skill-chip>span,
+  .landing-mobile-evidence .landing-chip-grid.condensed .landing-skill-chip>span{font-size:9px}
+  .landing-badge,.landing-mobile-evidence .landing-chip-grid.condensed .landing-badge{
+    grid-column:auto;grid-row:auto;padding:3px 5px;font-size:9px!important
+  }
+  .landing-scan-line{animation-name:landing-metrology-scan-mobile}
+  .landing-mobile-match{justify-content:center;gap:7px}
+  .landing-mobile-match .landing-match-card{padding:10px 11px;gap:5px}
+  .landing-mobile-match .landing-match-kicker{font-size:10px!important}
+  .landing-mobile-match .landing-match-card b{font-size:13px}
+  .landing-mobile-match .landing-match-line{font-size:10px!important}
+  .landing-mobile-match .landing-job-card{padding:8px 10px}
+  .landing-mobile-match .landing-job-card small,.landing-mobile-match .landing-job-card span{font-size:10px}
+  .landing-mobile-match .landing-job-card b{font-size:12px}
+  .landing-step-dots{height:48px;margin-top:0;padding:0;gap:8px;align-items:center}
+  .landing-step-dots button,.landing-step-dots button.active{
+    position:relative;width:48px;height:48px;min-width:48px;background:transparent
+  }
+  .landing-industry-segments{scroll-padding-inline:0}
+  .landing-ticker{display:none!important}
+}
+@keyframes landing-metrology-scan-mobile{
+  0%{transform:translateY(0);opacity:0}
+  4%{opacity:.8}
+  80%{transform:translateY(190px);opacity:.8}
+  82%,100%{transform:translateY(190px);opacity:0}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .landing-machining-decor{opacity:.055}
+  .landing-machining-path{stroke-dashoffset:0!important;opacity:.65!important}
+  .landing-cnc-tool{display:none!important}
+  .landing-machining-gear{transform:none!important}
+  .landing-scan-line{display:none!important}
+  .landing-passport::after{animation:none!important;background-position:0 0!important}
+  .landing-badge.verified::before{animation:none!important;opacity:1!important}
+}

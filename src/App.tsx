@@ -869,34 +869,46 @@ return <div className={'shell '+(((import.meta.env.PROD||e2eAuthGate)&&!session&
 function LandingPage({onCandidateSignup,onCompanySignup,onLogin,onDemo}:{onCandidateSignup:()=>void;onCompanySignup:()=>void;onLogin:()=>void;onDemo:()=>void}){
  const [audience,setAudience]=useState<'candidato'|'empresa'>('candidato');
  const [step,setStep]=useState(0);
+ const [scanCount,setScanCount]=useState(0);
  const [paused,setPaused]=useState(false);
- const [cardInView,setCardInView]=useState(true);
+ const [heroInView,setHeroInView]=useState(true);
  const [pageVisible,setPageVisible]=useState(()=>!document.hidden);
  const [compact,setCompact]=useState(()=>window.matchMedia('(max-width:767px)').matches);
  const [reduceMotion,setReduceMotion]=useState(()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches);
  const [stickyVisible,setStickyVisible]=useState(false);
- const cardRef=useRef<HTMLDivElement|null>(null);
+ const heroRef=useRef<HTMLDivElement|null>(null);
  const bodyCtaRef=useRef<HTMLButtonElement|null>(null);
  const touchStartX=useRef<number|null>(null);
  const touchMoved=useRef(false);
  useEffect(()=>{const mq=window.matchMedia('(max-width:767px)');const sync=()=>setCompact(mq.matches);sync();mq.addEventListener?.('change',sync);return()=>mq.removeEventListener?.('change',sync)},[]);
  useEffect(()=>{const mq=window.matchMedia('(prefers-reduced-motion: reduce)');const sync=()=>setReduceMotion(mq.matches);sync();mq.addEventListener?.('change',sync);return()=>mq.removeEventListener?.('change',sync)},[]);
  useEffect(()=>{const sync=()=>setPageVisible(!document.hidden);document.addEventListener('visibilitychange',sync);return()=>document.removeEventListener('visibilitychange',sync)},[]);
- useEffect(()=>{const el=cardRef.current;if(!el||typeof IntersectionObserver==='undefined'){setCardInView(true);return}const observer=new IntersectionObserver(([entry])=>setCardInView(entry.isIntersecting),{threshold:.15});observer.observe(el);return()=>observer.disconnect()},[]);
+ useEffect(()=>{const el=heroRef.current;if(!el||typeof IntersectionObserver==='undefined'){setHeroInView(true);return}const observer=new IntersectionObserver(([entry])=>setHeroInView(entry.isIntersecting),{threshold:.08});observer.observe(el);return()=>observer.disconnect()},[]);
  useEffect(()=>{const el=bodyCtaRef.current;if(!el||typeof IntersectionObserver==='undefined'){setStickyVisible(false);return}const observer=new IntersectionObserver(([entry])=>setStickyVisible(!entry.isIntersecting),{threshold:.3});observer.observe(el);return()=>observer.disconnect()},[audience]);
- useEffect(()=>{setStep(reduceMotion?(compact?1:2):0)},[compact,reduceMotion]);
- useEffect(()=>{if(reduceMotion||paused||!cardInView||!pageVisible)return;const count=compact?3:5;const timer=window.setInterval(()=>setStep(current=>(current+1)%count),2500);return()=>window.clearInterval(timer)},[compact,reduceMotion,paused,cardInView,pageVisible]);
+ useEffect(()=>{setStep(reduceMotion?(compact?2:4):0);setScanCount(reduceMotion?5:0)},[compact,reduceMotion]);
+ const maxSteps=compact?3:5;
+ useEffect(()=>{
+  if(reduceMotion||paused||!heroInView||!pageVisible)return;
+  if(step===1){
+   setScanCount(0);
+   const scanTimers=[650,1250,1850,2450,3050].map((delay,index)=>window.setTimeout(()=>setScanCount(index+1),delay));
+   const next=window.setTimeout(()=>setStep(2),5000);
+   return()=>{scanTimers.forEach(window.clearTimeout);window.clearTimeout(next)}
+  }
+  const next=window.setTimeout(()=>setStep(current=>(current+1)%maxSteps),2500);
+  return()=>window.clearTimeout(next)
+ },[step,maxSteps,reduceMotion,paused,heroInView,pageVisible]);
  const isProfessional=audience==='candidato';
  const primaryLabel=isProfessional?'Encontrar vagas na indústria':'Contratar para minha fábrica';
  const primaryAction=()=>{if(isProfessional)window.location.assign('/vagas');else onCompanySignup()};
- const maxSteps=compact?3:5;
  const advance=()=>{if(!reduceMotion)setStep(current=>(current+1)%maxSteps)};
  const skills=[
   {name:'Operação CNC Fanuc',status:'verified',label:'✓ Verificada',source:'Certificado SENAI-RS'},
   {name:'Soldagem TIG/MIG',status:'declared',label:'◐ Declarada',source:'Experiência declarada'},
   {name:'Metrologia',status:'verified',label:'✓ Verificada',source:'Desafio prático de metrologia · 92'},
   {name:'Leitura de desenho técnico',status:'declared',label:'◐ Declarada',source:'Histórico profissional'},
-  {name:'Manutenção preventiva',status:'developing',label:'✚ Em desenvolvimento',source:'Plano de desenvolvimento'}
+  {name:'Manutenção preventiva',status:'developing',label:'✚ Em desenvolvimento',source:'Plano de desenvolvimento'},
+  {name:'Programação CNC',status:'gap',label:'a desenvolver',source:'gap para esta vaga',gap:true}
  ];
  const segments=[
   {name:'Usinagem',icon:<Settings size={13}/>},
@@ -906,33 +918,26 @@ function LandingPage({onCandidateSignup,onCompanySignup,onLogin,onDemo}:{onCandi
   {name:'Automação',icon:<Cpu size={13}/>},
   {name:'Transformação',icon:<Cog size={13}/>}
  ];
- const featuredJobs=[
-  {title:'Soldador TIG',city:'Bento Gonçalves',skills:['TIG','Leitura de desenho']},
-  {title:'Técnico de Manutenção',city:'Farroupilha',skills:['Elétrica industrial','Manutenção preventiva']},
-  {title:'Programador CNC',city:'Caxias do Sul',skills:['Programação CNC','Metrologia']}
- ];
- const renderSkills=(badges:boolean,condensed=false)=><div className={'landing-chip-grid'+(condensed?' condensed':'')}>{skills.map(skill=><div className="landing-skill-chip" key={skill.name}><b>{skill.name}</b>{badges&&<span className={'landing-badge '+skill.status}>{skill.label}</span>}<span>{badges?skill.source:'competência identificada'}</span></div>)}</div>;
+ const renderSkills=(mode:'identified'|'scanning'|'evidence',condensed=false)=>{
+  return <div className={'landing-chip-grid'+(condensed?' condensed':'')}>{skills.map((skill,index)=>{
+   const scanned=mode==='scanning'&&index<scanCount&&!skill.gap;
+   const showEvidence=mode==='evidence';
+   const showBadge=showEvidence||scanned||skill.gap;
+   const badgeStatus=skill.gap?'gap':scanned?'verified':skill.status;
+   const badgeLabel=skill.gap?'a desenvolver':scanned?'✓ Verificada':skill.label;
+   const source=showEvidence?skill.source:scanned?'verificação concluída':skill.gap?'a desenvolver':'competência identificada';
+   return <div className={'landing-skill-chip'+(skill.gap?' is-gap':'')+(scanned?' is-scanned':'')} key={skill.name}><b>{skill.name}</b>{showBadge&&<span className={'landing-badge '+badgeStatus}>{badgeLabel}</span>}<span>{source}</span></div>
+  })}</div>
+ };
  const renderMatch=()=> <div className="landing-match-card"><span className="landing-match-kicker">Compatibilidade explicada</span><b>4 de 5 competências críticas atendidas</b><span className="landing-match-line"><BadgeCheck size={14}/> 3 com evidência</span><span className="landing-match-line gap"><Target size={14}/> falta: <strong>Programação CNC</strong></span><span className="landing-match-line"><GraduationCap size={14}/> treinamento estimado: ~40h</span></div>;
- return <section className="landing-home" aria-label="Entrada do TalentOS Industrial">
-  <svg className="landing-blueprint" viewBox="0 0 1440 760" aria-hidden="true">
-   <g className="blueprint-gear" transform="translate(1090 220)">
-    <circle cx="0" cy="0" r="104"/><circle cx="0" cy="0" r="69"/><circle cx="0" cy="0" r="28"/>
-    {Array.from({length:12}).map((_,i)=><rect key={i} x="-12" y="-126" width="24" height="24" rx="3" transform={'rotate('+(i*30)+')'}/>)}
-    <line className="blueprint-center" x1="-150" y1="0" x2="150" y2="0"/><line className="blueprint-center" x1="0" y1="-150" x2="0" y2="150"/>
-    <text x="118" y="-82">Ø208</text><text x="42" y="22">Ø56 H7</text>
-   </g>
-   <g className="blueprint-shaft" transform="translate(790 520)">
-    <path d="M0 0 H74 V-26 H188 V-45 H340 V45 H188 V26 H74 V0 Z"/>
-    <line className="blueprint-center" x1="-36" y1="0" x2="380" y2="0"/>
-    <g className="blueprint-dimensions"><line x1="0" y1="76" x2="340" y2="76"/><line x1="0" y1="64" x2="0" y2="88"/><line x1="340" y1="64" x2="340" y2="88"/><text x="154" y="69">340 ±0,05</text><line x1="188" y1="-68" x2="340" y2="-68"/><text x="225" y="-77">Ø90</text></g>
-   </g>
-  </svg>
+ const motionPaused=!heroInView||!pageVisible;
+ return <section className={'landing-home'+(motionPaused?' motion-paused':'')+(paused?' card-paused':'')} aria-label="Entrada do TalentOS Industrial">
   <header className="landing-top">
    <div className="landing-brand" aria-label="TalentOS Industrial"><span className="landing-brand-mark"><Factory size={19}/></span><span><b>TalentOS</b><span>INDUSTRIAL</span></span></div>
    <button className="landing-ghost" onClick={onLogin}><LogIn size={15}/> Entrar</button>
   </header>
   <div className="landing-shell">
-   <div className="landing-hero">
+   <div ref={heroRef} className="landing-hero">
     <div className="landing-copy">
      <div className="landing-eyebrow landing-reveal">TALENTOS INDUSTRIAL · SERRA GAÚCHA</div>
      <h1 className="landing-title landing-reveal" aria-label="A indústria contrata quem prova que sabe fazer.">
@@ -959,11 +964,34 @@ function LandingPage({onCandidateSignup,onCompanySignup,onLogin,onDemo}:{onCandi
      <div className="landing-trust landing-reveal"><ShieldCheck size={15}/><span>Evidência técnica · validação humana · foco em trabalho industrial</span></div>
     </div>
     <div className="landing-visual landing-reveal">
+     <svg className="landing-machining-decor" viewBox="0 0 520 330" aria-hidden="true">
+      <defs>
+       <marker id="landing-dim-arrow" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto-start-reverse"><path d="M0,0 L7,3.5 L0,7 Z"/></marker>
+      </defs>
+      <g className="landing-machining-gear" transform="translate(434 64)">
+       <circle r="44"/><circle r="27"/><circle r="10"/>
+       {Array.from({length:10}).map((_,i)=><rect key={i} x="-5" y="-55" width="10" height="12" rx="1.5" transform={'rotate('+(i*36)+')'}/>)}
+      </g>
+      <g className="landing-machining-profile">
+       <path className="landing-machining-path" d="M70 240 L70 182 L118 182 L136 164 L246 164 L264 182 L356 182 L376 202 L432 202 L432 260 L376 260 L356 280 L264 280 L246 298 L136 298 L118 280 L70 280 Z"/>
+       <circle cx="175" cy="231" r="22"/><circle cx="316" cy="231" r="16"/>
+       <line className="landing-machining-center" x1="44" y1="231" x2="458" y2="231"/>
+       <line className="landing-machining-center" x1="175" y1="148" x2="175" y2="314"/>
+       <line className="landing-machining-center" x1="316" y1="148" x2="316" y2="314"/>
+       <g className="landing-machining-dims">
+        <line x1="70" y1="142" x2="432" y2="142" markerStart="url(#landing-dim-arrow)" markerEnd="url(#landing-dim-arrow)"/>
+        <line x1="70" y1="151" x2="70" y2="170"/><line x1="432" y1="151" x2="432" y2="190"/>
+        <text x="226" y="132">362 ±0,05</text>
+        <line x1="175" y1="316" x2="316" y2="316" markerStart="url(#landing-dim-arrow)" markerEnd="url(#landing-dim-arrow)"/>
+        <text x="226" y="326">141</text>
+       </g>
+       <circle className="landing-cnc-tool" cx="0" cy="0" r="3"/>
+      </g>
+     </svg>
      <div className="landing-visual-grid">
-      <div ref={cardRef} className={'landing-passport step-'+step}
+      <div className={'landing-passport step-'+step}
        onPointerEnter={()=>{if(!compact)setPaused(true)}}
-       onPointerLeave={e=>{setPaused(false);e.currentTarget.style.setProperty('--parallax-x','0px');e.currentTarget.style.setProperty('--parallax-y','0px')}}
-       onPointerMove={e=>{if(compact||reduceMotion)return;const rect=e.currentTarget.getBoundingClientRect();const x=((e.clientX-rect.left)/rect.width-.5)*6;const y=((e.clientY-rect.top)/rect.height-.5)*6;e.currentTarget.style.setProperty('--parallax-x',x+'px');e.currentTarget.style.setProperty('--parallax-y',y+'px')}}
+       onPointerLeave={()=>setPaused(false)}
        onTouchStart={e=>{touchStartX.current=e.touches[0]?.clientX??null;touchMoved.current=false}}
        onTouchEnd={e=>{const start=touchStartX.current;touchStartX.current=null;if(start==null||!e.changedTouches[0])return;const delta=e.changedTouches[0].clientX-start;if(Math.abs(delta)>38){touchMoved.current=true;setStep(current=>(current+(delta<0?1:maxSteps-1))%maxSteps)}}}
        onClick={()=>{if(compact&&!touchMoved.current)advance();touchMoved.current=false}}
@@ -972,25 +1000,21 @@ function LandingPage({onCandidateSignup,onCompanySignup,onLogin,onDemo}:{onCandi
        <span id="landing-passport-caption" style={{position:'absolute',width:1,height:1,padding:0,margin:-1,overflow:'hidden',clip:'rect(0,0,0,0)',whiteSpace:'nowrap',border:0}}>Exemplo ilustrativo: currículo industrial vira competências, recebe evidências e se conecta a uma vaga com compatibilidade explicada.</span>
        <div className="landing-stage" data-step={step}>
         {compact&&step===0&&<div className="landing-state landing-resume-state"><div className="landing-resume"><div className="landing-resume-title"><FileText size={16}/> Operador de usinagem · experiência industrial</div><span className="landing-skeleton w92"/><span className="landing-skeleton w78"/><span className="landing-skeleton w63"/><span className="landing-skeleton w48"/></div></div>}
-        {compact&&step===1&&<div className="landing-state landing-skills-state landing-mobile-evidence">{renderSkills(true,true)}</div>}
+        {compact&&step===1&&<div className="landing-state landing-skills-state landing-scan-zone">{renderSkills('scanning',true)}<span className="landing-scan-line" aria-hidden="true"/></div>}
         {compact&&step===2&&<div className="landing-state landing-mobile-match">{renderMatch()}<div className="landing-job-card"><small>exemplo · vaga conectada</small><b>Operador de Usinagem CNC</b><span>Caxias do Sul · Turno A</span></div></div>}
         {!compact&&step===0&&<div className="landing-state landing-resume-state"><div className="landing-resume"><div className="landing-resume-title"><FileText size={16}/> Operador de usinagem · experiência industrial</div><span className="landing-skeleton w92"/><span className="landing-skeleton w78"/><span className="landing-skeleton w63"/><span className="landing-skeleton w48"/></div></div>}
-        {!compact&&step===1&&<div className="landing-state landing-skills-state">{renderSkills(false)}</div>}
-        {!compact&&step===2&&<div className="landing-state landing-skills-state">{renderSkills(true)}</div>}
-        {!compact&&step===3&&<div className="landing-state landing-connected-state">{renderSkills(true,true)}<div className="landing-connection-row"><svg className="landing-graph" viewBox="0 0 430 118" role="img" aria-label="SkillGraph conectando competências à vaga Operador de Usinagem CNC em Caxias do Sul"><path className="graph-line active" d="M26 16 C126 16 148 59 214 59"/><path className="graph-line active" d="M26 59 H214"/><path className="graph-line active" d="M26 102 C126 102 148 59 214 59"/><path className="graph-line active" d="M404 28 C306 28 282 59 214 59"/><path className="graph-line active" d="M404 90 C306 90 282 59 214 59"/><circle className="graph-node" cx="26" cy="16" r="6"/><circle className="graph-node" cx="26" cy="59" r="6"/><circle className="graph-node" cx="26" cy="102" r="6"/><circle className="graph-node" cx="404" cy="28" r="6"/><circle className="graph-node" cx="404" cy="90" r="6"/><circle className="graph-core" cx="214" cy="59" r="17"/><text x="214" y="63" textAnchor="middle" fill="#dbeafe" fontSize="8">MATCH</text></svg><div className="landing-job-card"><small>exemplo · vaga conectada</small><b>Operador de Usinagem CNC</b><span>Caxias do Sul · Turno A</span></div></div></div>}
-        {!compact&&step===4&&<div className="landing-state landing-match-state">{renderSkills(true,true)}{renderMatch()}</div>}
+        {!compact&&step===1&&<div className="landing-state landing-skills-state landing-scan-zone">{renderSkills('scanning')}<span className="landing-scan-line" aria-hidden="true"/></div>}
+        {!compact&&step===2&&<div className="landing-state landing-skills-state">{renderSkills('evidence')}</div>}
+        {!compact&&step===3&&<div className="landing-state landing-connected-state">{renderSkills('evidence',true)}<div className="landing-connection-row"><svg className="landing-graph" viewBox="0 0 430 118" role="img" aria-label="SkillGraph conectando competências à vaga Operador de Usinagem CNC em Caxias do Sul"><path className="graph-line active" d="M26 16 C126 16 148 59 214 59"/><path className="graph-line active" d="M26 59 H214"/><path className="graph-line active" d="M26 102 C126 102 148 59 214 59"/><path className="graph-line active" d="M404 28 C306 28 282 59 214 59"/><path className="graph-line active" d="M404 90 C306 90 282 59 214 59"/><circle className="graph-node" cx="26" cy="16" r="6"/><circle className="graph-node" cx="26" cy="59" r="6"/><circle className="graph-node" cx="26" cy="102" r="6"/><circle className="graph-node" cx="404" cy="28" r="6"/><circle className="graph-node" cx="404" cy="90" r="6"/><circle className="graph-core" cx="214" cy="59" r="17"/><text x="214" y="63" textAnchor="middle" fill="#dbeafe" fontSize="8">MATCH</text></svg><div className="landing-job-card"><small>exemplo · vaga conectada</small><b>Operador de Usinagem CNC</b><span>Caxias do Sul · Turno A</span></div></div></div>}
+        {!compact&&step===4&&<div className="landing-state landing-match-state">{renderSkills('evidence',true)}{renderMatch()}</div>}
        </div>
        <div className="landing-step-dots" aria-label="Etapas do exemplo">{Array.from({length:maxSteps}).map((_,index)=><button type="button" key={index} className={index===step?'active':''} aria-label={'Mostrar etapa '+(index+1)} onClick={event=>{event.stopPropagation();if(!reduceMotion)setStep(index)}}/>)}</div>
       </div>
-      <aside className="landing-featured-jobs" aria-label="Vagas em destaque, exemplos ilustrativos">
-       <h3>Vagas em destaque <span>exemplo</span></h3>
-       {featuredJobs.map(job=><div className="landing-featured-job" key={job.title}><div><small>exemplo</small><b>{job.title}</b><span>{job.city}</span></div><div className="landing-featured-skills">{job.skills.map(skill=><em key={skill}>{skill}</em>)}</div><strong><BadgeCheck size={12}/> Exige evidência</strong></div>)}
-      </aside>
      </div>
     </div>
    </div>
-   <div className="landing-ticker" aria-label="Competências industriais: CNC, TIG, MIG, torno, fresa, metrologia, NR-12, CLP e manutenção">
-    <div className="landing-ticker-track"><span>CNC · TIG · MIG · TORNO · FRESA · METROLOGIA · NR-12 · CLP · MANUTENÇÃO ·</span><span aria-hidden="true">CNC · TIG · MIG · TORNO · FRESA · METROLOGIA · NR-12 · CLP · MANUTENÇÃO ·</span></div>
+   <div className="landing-ticker" aria-hidden="true">
+    <div className="landing-ticker-track"><span>CNC · TIG · MIG · TORNO · FRESA · METROLOGIA · NR-12 · CLP · MANUTENÇÃO ·</span></div>
    </div>
    <section className="landing-process" aria-labelledby="landing-process-title">
     <div className="landing-section-kicker">DO CURRÍCULO AO DESEMPENHO</div><h2 id="landing-process-title" className="landing-section-title">Capacidade que continua depois da contratação.</h2>
