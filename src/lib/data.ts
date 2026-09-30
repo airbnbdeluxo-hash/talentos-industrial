@@ -178,9 +178,9 @@ export async function updateRemoteApplication(applicationId:string,status:Status
  if(error)throw error;
 }
 
-export async function applyToJob(userId:string,jobId:string){
+export async function applyToJob(userId:string,jobId:string,source='busca_vagas',sourceDetail?:string){
  if(!supabase)throw new Error('Supabase não configurado');
- const {error}=await supabase.from('applications').insert({candidate_id:userId,job_id:jobId,status:'novo'});
+ const {error}=await supabase.from('applications').insert({candidate_id:userId,job_id:jobId,status:'novo',source,source_detail:sourceDetail||null});
  if(error)throw error;
 }
 
