@@ -140,7 +140,7 @@ test.describe('TalentOS authenticated journeys', () => {
     await page.getByLabel('Salário').fill('4300');
     await page.getByLabel('Data de início').fill('2026-10-15');
     await page.getByLabel('Mensagem').fill('Proposta de demonstração para validação do fluxo.');
-    await page.getByRole('button', { name: 'Enviar proposta', exact: true }).click();
+    await page.locator('.overlay').getByRole('button', { name: 'Enviar proposta', exact: true }).click();
     await expect(page.locator('.overlay')).toHaveCount(0);
     await expect(candidate.getByText(/Proposta enviada/i)).toBeVisible();
 
