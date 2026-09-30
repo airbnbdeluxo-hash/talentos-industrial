@@ -262,4 +262,48 @@ test.describe('TalentOS authenticated journeys', () => {
       await expectPlainLanguage(page);
     }
   });
+
+
+  test('páginas do candidato compartilham o mesmo eixo central', async ({ page }) => {
+    await page.goto('/?e2eRole=candidato');
+
+    const main = page.locator('#conteudo-principal');
+    const header = main.locator(':scope > header');
+
+    const expectAligned = async (content: ReturnType<typeof page.locator>) => {
+      const [mainBox, headerBox, contentBox] = await Promise.all([
+        main.boundingBox(),
+        header.boundingBox(),
+        content.boundingBox(),
+      ]);
+      expect(mainBox).not.toBeNull();
+      expect(headerBox).not.toBeNull();
+      expect(contentBox).not.toBeNull();
+      if (!mainBox || !headerBox || !contentBox) return;
+
+      const mainCenter = mainBox.x + mainBox.width / 2;
+      const headerCenter = headerBox.x + headerBox.width / 2;
+      const contentCenter = contentBox.x + contentBox.width / 2;
+
+      expect(Math.abs(headerCenter - mainCenter)).toBeLessThanOrEqual(2);
+      expect(Math.abs(contentCenter - mainCenter)).toBeLessThanOrEqual(2);
+      expect(Math.abs(contentBox.x - headerBox.x)).toBeLessThanOrEqual(2);
+      expect(Math.abs(contentBox.width - headerBox.width)).toBeLessThanOrEqual(2);
+    };
+
+    await expect(page.getByRole('heading', { level: 1, name: 'Vagas' })).toBeVisible();
+    await expectAligned(main.locator(':scope > section.card').first());
+
+    await page.getByRole('button', { name: 'Meu currículo', exact: true }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Meu currículo' })).toBeVisible();
+    await expectAligned(main.locator(':scope > .candidate-resume-page'));
+
+    await page.getByRole('button', { name: 'Minhas candidaturas', exact: true }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Minhas candidaturas' })).toBeVisible();
+    await expectAligned(main.locator(':scope > section.card').first());
+
+    await page.getByRole('button', { name: 'Competências e desenvolvimento', exact: true }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Competências e desenvolvimento' })).toBeVisible();
+    await expectAligned(main.locator(':scope > section.card').first());
+  });
 });
