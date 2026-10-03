@@ -1,8 +1,15 @@
 node_modules
 dist
 .env
-.env.local
+.env.*
+!.env.example
+.vercel
 .DS_Store
+
+*.pem
+*.key
+*.p12
+*.pfx
 
 *.tsbuildinfo
 
