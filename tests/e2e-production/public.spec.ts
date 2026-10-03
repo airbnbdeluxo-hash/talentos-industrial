@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test('área pública não apresenta perfis de demonstração como dados reais', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByText('Acesso público', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'A indústria contrata quem sabe fazer.' })).toBeVisible();
   await expect(page.getByText('Marcos Silva', { exact: true })).toHaveCount(0);
   await expect(page.getByText('Ana Martins', { exact: true })).toHaveCount(0);
   await expect(page.getByText('Juliana Costa', { exact: true })).toHaveCount(0);
