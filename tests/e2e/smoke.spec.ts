@@ -57,17 +57,23 @@ test.describe('TalentOS smoke', () => {
   });
 
 
-  test('entrada separa claramente candidato e empresa', async ({ page }) => {
+  test('entrada separa claramente profissional e empresa', async ({ page }) => {
     await page.goto('/?e2eAuthGate=1');
 
-    await expect(page.getByRole('heading', { level: 2, name: 'Como você quer usar o TalentOS?' })).toBeVisible();
-    await expect(page.getByRole('heading', { level: 3, name: 'Quero encontrar vagas' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Entrar como candidato', exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Criar conta de candidato', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'A indústria contrata quem sabe fazer.' })).toBeVisible();
 
-    await expect(page.getByRole('heading', { level: 3, name: 'Sou empresa' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Entrar como empresa', exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Criar conta empresarial', exact: true })).toBeVisible();
-    await expect(page.getByText('Novas empresas podem criar a conta Owner. Recrutadores entram por convite da empresa.')).toBeVisible();
+    const professionalTab = page.getByRole('tab', { name: 'Sou profissional' });
+    const companyTab = page.getByRole('tab', { name: 'Sou empresa' });
+
+    await expect(professionalTab).toHaveAttribute('aria-selected', 'true');
+    await expect(companyTab).toHaveAttribute('aria-selected', 'false');
+    await expect(page.getByRole('button', { name: 'Encontrar vagas na indústria', exact: true })).toBeVisible();
+
+    await companyTab.click();
+    await expect(companyTab).toHaveAttribute('aria-selected', 'true');
+    await expect(professionalTab).toHaveAttribute('aria-selected', 'false');
+    await expect(page.getByRole('button', { name: 'Contratar para minha fábrica', exact: true }).first()).toBeVisible();
+
+    await expect(page.getByRole('button', { name: 'Entrar', exact: true })).toBeVisible();
   });
 });
