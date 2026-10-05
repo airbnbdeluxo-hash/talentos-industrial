@@ -8,7 +8,15 @@ const cors = (origin: string) => ({
 });
 
 const json = (body: unknown, status = 200, origin = 'https://talentos-industrial.vercel.app') =>
-  new Response(JSON.stringify(body), { status, headers: { ...cors(origin), 'Content-Type': 'application/json' } });
+  new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      ...cors(origin),
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store',
+      'X-Content-Type-Options': 'nosniff',
+    },
+  });
 
 const normalizeEmail = (value: unknown) => String(value ?? '').trim().toLowerCase();
 const isUuid = (value: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
@@ -29,7 +37,11 @@ Deno.serve(async (request) => {
   const appUrl = Deno.env.get('APP_URL') ?? 'https://talentos-industrial.vercel.app';
   const appOrigin = new URL(appUrl).origin;
   const requestOrigin = request.headers.get('Origin') ?? '';
-  const origin = requestOrigin === appOrigin || requestOrigin === 'http://localhost:5173' ? requestOrigin : appOrigin;
+  const allowedOrigins = new Set([appOrigin, 'http://localhost:5173']);
+  if (requestOrigin && !allowedOrigins.has(requestOrigin)) {
+    return json({ error: 'Origem não permitida.' }, 403, appOrigin);
+  }
+  const origin = requestOrigin || appOrigin;
   if (request.method === 'OPTIONS') return new Response('ok', { headers: cors(origin) });
   if (request.method !== 'POST') return json({ error: 'Método não permitido.' }, 405, origin);
 
@@ -49,8 +61,43 @@ Deno.serve(async (request) => {
   const caller = callerResult.user;
 
   try {
-    const body = await request.json();
+    const rawBody = await request.text();
+    if (new TextEncoder().encode(rawBody).byteLength > 16_384) {
+      return json({ error: 'Requisição muito grande.' }, 413, origin);
+    }
+
+    let body: Record<string, unknown>;
+    try {
+      body = JSON.parse(rawBody || '{}');
+    } catch {
+      return json({ error: 'JSON inválido.' }, 400, origin);
+    }
+
     const action = String(body.action ?? '');
+    const actionLimits: Record<string, [number, number]> = {
+      'create-company': [5, 3600],
+      'accept-invitation': [20, 3600],
+      'list': [120, 300],
+      'invite': [20, 3600],
+      'revoke-invitation': [40, 3600],
+      'update-role': [40, 3600],
+      'remove-member': [40, 3600],
+      'transfer-owner': [10, 3600],
+    };
+    const limitConfig = actionLimits[action];
+    if (!limitConfig) return json({ error: 'Ação desconhecida.' }, 400, origin);
+
+    const [rateLimit, windowSeconds] = limitConfig;
+    const { data: allowed, error: rateLimitError } = await admin.rpc('security_rate_limit_consume', {
+      p_actor_id: caller.id,
+      p_action: 'company-team:' + action,
+      p_limit: rateLimit,
+      p_window_seconds: windowSeconds,
+    });
+    if (rateLimitError) throw rateLimitError;
+    if (allowed !== true) {
+      return json({ error: 'Muitas tentativas. Aguarde antes de tentar novamente.' }, 429, origin);
+    }
 
     if (action === 'create-company') {
       if (!caller.email_confirmed_at) return json({ error: 'Confirme seu e-mail antes de cadastrar a empresa.' }, 403, origin);
