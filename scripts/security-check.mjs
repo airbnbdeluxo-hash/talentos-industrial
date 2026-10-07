@@ -42,6 +42,23 @@ for (const file of textFiles) {
     if (pattern.test(content)) failures.push(label + ' encontrado em ' + file);
   }
 
+
+  // Legacy Supabase service_role tokens are JWTs, not sb_secret_* keys.
+  // Inspect only the decoded role claim; never log or reproduce a token.
+  const jwtCandidates = content.match(/\beyJ[A-Za-z0-9_-]{8,}\.eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{12,}\b/g) ?? [];
+  for (const token of jwtCandidates) {
+    const encodedPayload = token.split('.')[1];
+    if (encodedPayload.length > 8192) continue;
+    try {
+      const claims = JSON.parse(Buffer.from(encodedPayload, 'base64url').toString('utf8'));
+      if (claims && claims.role === 'service_role') {
+        failures.push('Supabase legacy service_role JWT encontrado em ' + file);
+      }
+    } catch {
+      // Ignore malformed JWT-like strings, never their plaintext.
+    }
+  }
+
   if (file.startsWith('src/')) {
     if (/SUPABASE_SERVICE_ROLE_KEY/.test(content)) {
       failures.push('service role referenciado no frontend: ' + file);
