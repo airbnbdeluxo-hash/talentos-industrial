@@ -99,6 +99,7 @@ test.describe('TalentOS authenticated journeys', () => {
 
     await page.getByRole('button', { name: 'Definir horário', exact: true }).click();
     await expect(page.getByRole('heading', { level: 2, name: 'Definir horário semanal' })).toBeVisible();
+    await expect(page.locator('.overlay'), 'Apenas um modal de disponibilidade deve existir').toHaveCount(1);
     await page.getByLabel('Dia').selectOption('1');
     await page.getByLabel('Início').fill('09:00');
     await page.getByLabel('Fim').fill('12:00');
