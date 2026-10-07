@@ -1168,7 +1168,7 @@ function LandingPage({onCandidateSignup,onCompanySignup,onLogin,onDemo}:{onCandi
       <article className="talentos-job-preview">
        <div className="talentos-preview-head">
         <div>
-         <span className="talentos-preview-kicker">Vaga em destaque</span>
+         <span className="talentos-preview-kicker">Exemplo ilustrativo · Vaga em destaque</span>
          <h2>Operador CNC</h2>
          <p><MapPinned size={13}/> Caxias do Sul · 2º turno</p>
         </div>
@@ -1181,9 +1181,9 @@ function LandingPage({onCandidateSignup,onCompanySignup,onLogin,onDemo}:{onCandi
 
       <article className="talentos-profile-preview">
        <div className="talentos-profile-main">
-        <div className="talentos-profile-avatar">MS</div>
+        <div className="talentos-profile-avatar">PC</div>
         <div className="talentos-profile-copy">
-         <div className="talentos-profile-name"><h3>Marcos Silva</h3><span><BadgeCheck size={12}/> Perfil completo</span></div>
+         <div className="talentos-profile-name"><h3>Profissional CNC</h3><span><BadgeCheck size={12}/> Perfil completo</span></div>
          <p>Operador CNC · 6 anos de experiência</p>
         </div>
         <div className="talentos-profile-score"><b>92%</b><span>compatibilidade</span></div>
