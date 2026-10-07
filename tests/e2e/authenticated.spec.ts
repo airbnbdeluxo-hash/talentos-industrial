@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 async function expectPlainLanguage(page: import('@playwright/test').Page) {
   const text = await page.locator('body').innerText();
-  expect(text).not.toMatch(/Skill Passport|Readiness|Adicionar evidência|Evidência desta habilidade|\bAnalytics\b|\bGaps?\b/i);
+  expect(text).not.toMatch(/Skill Passport|Readiness|Adicionar evidência|Evidência desta habilidade|Supabase real|\bAnalytics\b|\bGaps?\b/i);
 }
 
 test.describe('TalentOS authenticated journeys', () => {
@@ -55,6 +55,38 @@ test.describe('TalentOS authenticated journeys', () => {
       await expect(page.locator('.overlay')).toHaveCount(0);
       await expectPlainLanguage(page);
     }
+  });
+
+  test('currículo e vagas usam catálogos em vez de texto livre', async ({ page }) => {
+    await page.goto('/?e2eRole=candidato');
+    await page.getByRole('button', { name: 'Meu currículo', exact: true }).click();
+    await page.getByRole('button', { name: 'Editar currículo', exact: true }).click();
+
+    const currentRole = page.getByLabel('Função atual');
+    await expect(currentRole).toBeVisible();
+    await expect(currentRole.locator('option')).toHaveCount(58);
+    await expect(currentRole.locator('option', { hasText: 'Desempregado' })).toHaveCount(1);
+
+    await expect(page.locator('fieldset.catalog-picker').filter({ hasText: 'Funções desejadas' })).toBeVisible();
+    await expect(page.locator('fieldset.catalog-picker').filter({ hasText: 'Minhas competências' })).toBeVisible();
+    await expect(page.locator('fieldset.catalog-picker').filter({ hasText: 'Turnos preferidos' })).toBeVisible();
+
+    const salary = page.getByLabel('Pretensão salarial (R$)');
+    await salary.fill('3500');
+    await salary.press('Tab');
+    await expect(salary).toHaveValue('3.500,00');
+
+    await page.getByRole('button', { name: 'Fechar' }).click();
+    await page.getByRole('button', { name: 'Vagas', exact: true }).click();
+    await expect(page.getByText('Salário máximo', { exact: true })).toHaveCount(0);
+    await expect(page.locator('fieldset.catalog-picker').filter({ hasText: 'Cargo' })).toBeVisible();
+    await expect(page.locator('fieldset.catalog-picker').filter({ hasText: 'Competência' })).toBeVisible();
+    await expect(page.locator('fieldset.catalog-picker').filter({ hasText: 'Turno' })).toBeVisible();
+
+    await page.getByRole('button', { name: 'Criar alerta', exact: true }).click();
+    await expect(page.getByRole('heading', { level: 2, name: 'Escolha o que deseja acompanhar' })).toBeVisible();
+    await expect(page.locator('.job-alert-criterion input[type="checkbox"]')).toHaveCount(7);
+    await expect(page.getByText('Salário máximo', { exact: true })).toHaveCount(0);
   });
 
   test('candidato altera privacidade e continua navegando sem reabrir a decisão', async ({ page }) => {
@@ -209,19 +241,19 @@ test.describe('TalentOS authenticated journeys', () => {
 
     await job.getByRole('button', { name: 'Editar vaga', exact: true }).click();
     await expect(page.getByRole('heading', { level: 2, name: 'Editar vaga' })).toBeVisible();
-    await page.getByLabel('Cargo').fill('Operador CNC Sênior');
+    await page.getByLabel('Cargo da vaga').selectOption({ label: 'Programador CNC' });
     await page.getByRole('button', { name: 'Salvar alterações', exact: true }).click();
 
-    job = page.locator('article.company-managed-job').filter({ hasText: 'Operador CNC Sênior' }).first();
+    job = page.locator('article.company-managed-job').filter({ hasText: 'Programador CNC' }).first();
     await expect(job).toBeVisible();
     await expect(job.getByText('2', { exact: true }).first()).toBeVisible();
 
     await job.getByRole('button', { name: 'Duplicar vaga', exact: true }).click();
     await expect(page.getByRole('heading', { level: 2, name: 'Estruturar nova vaga' })).toBeVisible();
-    await expect(page.getByLabel('Cargo')).toHaveValue('Operador CNC Sênior (cópia)');
+    await expect(page.getByLabel('Cargo da vaga')).toHaveValue('Programador CNC');
     await page.locator('.modal').getByRole('button', { name: 'Criar vaga', exact: true }).click();
 
-    await expect(page.locator('article.company-managed-job').filter({ hasText: 'Operador CNC Sênior (cópia)' })).toBeVisible();
+    await expect(page.locator('article.company-managed-job').filter({ hasText: 'Programador CNC' })).toHaveCount(2);
     await expect(page.locator('article.company-managed-job')).toHaveCount(4);
   });
 
