@@ -17,3 +17,18 @@ test('recuperação de senha usa título coerente e mantém a tela de login aces
   await expect(page.getByRole('heading', { name: 'Recuperar acesso' })).toBeVisible();
   await expect(page.getByLabel('E-mail')).toBeVisible();
 });
+
+test('preview não envia requisições ao Supabase de produção', async ({ page }) => {
+  const productionRequests: string[] = [];
+  await page.route('https://kvxqhvngkjxqlvlzcsef.supabase.co/**', async route => {
+    productionRequests.push(new URL(route.request().url()).pathname);
+    await route.abort();
+  });
+
+  await page.goto('/');
+  await expect(page.getByRole('heading', { level: 1, name: 'A indústria contrata quem sabe fazer.' })).toBeVisible();
+  await page.getByRole('button', { name: 'Entrar', exact: true }).first().click();
+  await expect(page.getByRole('heading', { name: 'Entrar como candidato' })).toBeVisible();
+  await page.waitForTimeout(300);
+  expect(productionRequests).toEqual([]);
+});
