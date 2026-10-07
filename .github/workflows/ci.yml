@@ -54,8 +54,12 @@ jobs:
           exit 1
       - name: Run browser smoke tests
         run: npx playwright test
-      - name: Build production bundle
+      - name: Build production bundle against an isolated synthetic endpoint
         run: npm run build
+        env:
+          VERCEL_ENV: preview
+          VITE_SUPABASE_URL: https://talentos-preview-ci.invalid
+          VITE_SUPABASE_PUBLISHABLE_KEY: ci-public-placeholder
       - name: Start production preview
         run: |
           npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/talentos-preview.log 2>&1 &
