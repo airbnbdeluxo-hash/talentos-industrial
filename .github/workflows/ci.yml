@@ -22,6 +22,8 @@ jobs:
         run: npm run security:scan
       - name: Verify scanner catches legacy credentials
         run: node --test scripts/security-check.test.mjs
+      - name: Verify Supabase environment isolation
+        run: node --experimental-strip-types --test tests/supabaseTarget.test.mjs
       - run: npm ci --no-audit --no-fund
       - run: npm run build
 
