@@ -27,6 +27,9 @@ test('confirmação e recuperação usam a URL canônica de produção', async (
   expect(source).toContain("https://talentos-industrial.vercel.app");
   expect(source).toContain("authRedirectUrl('confirm')");
   expect(source).toContain("authRedirectUrl('recovery')");
+  expect(source).toContain("TALENTOS_OFFICIAL_ORIGIN='https://talentos-industrial.vercel.app'");
+  expect(source).toContain("['localhost','127.0.0.1','0.0.0.0']");
+  expect(source).not.toContain("window.location.origin");
   expect(source).not.toContain("resetPasswordForEmail(authEmail.trim(),{redirectTo:window.location.origin})");
 });
 
@@ -60,5 +63,6 @@ test('conta existente pode continuar cadastro empresarial sem nova confirmação
   const source = readFileSync(resolve(here, '../../src/App.tsx'), 'utf8');
   expect(source).toContain("existingCandidateStartingCompany");
   expect(source).toContain("requested_account_type:'empresa'");
-  expect(source).toContain('Não será enviado um novo e-mail de confirmação.');
+  expect(source).toContain('Este e-mail já está cadastrado no TalentOS.');
+  expect(source).toContain('Não enviaremos outro e-mail de confirmação.');
 });
