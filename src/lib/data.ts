@@ -181,7 +181,7 @@ export async function createRemoteCompanyAccount(input:{name:string;cnpj:string;
 export async function createRemoteJob(userId:string,input:{title:string;description?:string;companyId:string;city:string;min:number;max:number;shift:string;skills:string[];screeningQuestions?:string[];employmentType?:string;workModel?:string;benefits?:string[];travelRequired?:boolean;interviewQuestions?:string[]}){
  if(!supabase)throw new Error('Supabase não configurado');
  const company=await supabase.from('companies').select('name').eq('id',input.companyId).single();if(company.error)throw company.error;
- const {data:job,error}=await supabase.from('jobs').insert({title:input.title,description:input.description?.trim()||null,company_id:input.companyId,company_public_name:company.data.name,city:input.city,salary_min:input.min,salary_max:input.max,shift:input.shift,status:'aberta',screening_questions:(input.screeningQuestions??[]).filter(Boolean),employment_type:input.employmentType||'CLT',work_model:input.workModel||'Presencial',benefits:(input.benefits??[]).filter(Boolean),travel_required:Boolean(input.travelRequired),interview_questions:(input.interviewQuestions??[]).filter(Boolean)}).select('*').single();
+ const {data:job,error}=await supabase.from('jobs').insert({title:input.title,description:input.description?.trim()||null,company_id:input.companyId,company_public_name:company.data.name,city:input.city,salary_min:input.min,salary_max:null,shift:input.shift,status:'aberta',screening_questions:(input.screeningQuestions??[]).filter(Boolean),employment_type:input.employmentType||'CLT',work_model:input.workModel||'Presencial',benefits:(input.benefits??[]).filter(Boolean),travel_required:Boolean(input.travelRequired),interview_questions:(input.interviewQuestions??[]).filter(Boolean)}).select('*').single();
  if(error)throw error;
  const skills=await findSkillIds(input.skills);
  if(skills.length) {
@@ -202,7 +202,7 @@ export async function updateRemoteJobDetails(input:{jobId:string;title:string;de
  if(!supabase)throw new Error('Supabase não configurado');
  const {data,error}=await supabase.rpc('update_job_details',{
   p_job_id:input.jobId,p_title:input.title,p_description:input.description?.trim()||null,p_city:input.city,
-  p_salary_min:input.min,p_salary_max:input.max,p_shift:input.shift,p_skills:input.skills,
+  p_salary_min:input.min,p_salary_max:null,p_shift:input.shift,p_skills:input.skills,
   p_screening_questions:(input.screeningQuestions??[]).filter(Boolean),p_employment_type:input.employmentType||'CLT',
   p_work_model:input.workModel||'Presencial',p_benefits:(input.benefits??[]).filter(Boolean),
   p_travel_required:Boolean(input.travelRequired),p_interview_questions:(input.interviewQuestions??[]).filter(Boolean)
