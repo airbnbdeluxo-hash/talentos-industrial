@@ -8,6 +8,6 @@ export default defineConfig({
   },
   build:{
     sourcemap:false,
-    minify:'esbuild',
+    // Vite 8 uses its built-in Oxc minifier; esbuild is no longer bundled.
   },
 });
