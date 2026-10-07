@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 async function expectPlainLanguage(page: import('@playwright/test').Page) {
   const text = await page.locator('body').innerText();
-  expect(text).not.toMatch(/Skill Passport|Readiness|Adicionar evidência|Evidência desta habilidade|\bAnalytics\b|\bGaps?\b/i);
+  expect(text).not.toMatch(/Skill Passport|Readiness|Adicionar evidência|Evidência desta habilidade|Supabase real|\bAnalytics\b|\bGaps?\b/i);
 }
 
 test.describe('TalentOS authenticated journeys', () => {
