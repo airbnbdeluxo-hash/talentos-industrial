@@ -1133,13 +1133,12 @@ function LandingPage({onCandidateSignup,onCompanySignup,onLogin,onDemo}:{onCandi
     <div className="talentos-hero-gear talentos-hero-gear-two" aria-hidden="true"><Settings size={82}/></div>
 
     <div className="talentos-hero-copy">
-     <div className="talentos-hero-eyebrow talentos-hero-enter">TALENTOS INDUSTRIAL · SERRA GAÚCHA</div>
      <h1 className="talentos-hero-title talentos-hero-enter" aria-label="Sua melhor vaga na indústria começa aqui.">
       Sua melhor vaga <span className="talentos-hero-highlight">na indústria
        <svg viewBox="0 0 360 18" preserveAspectRatio="none" aria-hidden="true"><path d="M4 12 C50 2 88 18 132 10 C179 2 213 17 258 9 C302 2 329 12 356 5"/></svg>
       </span> começa aqui.
      </h1>
-     <p className="talentos-hero-subtitle talentos-hero-enter">Você já sabe fazer. Agora seja visto por quem paga o que isso vale. Empresas encontram aqui os profissionais mais preparados da indústria.</p>
+     <p className="talentos-hero-subtitle talentos-hero-enter">Empresas encontram aqui os profissionais mais preparados da indústria.</p>
 
      <div className="talentos-hero-ctas talentos-hero-enter">
       <div className="talentos-hero-cta-block">
@@ -1205,23 +1204,7 @@ function LandingPage({onCandidateSignup,onCompanySignup,onLogin,onDemo}:{onCandi
    <div className="landing-ticker" aria-hidden="true">
     <div className="landing-ticker-track"><span>CNC · TIG · MIG · TORNO · FRESA · METROLOGIA · NR-12 · CLP · MANUTENÇÃO ·</span></div>
    </div>
-   <section className="landing-process" aria-labelledby="landing-process-title">
-    <div className="landing-section-kicker">DO CURRÍCULO AO DESEMPENHO</div><h2 id="landing-process-title" className="landing-section-title">Capacidade que continua depois da contratação.</h2>
-    <div className="landing-process-line">
-     <div className="landing-process-step"><b>Capacidade</b><span>O que a pessoa realmente sabe fazer.</span></div>
-     <div className="landing-process-step"><b>Evidência</b><span>Como essa capacidade foi demonstrada.</span></div>
-     <div className="landing-process-step"><b>Match</b><span>Por que a pessoa combina — ou ainda não.</span></div>
-     <div className="landing-process-step"><b>Outcome Loop 30/60/90</b><span>O que aconteceu no trabalho após a contratação.</span></div>
-    </div>
-   </section>
-   <section className="landing-paths" aria-labelledby="landing-path-title">
-    <div className="landing-section-kicker">ESCOLHA SEU CAMINHO</div><h2 id="landing-path-title" className="landing-section-title">Entre pelo que você precisa resolver agora.</h2>
-    <div className="landing-path-grid">
-     <button className="landing-path-card" onClick={onCandidateSignup}><span className="landing-path-icon"><BriefcaseBusiness size={19}/></span><b>Sou profissional</b><span>Monte seu Skill Passport, mostre evidências e encontre vagas compatíveis.</span><em>Criar meu perfil <ChevronRight size={14}/></em></button>
-     <button className="landing-path-card" onClick={onCompanySignup}><span className="landing-path-icon"><Building2 size={19}/></span><b>Sou empresa</b><span>Publique vagas por capacidades e compare candidatos com contexto.</span><em>Publicar vaga <ChevronRight size={14}/></em></button>
-     <button className="landing-path-card" onClick={onDemo}><span className="landing-path-icon"><Compass size={19}/></span><b>Quero ver funcionando</b><span>Explore o ambiente de demonstração antes de criar uma conta.</span><em>Explorar demonstração <ChevronRight size={14}/></em></button>
-    </div>
-   </section>
+
   </div>
   <div className={'landing-mobile-action '+(stickyVisible?'is-visible':'')} aria-hidden={!stickyVisible}><button className="landing-primary" onClick={primaryAction}>{primaryLabel} <ChevronRight size={17}/></button></div>
  </section>
