@@ -3,7 +3,7 @@ import { supabase } from './supabase';
 type Status='novo'|'triagem'|'entrevista'|'aprovado'|'rejeitado'|'contratado';
 export type Evidence={id:string;skill:string;type:string;title:string;issuer:string;verified:boolean;expires?:string;score?:number;storagePath?:string;fileName?:string;mimeType?:string;fileSize?:number;validationStatus?:'pendente'|'aprovada'|'reprovada';reviewedBy?:string;reviewedAt?:string;reviewNote?:string;fileHash?:string;integrityStatus?:'normal'|'duplicado'|'revisao'};
 export type CandidateSkillDetail={skillId:string;skill:string;proficiency:number;verified:boolean;yearsExperience:number;sourceType:string;sourceConfidence?:number|null;sourceExcerpt?:string|null};
-export type Candidate={id:string;name:string;city:string;role:string;years:number;salary:number;skills:string[];verified:string[];skillDetails?:CandidateSkillDetail[];evidence:Evidence[];shifts:string[];consentGiven?:boolean;bio?:string};
+export type Candidate={id:string;name:string;city:string;role:string;currentRole?:string;desiredRoles?:string[];years:number;salary:number;skills:string[];verified:string[];skillDetails?:CandidateSkillDetail[];evidence:Evidence[];shifts:string[];consentGiven?:boolean;bio?:string};
 export type Company={id:string;name:string;city:string;industry:string};
 export type Job={id:string;title:string;description?:string|null;companyId:string;companyName?:string;city:string;min:number;max:number;skills:string[];status:'aberta'|'pausada'|'fechada';shift:string;createdAt?:string|null;qualifiedCandidateAt?:string|null;publicSlug?:string|null;screeningQuestions:string[];employmentType?:string;workModel?:string;benefits?:string[];travelRequired?:boolean;interviewQuestions:string[]};
 export type AppRow={id:string;jobId:string;candidateId:string;status:Status;source?:string|null;sourceDetail?:string|null;screeningAnswers?:Record<string,string>;rejectionReasonCode?:string|null;rejectionReasonNote?:string|null};
@@ -44,7 +44,7 @@ export type Challenge={id:string;skillId:string;skill:string;title:string;descri
 const mapEvidence=(e:any):Evidence=>({id:e.id,skill:e.skills?.name??'Skill',type:e.evidence_type,title:e.title,issuer:e.issuer??'',verified:Boolean(e.verified),expires:e.expires_at??undefined,score:e.score??undefined,storagePath:e.storage_path??undefined,fileName:e.file_name??undefined,mimeType:e.mime_type??undefined,fileSize:e.file_size??undefined,validationStatus:e.validation_status??'pendente',reviewedBy:e.reviewed_by??undefined,reviewedAt:e.reviewed_at??undefined,reviewNote:e.review_note??undefined,fileHash:e.file_hash??undefined,integrityStatus:e.integrity_status??'normal'});
 const mapCandidate=(c:any):Candidate=>{
  const prefs=Array.isArray(c.talent_preferences)?c.talent_preferences[0]:c.talent_preferences;
- return {id:c.profile_id,name:c.display_name??'Talento',city:c.city??'',role:c.role_title??'Profissional industrial',years:Number(c.years_experience??0),salary:Number(c.desired_salary??0),bio:c.bio??undefined,skills:(c.candidate_skills??[]).map((x:any)=>x.skills?.name).filter(Boolean),verified:(c.candidate_skills??[]).filter((x:any)=>x.verified).map((x:any)=>x.skills?.name).filter(Boolean),skillDetails:(c.candidate_skills??[]).map((x:any)=>({skillId:x.skill_id,skill:x.skills?.name??'Skill',proficiency:Number(x.proficiency??0),verified:Boolean(x.verified),yearsExperience:Number(x.years_experience??0),sourceType:x.source_type??'manual',sourceConfidence:x.source_confidence==null?null:Number(x.source_confidence),sourceExcerpt:x.source_excerpt??null})),evidence:(c.skill_evidence??[]).map(mapEvidence),shifts:prefs?.preferred_shifts??[],consentGiven:c.consent_version?Boolean(c.searchable):undefined};
+ return {id:c.profile_id,name:c.display_name??'Talento',city:c.city??'',role:c.role_title??'Profissional industrial',currentRole:c.current_role_title??'',desiredRoles:Array.isArray(c.desired_role_titles)&&c.desired_role_titles.length?c.desired_role_titles:[c.role_title??'Profissional industrial'],years:Number(c.years_experience??0),salary:Number(c.desired_salary??0),bio:c.bio??undefined,skills:(c.candidate_skills??[]).map((x:any)=>x.skills?.name).filter(Boolean),verified:(c.candidate_skills??[]).filter((x:any)=>x.verified).map((x:any)=>x.skills?.name).filter(Boolean),skillDetails:(c.candidate_skills??[]).map((x:any)=>({skillId:x.skill_id,skill:x.skills?.name??'Skill',proficiency:Number(x.proficiency??0),verified:Boolean(x.verified),yearsExperience:Number(x.years_experience??0),sourceType:x.source_type??'manual',sourceConfidence:x.source_confidence==null?null:Number(x.source_confidence),sourceExcerpt:x.source_excerpt??null})),evidence:(c.skill_evidence??[]).map(mapEvidence),shifts:prefs?.preferred_shifts??[],consentGiven:c.consent_version?Boolean(c.searchable):undefined};
 };
 const mapCompany=(c:any):Company=>({id:c.id,name:c.name,city:c.city,industry:c.industry??'Indústria'});
 const mapJob=(j:any):Job=>({id:j.id,title:j.title,description:j.description??null,companyId:j.company_id,companyName:j.company_public_name??undefined,city:j.city,min:Number(j.salary_min??0),max:Number(j.salary_max??0),skills:[],status:j.status,shift:j.shift??'1º turno',createdAt:j.created_at??null,qualifiedCandidateAt:j.qualified_candidate_at??null,publicSlug:j.public_slug??null,screeningQuestions:Array.isArray(j.screening_questions)?j.screening_questions.map(String):[],employmentType:j.employment_type??'CLT',workModel:j.work_model??'Presencial',benefits:Array.isArray(j.benefits)?j.benefits.map(String):[],travelRequired:Boolean(j.travel_required),interviewQuestions:Array.isArray(j.interview_questions)?j.interview_questions.map(String):[]});
@@ -90,7 +90,7 @@ export async function loadRemoteData(userId:string, role?:'empresa'|'candidato'|
  const [companyRes,jobsRes,candidatesRes,appsRes,eventsRes,matchesRes,trainingRes,capabilityNodesRes,capabilityEdgesRes,outcomesRes,outcomeSkillSignalsRes,savedJobsRes,jobAlertsRes,messagesRes,interviewsRes,scorecardsRes,talentPoolsRes,talentPoolMembersRes,offersRes,notificationsRes,applicationNotesRes,jobEngagementEventsRes,candidateAvailabilityRes]=await Promise.all([
    companyQuery,
    supabase.from('jobs').select('*').order('created_at',{ascending:false}),
-   (role==='candidato'?supabase.from('candidate_profiles').select('profile_id,display_name,role_title,years_experience,desired_salary,bio,city,searchable,visibility_consent_at,consent_version,candidate_skills(skill_id,proficiency,verified,years_experience,source_type,source_confidence,source_excerpt,skills(name)),skill_evidence(id,skill_id,evidence_type,title,issuer,verified,verified_at,expires_at,score,storage_path,file_name,mime_type,file_size,file_hash,integrity_status,validation_status,reviewed_by,reviewed_at,review_note,skills(name)),talent_preferences(preferred_shifts)').eq('profile_id',userId):supabase.from('candidate_profiles').select('profile_id,display_name,role_title,years_experience,desired_salary,bio,city,searchable,visibility_consent_at,consent_version,candidate_skills(skill_id,proficiency,verified,years_experience,source_type,source_confidence,source_excerpt,skills(name)),skill_evidence(id,skill_id,evidence_type,title,issuer,verified,verified_at,expires_at,score,storage_path,file_name,mime_type,file_size,validation_status,reviewed_by,reviewed_at,review_note,skills(name)),talent_preferences(preferred_shifts)').or(`searchable.eq.true,profile_id.eq.${userId}`)),
+   (role==='candidato'?supabase.from('candidate_profiles').select('profile_id,display_name,role_title,current_role_title,desired_role_titles,years_experience,desired_salary,bio,city,searchable,visibility_consent_at,consent_version,candidate_skills(skill_id,proficiency,verified,years_experience,source_type,source_confidence,source_excerpt,skills(name)),skill_evidence(id,skill_id,evidence_type,title,issuer,verified,verified_at,expires_at,score,storage_path,file_name,mime_type,file_size,file_hash,integrity_status,validation_status,reviewed_by,reviewed_at,review_note,skills(name)),talent_preferences(preferred_shifts)').eq('profile_id',userId):supabase.from('candidate_profiles').select('profile_id,display_name,role_title,current_role_title,desired_role_titles,years_experience,desired_salary,bio,city,searchable,visibility_consent_at,consent_version,candidate_skills(skill_id,proficiency,verified,years_experience,source_type,source_confidence,source_excerpt,skills(name)),skill_evidence(id,skill_id,evidence_type,title,issuer,verified,verified_at,expires_at,score,storage_path,file_name,mime_type,file_size,validation_status,reviewed_by,reviewed_at,review_note,skills(name)),talent_preferences(preferred_shifts)').or(`searchable.eq.true,profile_id.eq.${userId}`)),
    supabase.from('applications').select('*').order('updated_at',{ascending:false}),
    supabase.from('application_events').select('*').order('created_at',{ascending:true}),
    supabase.from('matches').select('*').order('score',{ascending:false}),
@@ -137,6 +137,13 @@ export async function getRemoteBrazilCities():Promise<Array<{name:string;uf:stri
  }
  return rows;
 
+}
+
+export async function getRemoteIndustryOccupations():Promise<string[]> {
+ if(!supabase) return [];
+ const {data,error}=await supabase.from('industrial_occupations').select('name').eq('active',true).order('name',{ascending:true});
+ if(error) throw error;
+ return (data??[]).map((x:any)=>String(x.name)).filter(Boolean);
 }
 
 export async function getRemoteSkills():Promise<string[]>{
@@ -204,7 +211,7 @@ export async function updateRemoteJobDetails(input:{jobId:string;title:string;de
  return data;
 }
 
-export async function createRemoteCandidate(userId:string,input:{name:string;role:string;city:string;years:number;salary:number;skills:string[];preferredShifts?:string[];searchable?:boolean;bio?:string;resumeFile?:File|null;skillMentions?:Array<{skill:string;excerpt:string;confidence:number}>}){
+export async function createRemoteCandidate(userId:string,input:{name:string;role:string;currentRole?:string;desiredRoles?:string[];city:string;years:number;salary:number;skills:string[];preferredShifts?:string[];searchable?:boolean;bio?:string;resumeFile?:File|null;skillMentions?:Array<{skill:string;excerpt:string;confidence:number}>}){
  if(!supabase)throw new Error('Supabase não configurado');
  const client=supabase;
  const skills=await findSkillIds(input.skills);
@@ -232,7 +239,7 @@ export async function createRemoteCandidate(userId:string,input:{name:string;rol
   source_excerpt:fromResume?(mention?.excerpt?.slice(0,500)??null):null,
  };});
  try{
-  const {error}=await client.rpc('save_candidate_passport',{p_profile:{name:input.name,role:input.role,city:input.city,years:input.years,salary:input.salary,bio:input.bio??'',searchable:input.searchable===true,...(input.preferredShifts?{preferredShifts:input.preferredShifts}:{})},p_skills:rows,p_resume:resume});
+  const {error}=await client.rpc('save_candidate_passport',{p_profile:{name:input.name,role:input.role,currentRole:input.currentRole??'',desiredRoles:input.desiredRoles??[input.role],city:input.city,years:input.years,salary:input.salary,bio:input.bio??'',searchable:input.searchable===true,...(input.preferredShifts?{preferredShifts:input.preferredShifts}:{})},p_skills:rows,p_resume:resume});
   if(error)throw error;
  }catch(error){
   if(newStoragePath){const cleanup=await client.storage.from('candidate-resumes').remove([newStoragePath]);if(cleanup.error)console.warn('Não foi possível limpar o novo arquivo',cleanup.error);}
