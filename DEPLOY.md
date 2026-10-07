@@ -8,7 +8,7 @@ A implantação de produção, identificada pelo ambiente Vercel `VERCEL_ENV=pro
 Os previews criados pela Vercel não devem usar o banco de dados de produção. O frontend distingue o alvo pelo `VERCEL_ENV` no momento do build e pelo `VITE_VERCEL_ENV` quando fornecido. Se a configuração não existir, somente os domínios canônicos de produção conhecidos têm fallback.
 
 - **Sem Supabase de testes:** não configure `VITE_SUPABASE_URL` nem `VITE_SUPABASE_PUBLISHABLE_KEY` para o ambiente Preview. A interface pública e os testes simulados continuam utilizáveis, mas funções remotas de cadastro/login ficam indisponíveis.
-- **Com Supabase de testes isolado:** configure ambas as variáveis **apenas no Preview**, apontando para outro projeto Supabase que não contenha dados reais. Aponte o URL para o banco de testes, nunca para `kvxqhvngkjxqlvlzcsef.supabase.co`.
+- **Com Supabase de testes isolado:** configure ambas as variáveis **apenas no Preview**, apontando para outro projeto Supabase que não contenha dados reais. Aponte o URL para o banco de testes, nunca para `kvxqhvngkjxqlvlzcsef.supabase.co`. Antes de habilitar requisições, revise a política CSP `connect-src` em `vercel.json` para incluir **explicitamente** somente o endereço de testes necessário. A configuração atual permite apenas o Supabase de produção.
 - Se uma variável Preview for acidentalmente configurada para o endpoint de produção, a aplicação **recusará** a conexão em vez de fazer requisições ao banco real.
 - Credenciais da produção não podem ser copiadas para os ambientes Preview e Development. Em desenvolvimento local, qualquer conexão exige configuração explícita.
 
