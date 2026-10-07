@@ -859,13 +859,13 @@
    ===================================================================== */
 .talentos-hero{
   position:relative;
-  min-height:calc(100dvh - 68px);
+  min-height:calc(100dvh - 118px);
   display:grid;
   grid-template-columns:minmax(0,1.02fr) minmax(460px,.98fr);
   align-items:center;
   gap:clamp(42px,5vw,76px);
   isolation:isolate;
-  padding:54px 0 76px;
+  padding:26px 0 42px;
 }
 .talentos-hero::before{
   content:"";
@@ -1012,7 +1012,7 @@
   width:100%;
   max-width:590px;
   justify-self:end;
-  padding:18px 12px 34px;
+  padding:4px 12px 24px;
 }
 .talentos-showcase-glow{
   position:absolute;z-index:-1;inset:13% 7% 12%;
@@ -1198,12 +1198,12 @@
 @keyframes talentos-hero-pulse{0%,100%{opacity:.7;transform:scale(.88)}50%{opacity:1;transform:scale(1.1)}}
 
 @media(max-width:1100px){
-  .talentos-hero{grid-template-columns:minmax(0,1fr) minmax(420px,.9fr);gap:30px}
+  .talentos-hero{grid-template-columns:minmax(0,1fr) minmax(420px,.9fr);gap:30px;min-height:calc(100dvh - 100px);padding-top:20px;padding-bottom:34px}
   .talentos-hero-title{font-size:clamp(46px,5.6vw,68px)}
   .talentos-hero-visual{padding-left:0;padding-right:0}
 }
 @media(min-width:768px) and (max-width:930px){
-  .talentos-hero{grid-template-columns:1fr 1fr;gap:22px;padding-top:40px}
+  .talentos-hero{grid-template-columns:1fr 1fr;gap:22px;min-height:calc(100dvh - 88px);padding-top:18px;padding-bottom:30px}
   .talentos-hero-title{font-size:clamp(40px,5.5vw,52px)}
   .talentos-hero-subtitle{font-size:15px}
   .talentos-hero-ctas{grid-template-columns:1fr;gap:12px}
@@ -1220,8 +1220,8 @@
     display:flex;
     flex-direction:column;
     align-items:stretch;
-    gap:34px;
-    padding:28px 0 50px;
+    gap:26px;
+    padding:14px 0 34px;
   }
   .talentos-hero-copy{max-width:none}
   .talentos-hero-eyebrow{margin-bottom:18px;font-size:9px;letter-spacing:.13em}
