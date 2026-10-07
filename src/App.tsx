@@ -1089,8 +1089,8 @@ function LandingPage({onCandidateSignup,onCompanySignup,onLogin,onDemo}:{onCandi
   return()=>window.clearTimeout(next)
  },[step,maxSteps,reduceMotion,paused,heroInView,pageVisible]);
  const isProfessional=audience==='candidato';
- const primaryLabel=isProfessional?'Encontrar vagas na indústria':'Contratar para minha fábrica';
- const primaryAction=()=>{if(isProfessional)window.location.assign('/vagas');else onCompanySignup()};
+ const primaryLabel='Encontrar minha vaga';
+ const primaryAction=()=>window.location.assign('/vagas');
  const advance=()=>{if(!reduceMotion)setStep(current=>(current+1)%maxSteps)};
  const skills=[
   {name:'Operação CNC Fanuc',status:'verified',label:'✓ Verificada',source:'Certificado SENAI-RS'},
@@ -1127,78 +1127,78 @@ function LandingPage({onCandidateSignup,onCompanySignup,onLogin,onDemo}:{onCandi
    <button className="landing-ghost" onClick={onLogin}><LogIn size={15}/> Entrar</button>
   </header>
   <div className="landing-shell">
-   <div ref={heroRef} className="landing-hero">
-    <div className="landing-copy">
-     <div className="landing-eyebrow landing-reveal">TALENTOS INDUSTRIAL · SERRA GAÚCHA</div>
-     <h1 className="landing-title landing-reveal" aria-label="A indústria contrata quem sabe fazer.">
-      <span className="word">A</span><span className="word">indústria</span><span className="word">contrata</span><br/>
-      <span className="word">quem</span><em className="word landing-proof-word">sabe<svg viewBox="0 0 210 12" aria-hidden="true"><path d="M3 8 C48 3, 128 12, 207 5"/></svg></em><span className="word">fazer.</span>
+   <div ref={heroRef} className="talentos-hero">
+    <div className="talentos-hero-circuit talentos-hero-circuit-left" aria-hidden="true"><span/><span/><span/><span/></div>
+    <div className="talentos-hero-gear talentos-hero-gear-one" aria-hidden="true"><Cog size={148}/></div>
+    <div className="talentos-hero-gear talentos-hero-gear-two" aria-hidden="true"><Settings size={82}/></div>
+
+    <div className="talentos-hero-copy">
+     <div className="talentos-hero-eyebrow talentos-hero-enter">TALENTOS INDUSTRIAL · SERRA GAÚCHA</div>
+     <h1 className="talentos-hero-title talentos-hero-enter" aria-label="Feita para quem move a indústria.">
+      Feita para quem <span className="talentos-hero-highlight">move a indústria
+       <svg viewBox="0 0 360 18" preserveAspectRatio="none" aria-hidden="true"><path d="M4 12 C50 2 88 18 132 10 C179 2 213 17 258 9 C302 2 329 12 356 5"/></svg>
+      </span>.
      </h1>
-     <p className="landing-subtitle landing-reveal">Vagas em usinagem, soldagem, manutenção e automação. Profissionais mostram o que operam e constroem, com evidência. Empresas contratam com evidência, não com palavra-chave.</p>
-     <div className="landing-segmented" role="tablist" aria-label="Escolha como usar o TalentOS">
-      <button role="tab" aria-selected={isProfessional} onClick={()=>setAudience('candidato')}>Sou profissional</button>
-      <button role="tab" aria-selected={!isProfessional} onClick={()=>setAudience('empresa')}>Sou empresa</button>
-     </div>
-     <div className="landing-actions landing-reveal">
-      <button ref={bodyCtaRef} className="landing-primary" onClick={primaryAction}>{primaryLabel} <ChevronRight size={17}/></button>
-      <button className="landing-secondary" onClick={onCompanySignup}><Building2 size={16}/> Contratar para minha fábrica</button>
-     </div>
-     <div className="landing-inline-links">
-      <button className="landing-link" onClick={onCandidateSignup}>Criar meu Skill Passport</button>
-      <button className="landing-link" onClick={onLogin}>Já tenho conta · Entrar</button>
-     </div>
-     <div className="landing-industry-segments" aria-label="Segmentos industriais">
-      {segments.map((segment,index)=><span className={'landing-segment-chip '+(index===0?'is-active':'')} key={segment.name}>{segment.icon}{segment.name}</span>)}
-     </div>
-     <div className="landing-trust landing-reveal"><ShieldCheck size={15}/><span>Evidência técnica · validação humana · foco em trabalho industrial</span></div>
-    </div>
-    <div className="landing-visual landing-reveal">
-     <svg className="landing-machining-decor" viewBox="0 0 520 330" aria-hidden="true">
-      <defs>
-       <marker id="landing-dim-arrow" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto-start-reverse"><path d="M0,0 L7,3.5 L0,7 Z"/></marker>
-      </defs>
-      <g className="landing-machining-gear" transform="translate(434 64)">
-       <circle r="44"/><circle r="27"/><circle r="10"/>
-       {Array.from({length:10}).map((_,i)=><rect key={i} x="-5" y="-55" width="10" height="12" rx="1.5" transform={'rotate('+(i*36)+')'}/>)}
-      </g>
-      <g className="landing-machining-profile">
-       <path className="landing-machining-path" d="M70 240 L70 182 L118 182 L136 164 L246 164 L264 182 L356 182 L376 202 L432 202 L432 260 L376 260 L356 280 L264 280 L246 298 L136 298 L118 280 L70 280 Z"/>
-       <circle cx="175" cy="231" r="22"/><circle cx="316" cy="231" r="16"/>
-       <line className="landing-machining-center" x1="44" y1="231" x2="458" y2="231"/>
-       <line className="landing-machining-center" x1="175" y1="148" x2="175" y2="314"/>
-       <line className="landing-machining-center" x1="316" y1="148" x2="316" y2="314"/>
-       <g className="landing-machining-dims">
-        <line x1="70" y1="142" x2="432" y2="142" markerStart="url(#landing-dim-arrow)" markerEnd="url(#landing-dim-arrow)"/>
-        <line x1="70" y1="151" x2="70" y2="170"/><line x1="432" y1="151" x2="432" y2="190"/>
-        <text x="226" y="132">362 ±0,05</text>
-        <line x1="175" y1="316" x2="316" y2="316" markerStart="url(#landing-dim-arrow)" markerEnd="url(#landing-dim-arrow)"/>
-        <text x="226" y="326">141</text>
-       </g>
-       <circle className="landing-cnc-tool" cx="0" cy="0" r="3"/>
-      </g>
-     </svg>
-     <div className="landing-visual-grid">
-      <div className={'landing-passport step-'+step}
-       onPointerEnter={()=>{if(!compact)setPaused(true)}}
-       onPointerLeave={()=>setPaused(false)}
-       onTouchStart={e=>{touchStartX.current=e.touches[0]?.clientX??null;touchMoved.current=false}}
-       onTouchEnd={e=>{const start=touchStartX.current;touchStartX.current=null;if(start==null||!e.changedTouches[0])return;const delta=e.changedTouches[0].clientX-start;if(Math.abs(delta)>38){touchMoved.current=true;setStep(current=>(current+(delta<0?1:maxSteps-1))%maxSteps)}}}
-       onClick={()=>{if(compact&&!touchMoved.current)advance();touchMoved.current=false}}
-       aria-describedby="landing-passport-caption">
-       <div className="landing-passport-head"><div><b>Vagas + Prova</b><span>capacidade → evidência → vaga</span></div><span className="landing-example">exemplo</span></div>
-       <span id="landing-passport-caption" style={{position:'absolute',width:1,height:1,padding:0,margin:-1,overflow:'hidden',clip:'rect(0,0,0,0)',whiteSpace:'nowrap',border:0}}>Exemplo ilustrativo: currículo industrial vira competências, recebe evidências e se conecta a uma vaga com compatibilidade explicada.</span>
-       <div className="landing-stage" data-step={step}>
-        {compact&&step===0&&<div className="landing-state landing-resume-state"><div className="landing-resume"><div className="landing-resume-title"><FileText size={16}/> Operador de usinagem · experiência industrial</div><span className="landing-skeleton w92"/><span className="landing-skeleton w78"/><span className="landing-skeleton w63"/><span className="landing-skeleton w48"/></div></div>}
-        {compact&&step===1&&<div className="landing-state landing-skills-state landing-scan-zone">{renderSkills('scanning',true)}<span className="landing-scan-line" aria-hidden="true"/></div>}
-        {compact&&step===2&&<div className="landing-state landing-mobile-match">{renderMatch()}<div className="landing-job-card"><small>exemplo · vaga conectada</small><b>Operador de Usinagem CNC</b><span>Caxias do Sul · Turno A</span></div></div>}
-        {!compact&&step===0&&<div className="landing-state landing-resume-state"><div className="landing-resume"><div className="landing-resume-title"><FileText size={16}/> Operador de usinagem · experiência industrial</div><span className="landing-skeleton w92"/><span className="landing-skeleton w78"/><span className="landing-skeleton w63"/><span className="landing-skeleton w48"/></div></div>}
-        {!compact&&step===1&&<div className="landing-state landing-skills-state landing-scan-zone">{renderSkills('scanning')}<span className="landing-scan-line" aria-hidden="true"/></div>}
-        {!compact&&step===2&&<div className="landing-state landing-skills-state">{renderSkills('evidence')}</div>}
-        {!compact&&step===3&&<div className="landing-state landing-connected-state">{renderSkills('evidence',true)}<div className="landing-connection-row"><svg className="landing-graph" viewBox="0 0 430 118" role="img" aria-label="SkillGraph conectando competências à vaga Operador de Usinagem CNC em Caxias do Sul"><path className="graph-line active" d="M26 16 C126 16 148 59 214 59"/><path className="graph-line active" d="M26 59 H214"/><path className="graph-line active" d="M26 102 C126 102 148 59 214 59"/><path className="graph-line active" d="M404 28 C306 28 282 59 214 59"/><path className="graph-line active" d="M404 90 C306 90 282 59 214 59"/><circle className="graph-node" cx="26" cy="16" r="6"/><circle className="graph-node" cx="26" cy="59" r="6"/><circle className="graph-node" cx="26" cy="102" r="6"/><circle className="graph-node" cx="404" cy="28" r="6"/><circle className="graph-node" cx="404" cy="90" r="6"/><circle className="graph-core" cx="214" cy="59" r="17"/><text x="214" y="63" textAnchor="middle" fill="#dbeafe" fontSize="8">MATCH</text></svg><div className="landing-job-card"><small>exemplo · vaga conectada</small><b>Operador de Usinagem CNC</b><span>Caxias do Sul · Turno A</span></div></div></div>}
-        {!compact&&step===4&&<div className="landing-state landing-match-state">{renderSkills('evidence',true)}{renderMatch()}</div>}
-       </div>
-       <div className="landing-step-dots" aria-label="Etapas do exemplo">{Array.from({length:maxSteps}).map((_,index)=><button type="button" key={index} className={index===step?'active':''} aria-label={'Mostrar etapa '+(index+1)} onClick={event=>{event.stopPropagation();if(!reduceMotion)setStep(index)}}/>)}</div>
+     <p className="talentos-hero-subtitle talentos-hero-enter">Profissionais acham oportunidades que valorizam o que sabem fazer. Empresas acham quem entrega desde o primeiro dia.</p>
+
+     <div className="talentos-hero-ctas talentos-hero-enter">
+      <div className="talentos-hero-cta-block">
+       <button ref={bodyCtaRef} className="talentos-hero-primary" onClick={()=>window.location.assign('/vagas')}>
+        Encontrar minha vaga <ChevronRight size={18}/>
+       </button>
+       <p>Grátis, sempre. Crie seu perfil em minutos.</p>
       </div>
+      <div className="talentos-hero-cta-block">
+       <button className="talentos-hero-secondary" onClick={onCompanySignup}>
+        <Building2 size={17}/> Anunciar vagas
+       </button>
+       <p>Publique sua primeira vaga e receba candidatos qualificados.</p>
+      </div>
+     </div>
+    </div>
+
+    <div className="talentos-hero-visual talentos-hero-enter" aria-label="Exemplo de conexão entre vaga industrial e profissional qualificado">
+     <div className="talentos-showcase-glow" aria-hidden="true"/>
+     <div className="talentos-showcase">
+      <div className="talentos-showcase-top">
+       <div><span className="talentos-live-dot"/><b>TALENTOS EM MOVIMENTO</b></div>
+       <span className="talentos-region-pill">Serra Gaúcha</span>
+      </div>
+
+      <article className="talentos-job-preview">
+       <div className="talentos-preview-head">
+        <div>
+         <span className="talentos-preview-kicker">Exemplo ilustrativo · Vaga em destaque</span>
+         <h2>Operador CNC</h2>
+         <p><MapPinned size={13}/> Caxias do Sul · 2º turno</p>
+        </div>
+        <div className="talentos-salary-preview"><span>A partir de</span><b>R$ 3.800,00</b></div>
+       </div>
+       <div className="talentos-preview-skills"><span>CNC</span><span>Metrologia</span><span>Desenho Técnico</span></div>
+      </article>
+
+      <div className="talentos-match-bridge" aria-hidden="true"><span/><i/></div>
+
+      <article className="talentos-profile-preview">
+       <div className="talentos-profile-main">
+        <div className="talentos-profile-avatar">PC</div>
+        <div className="talentos-profile-copy">
+         <div className="talentos-profile-name"><h3>Profissional CNC</h3><span><BadgeCheck size={12}/> Perfil completo</span></div>
+         <p>Operador CNC · 6 anos de experiência</p>
+        </div>
+        <div className="talentos-profile-score"><b>92%</b><span>compatibilidade</span></div>
+       </div>
+       <div className="talentos-compatibility">
+        <div><span>Competências para a vaga</span><b>3 de 3</b></div>
+        <div className="talentos-compatibility-bar"><i/></div>
+       </div>
+       <div className="talentos-profile-proof"><BadgeCheck size={16}/><span>CNC, Metrologia e Desenho Técnico presentes no perfil.</span></div>
+      </article>
+     </div>
+
+     <div className="talentos-floating-proof">
+      <Target size={17}/>
+      <div><b>Vaga e capacidade conectadas</b><span>Menos ruído. Mais gente certa no processo.</span></div>
      </div>
     </div>
    </div>
