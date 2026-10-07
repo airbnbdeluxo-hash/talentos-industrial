@@ -58,6 +58,18 @@ test('missing deployment metadata permits only known canonical production host',
   );
 });
 
+test('local development rejects the production backend', () => {
+  const result = resolveSupabaseClientTarget({
+    ...base,
+    isProductionBuild: false,
+    deploymentEnvironment: 'development',
+    hostname: 'localhost',
+    configuredUrl: productionUrl,
+    configuredKey: base.productionPublishableKey,
+  });
+  assert.deepEqual(result, { url: undefined, key: undefined });
+});
+
 test('local development can explicitly use a chosen backend', () => {
   const result = resolveSupabaseClientTarget({
     ...base,
