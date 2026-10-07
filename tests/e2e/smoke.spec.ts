@@ -60,8 +60,8 @@ test.describe('TalentOS smoke', () => {
   test('entrada separa claramente profissional e empresa', async ({ page }) => {
     await page.goto('/?e2eAuthGate=1');
 
-    await expect(page.getByRole('heading', { level: 1, name: 'A indústria contrata quem sabe fazer.' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Encontrar vagas na indústria', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Feita para quem move a indústria.' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Encontrar minha vaga', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Contratar para minha fábrica', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Criar meu Skill Passport', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Já tenho conta · Entrar', exact: true })).toBeVisible();
