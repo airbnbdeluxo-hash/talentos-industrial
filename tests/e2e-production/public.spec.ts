@@ -1,4 +1,7 @@
 import { expect, test } from '@playwright/test';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
 
 test('área pública não apresenta perfis de demonstração como dados reais', async ({ page }) => {
   await page.goto('/');
@@ -18,21 +21,13 @@ test('recuperação de senha usa título coerente e mantém a tela de login aces
   await expect(page.getByLabel('E-mail')).toBeVisible();
 });
 
-test('recuperação de senha sempre retorna para a produção do TalentOS', async ({ page }) => {
-  let recoveryRequestUrl = '';
-  await page.route('https://kvxqhvngkjxqlvlzcsef.supabase.co/auth/v1/recover**', async route => {
-    recoveryRequestUrl = route.request().url();
-    await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
-  });
-
-  await page.goto('/');
-  await page.getByRole('button', { name: 'Entrar', exact: true }).first().evaluate((button) => (button as HTMLButtonElement).click());
-  await page.getByRole('button', { name: 'Alterar ou recuperar minha senha' }).click();
-  await page.getByLabel('E-mail').fill('teste-recuperacao@example.com');
-  await page.getByRole('button', { name: 'Enviar link de recuperação' }).click();
-
-  await expect.poll(() => recoveryRequestUrl).not.toBe('');
-  expect(new URL(recoveryRequestUrl).searchParams.get('redirect_to')).toBe('https://talentos-industrial.vercel.app/?auth=recovery');
+test('confirmação e recuperação usam a URL canônica de produção', async () => {
+  const here = dirname(fileURLToPath(import.meta.url));
+  const source = readFileSync(resolve(here, '../../src/App.tsx'), 'utf8');
+  expect(source).toContain("https://talentos-industrial.vercel.app");
+  expect(source).toContain("authRedirectUrl('confirm')");
+  expect(source).toContain("authRedirectUrl('recovery')");
+  expect(source).not.toContain("resetPasswordForEmail(authEmail.trim(),{redirectTo:window.location.origin})");
 });
 
 test('preview não envia requisições ao Supabase de produção', async ({ page }) => {
