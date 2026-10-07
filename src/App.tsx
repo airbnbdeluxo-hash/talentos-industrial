@@ -1089,7 +1089,7 @@ function LandingPage({onCandidateSignup,onCompanySignup,onLogin,onDemo}:{onCandi
   return()=>window.clearTimeout(next)
  },[step,maxSteps,reduceMotion,paused,heroInView,pageVisible]);
  const isProfessional=audience==='candidato';
- const primaryLabel='Encontrar minha vaga';
+ const primaryLabel='Mudar minha carreira';
  const primaryAction=()=>window.location.assign('/vagas');
  const advance=()=>{if(!reduceMotion)setStep(current=>(current+1)%maxSteps)};
  const skills=[
@@ -1134,23 +1134,23 @@ function LandingPage({onCandidateSignup,onCompanySignup,onLogin,onDemo}:{onCandi
 
     <div className="talentos-hero-copy">
      <div className="talentos-hero-eyebrow talentos-hero-enter">TALENTOS INDUSTRIAL · SERRA GAÚCHA</div>
-     <h1 className="talentos-hero-title talentos-hero-enter" aria-label="Feita para quem move a indústria.">
-      Feita para quem <span className="talentos-hero-highlight">move a indústria
+     <h1 className="talentos-hero-title talentos-hero-enter" aria-label="Sua melhor vaga na indústria começa aqui.">
+      Sua melhor vaga <span className="talentos-hero-highlight">na indústria
        <svg viewBox="0 0 360 18" preserveAspectRatio="none" aria-hidden="true"><path d="M4 12 C50 2 88 18 132 10 C179 2 213 17 258 9 C302 2 329 12 356 5"/></svg>
-      </span>.
+      </span> começa aqui.
      </h1>
-     <p className="talentos-hero-subtitle talentos-hero-enter">Profissionais acham oportunidades que valorizam o que sabem fazer. Empresas acham quem entrega desde o primeiro dia.</p>
+     <p className="talentos-hero-subtitle talentos-hero-enter">Você já sabe fazer. Agora seja visto por quem paga o que isso vale. Empresas encontram aqui os profissionais mais preparados da indústria.</p>
 
      <div className="talentos-hero-ctas talentos-hero-enter">
       <div className="talentos-hero-cta-block">
        <button ref={bodyCtaRef} className="talentos-hero-primary" onClick={()=>window.location.assign('/vagas')}>
-        Encontrar minha vaga <ChevronRight size={18}/>
+        Mudar minha carreira <ChevronRight size={18}/>
        </button>
        <p>Grátis, sempre. Crie seu perfil em minutos.</p>
       </div>
       <div className="talentos-hero-cta-block">
        <button className="talentos-hero-secondary" onClick={onCompanySignup}>
-        <Building2 size={17}/> Anunciar vagas
+        <Building2 size={18}/> Contratar os melhores
        </button>
        <p>Publique sua primeira vaga e receba candidatos qualificados.</p>
       </div>
