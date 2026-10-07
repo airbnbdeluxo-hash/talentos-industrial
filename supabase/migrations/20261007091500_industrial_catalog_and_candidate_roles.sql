@@ -131,6 +131,8 @@ VALUES
   ('WCM', 'Industrial')
 ON CONFLICT (name) DO NOTHING;
 
+ALTER TABLE public.job_alerts ADD COLUMN IF NOT EXISTS company_name text;
+
 ALTER TABLE public.candidate_profiles
   ADD COLUMN IF NOT EXISTS current_role_title text,
   ADD COLUMN IF NOT EXISTS desired_role_titles text[] NOT NULL DEFAULT '{}'::text[];
