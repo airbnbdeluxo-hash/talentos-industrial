@@ -241,19 +241,19 @@ test.describe('TalentOS authenticated journeys', () => {
 
     await job.getByRole('button', { name: 'Editar vaga', exact: true }).click();
     await expect(page.getByRole('heading', { level: 2, name: 'Editar vaga' })).toBeVisible();
-    await page.getByLabel('Cargo').fill('Operador CNC Sênior');
+    await page.getByLabel('Cargo da vaga').selectOption({ label: 'Programador CNC' });
     await page.getByRole('button', { name: 'Salvar alterações', exact: true }).click();
 
-    job = page.locator('article.company-managed-job').filter({ hasText: 'Operador CNC Sênior' }).first();
+    job = page.locator('article.company-managed-job').filter({ hasText: 'Programador CNC' }).first();
     await expect(job).toBeVisible();
     await expect(job.getByText('2', { exact: true }).first()).toBeVisible();
 
     await job.getByRole('button', { name: 'Duplicar vaga', exact: true }).click();
     await expect(page.getByRole('heading', { level: 2, name: 'Estruturar nova vaga' })).toBeVisible();
-    await expect(page.getByLabel('Cargo')).toHaveValue('Operador CNC Sênior (cópia)');
+    await expect(page.getByLabel('Cargo da vaga')).toHaveValue('Programador CNC');
     await page.locator('.modal').getByRole('button', { name: 'Criar vaga', exact: true }).click();
 
-    await expect(page.locator('article.company-managed-job').filter({ hasText: 'Operador CNC Sênior (cópia)' })).toBeVisible();
+    await expect(page.locator('article.company-managed-job').filter({ hasText: 'Programador CNC' })).toHaveCount(2);
     await expect(page.locator('article.company-managed-job')).toHaveCount(4);
   });
 
