@@ -18,6 +18,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Scan tracked files for secrets and unsafe frontend APIs
+        run: npm run security:scan
       - run: npm ci --no-audit --no-fund
       - run: npm run build
 
