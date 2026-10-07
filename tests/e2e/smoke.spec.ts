@@ -61,6 +61,10 @@ test.describe('TalentOS smoke', () => {
     await page.goto('/?e2eAuthGate=1');
 
     await expect(page.getByRole('heading', { level: 1, name: 'Sua melhor vaga na indústria começa aqui.' })).toBeVisible();
+    await expect(page.getByText('Empresas encontram aqui os profissionais mais preparados da indústria.', { exact: true })).toBeVisible();
+    await expect(page.getByText('TALENTOS INDUSTRIAL · SERRA GAÚCHA', { exact: true })).toHaveCount(0);
+    await expect(page.getByText('Capacidade que continua depois da contratação.', { exact: true })).toHaveCount(0);
+    await expect(page.getByText('Entre pelo que você precisa resolver agora.', { exact: true })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Mudar minha carreira', exact: true }).first()).toBeVisible();
     await expect(page.getByRole('button', { name: 'Contratar os melhores', exact: true })).toBeVisible();
     await expect(page.getByText('Grátis, sempre. Crie seu perfil em minutos.', { exact: true })).toBeVisible();
