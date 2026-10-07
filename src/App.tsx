@@ -632,7 +632,7 @@ const openJobEditor=(target:Job)=>{
 };
 const duplicateJob=(target:Job)=>{
  setEditingJobId(null);
- setF(x=>({...x,title:target.title+' (cópia)',description:target.description??'',companyId:target.companyId,city:target.city,min:formatBrazilianMoney(target.min),max:formatBrazilianMoney(target.max),skills:target.skills.join(', '),shift:target.shift,screeningQuestions:target.screeningQuestions.join('\n'),employmentType:target.employmentType??'CLT',workModel:target.workModel??'Presencial',benefits:(target.benefits??[]).join(', '),travelRequired:Boolean(target.travelRequired),interviewQuestions:target.interviewQuestions.join('\n')}));
+ setF(x=>({...x,title:target.title,description:target.description??'',companyId:target.companyId,city:target.city,min:formatBrazilianMoney(target.min),max:formatBrazilianMoney(target.max),skills:target.skills.join(', '),shift:target.shift,screeningQuestions:target.screeningQuestions.join('\n'),employmentType:target.employmentType??'CLT',workModel:target.workModel??'Presencial',benefits:(target.benefits??[]).join(', '),travelRequired:Boolean(target.travelRequired),interviewQuestions:target.interviewQuestions.join('\n')}));
  setModal('job');
 };
 const changeJobStatus=async(targetJobId:string,status:'aberta'|'pausada'|'fechada')=>{
