@@ -82,6 +82,9 @@ test.describe('TalentOS authenticated journeys', () => {
     await expect(page.locator('fieldset.catalog-picker').filter({ hasText: 'Cargo' })).toBeVisible();
     await expect(page.locator('fieldset.catalog-picker').filter({ hasText: 'Competência' })).toBeVisible();
     await expect(page.locator('fieldset.catalog-picker').filter({ hasText: 'Turno' })).toBeVisible();
+    await expect(page.locator('.candidate-jobs-panel')).toHaveCount(2);
+    await expect(page.locator('.candidate-jobs-panel').filter({ hasText: 'Vagas salvas' })).toBeVisible();
+    await expect(page.locator('.candidate-jobs-panel').filter({ hasText: 'Alertas de vagas' })).toBeVisible();
 
     await page.getByRole('button', { name: 'Criar alerta', exact: true }).click();
     await expect(page.getByRole('heading', { level: 2, name: 'Escolha o que deseja acompanhar' })).toBeVisible();

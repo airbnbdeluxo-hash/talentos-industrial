@@ -61,6 +61,12 @@ test.describe('TalentOS smoke', () => {
     await page.goto('/?e2eAuthGate=1');
 
     await expect(page.getByRole('heading', { level: 1, name: 'Sua melhor vaga na indústria começa aqui.' })).toBeVisible();
+    const industryLine = page.locator('.talentos-hero-line-industry');
+    const heroVisual = page.locator('.talentos-hero-visual');
+    const [industryBox, visualBox] = await Promise.all([industryLine.boundingBox(), heroVisual.boundingBox()]);
+    expect(industryBox).not.toBeNull();
+    expect(visualBox).not.toBeNull();
+    expect(industryBox!.x + industryBox!.width).toBeLessThanOrEqual(visualBox!.x + 2);
     await expect(page.getByText('Empresas encontram aqui os profissionais mais preparados da indústria.', { exact: true })).toBeVisible();
     await expect(page.locator('.talentos-hero-eyebrow')).toHaveCount(0);
     await expect(page.getByText('Capacidade que continua depois da contratação.', { exact: true })).toHaveCount(0);

@@ -738,3 +738,91 @@
 .jobs-filter-grid .catalog-selected { min-height:22px; }
 .jobs-filter-grid .catalog-expand summary { font-size:11px; }
 .candidate-facts b { overflow-wrap:anywhere; word-break:break-word; }
+
+
+/* Candidate jobs: saved vacancies and alerts need clear vertical rhythm. */
+.candidate-jobs-panel{
+  margin-top:16px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:#fff;
+  overflow:hidden;
+}
+.candidate-jobs-panel + .candidate-jobs-panel{margin-top:14px}
+.candidate-jobs-panel-head{
+  padding:14px 16px 10px;
+  border-bottom:1px solid #e7edf5;
+  background:#fbfcfe;
+}
+.candidate-jobs-panel-head b{
+  display:block;
+  color:#172033;
+  font-size:13px;
+  line-height:1.35;
+}
+.candidate-jobs-panel-body{
+  display:grid;
+  gap:0;
+  padding:4px 16px 8px;
+}
+.candidate-panel-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto auto;
+  gap:14px;
+  align-items:center;
+  min-width:0;
+  padding:12px 0;
+  border-bottom:1px solid #eef2f7;
+}
+.candidate-panel-row:last-child{border-bottom:0}
+.candidate-panel-title{
+  min-width:0;
+  color:#243247;
+  font-size:12px;
+  line-height:1.5;
+  overflow-wrap:anywhere;
+}
+.candidate-panel-actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.candidate-panel-actions .textbtn{
+  margin:0;
+  min-height:32px;
+  padding:5px 7px;
+}
+.candidate-delete-action{color:#b42318!important}
+.candidate-alert-status{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:62px;
+  padding:5px 9px;
+  border-radius:999px;
+  font-size:10px;
+  font-style:normal;
+  font-weight:750;
+  line-height:1;
+}
+.candidate-alert-status.is-active{color:#067647;background:#ecfdf3;border:1px solid #abefc6}
+.candidate-alert-status.is-paused{color:#475467;background:#f2f4f7;border:1px solid #e4e7ec}
+.candidate-panel-empty{
+  margin:0;
+  padding:12px 0 14px;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.5;
+}
+@media(max-width:720px){
+  .candidate-jobs-panel{margin-top:14px}
+  .candidate-panel-row{
+    grid-template-columns:1fr;
+    gap:8px;
+    align-items:start;
+  }
+  .candidate-alert-status{justify-self:start}
+  .candidate-panel-actions{justify-content:flex-start;gap:10px}
+}
