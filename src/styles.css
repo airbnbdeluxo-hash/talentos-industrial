@@ -729,3 +729,12 @@
  .catalog-option-list { grid-template-columns:1fr; }
  .job-alert-criterion { grid-template-columns:1fr; }
 }
+
+
+.candidate-form-grid > .catalog-picker { grid-column:1/-1; margin:10px 0; }
+.jobs-filter-grid > .catalog-picker { margin:0; min-width:0; }
+.jobs-filter-grid > .catalog-picker legend { font-size:10px; }
+.jobs-filter-grid .catalog-option-list { grid-template-columns:1fr; max-height:210px; }
+.jobs-filter-grid .catalog-selected { min-height:22px; }
+.jobs-filter-grid .catalog-expand summary { font-size:11px; }
+.candidate-facts b { overflow-wrap:anywhere; word-break:break-word; }
