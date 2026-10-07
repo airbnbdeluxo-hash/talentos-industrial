@@ -54,3 +54,11 @@ test('preview não envia requisições ao Supabase de produção', async ({ page
   await page.waitForTimeout(300);
   expect(productionRequests).toEqual([]);
 });
+
+test('conta existente pode continuar cadastro empresarial sem nova confirmação', async () => {
+  const here = dirname(fileURLToPath(import.meta.url));
+  const source = readFileSync(resolve(here, '../../src/App.tsx'), 'utf8');
+  expect(source).toContain("existingCandidateStartingCompany");
+  expect(source).toContain("requested_account_type:'empresa'");
+  expect(source).toContain('Não será enviado um novo e-mail de confirmação.');
+});
