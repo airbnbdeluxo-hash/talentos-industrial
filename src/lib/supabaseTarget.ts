@@ -41,10 +41,8 @@ export function resolveSupabaseClientTarget(options: SupabaseClientTargetOptions
     const candidateHost = new URL(url).hostname.toLowerCase();
     const productionHost = new URL(options.productionUrl).hostname.toLowerCase();
 
-    // Preview builds must use a *separate* Supabase project, not production.
-    // Fail closed even if a production URL/key were accidentally copied into
-    // the preview environment variables.
-    if (options.isProductionBuild && candidateHost === productionHost) {
+    // Non-production runtimes must not reuse the production backend.
+    if (candidateHost === productionHost) {
       return emptyConfig;
     }
   } catch {
