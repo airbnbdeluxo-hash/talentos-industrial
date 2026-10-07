@@ -30,6 +30,16 @@ test('confirmação e recuperação usam a URL canônica de produção', async (
   expect(source).not.toContain("resetPasswordForEmail(authEmail.trim(),{redirectTo:window.location.origin})");
 });
 
+test('convites administrativos usam inviteUserByEmail e não aceitam fallback de link', async () => {
+  const here = dirname(fileURLToPath(import.meta.url));
+  const source = readFileSync(resolve(here, '../../supabase/functions/company-team/index.ts'), 'utf8');
+  expect(source).toContain('admin.auth.admin.inviteUserByEmail');
+  expect(source).not.toContain('admin.auth.admin.createUser');
+  expect(source).not.toContain("delivery: 'link'");
+  expect(source).toContain('admin.auth.admin.deleteUser(createdUser.id)');
+  expect(source).toContain('O Supabase não confirmou o envio do e-mail de convite.');
+});
+
 test('preview não envia requisições ao Supabase de produção', async ({ page }) => {
   const productionRequests: string[] = [];
   await page.route('https://kvxqhvngkjxqlvlzcsef.supabase.co/**', async route => {

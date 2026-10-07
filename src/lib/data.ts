@@ -591,7 +591,7 @@ async function invokeCompanyTeam(input:CompanyTeamActionInput){
  if(data?.error)throw new Error(data.error);
  return data;
 }
-export async function manageRemoteCompanyTeam(input:{action:'list'|'invite'|'revoke-invitation';companyId:string;email?:string;memberRole?:'recruiter'|'viewer';invitationId?:string}):Promise<CompanyTeamSnapshot|{delivery:'email'|'link';invitationId:string;inviteUrl:string;expiresAt:string}|{ok:true}>{
+export async function manageRemoteCompanyTeam(input:{action:'list'|'invite'|'revoke-invitation';companyId:string;email?:string;memberRole?:'recruiter'|'viewer';invitationId?:string}):Promise<CompanyTeamSnapshot|{delivery:'email';invitationId:string;expiresAt:string}|{ok:true}>{
  return invokeCompanyTeam(input);
 }
 export async function acceptRemoteCompanyInvitation(invitationId:string){
