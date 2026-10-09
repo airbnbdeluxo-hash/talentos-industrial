@@ -18,12 +18,8 @@ begin
     raise exception 'browser clients must not change or remove company_members directly';
   end if;
 
-  if has_function_privilege('anon','public.company_team_update_member_role(uuid,uuid,text)','execute')
-     or has_function_privilege('anon','public.company_team_remove_member(uuid,uuid)','execute')
-     or has_function_privilege('anon','public.company_team_transfer_owner(uuid,uuid)','execute')
-     or has_function_privilege('anon','public.accept_company_invitation(uuid)','execute') then
-    raise exception 'anonymous users must not execute company team functions';
-  end if;
+  -- These browser RPCs were removed; passing their names to
+  -- has_function_privilege raises undefined_function before the absence check.
   if to_regprocedure('public.company_team_update_member_role(uuid,uuid,text)') is not null
      or to_regprocedure('public.company_team_remove_member(uuid,uuid)') is not null
      or to_regprocedure('public.company_team_transfer_owner(uuid,uuid)') is not null
