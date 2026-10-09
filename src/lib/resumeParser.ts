@@ -1,5 +1,3 @@
-import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-
 export type ResumeDraft = {
   name: string;
   role: string;
@@ -148,7 +146,7 @@ export function parseResumeText(text: string, catalog: string[] = []): ResumeDra
           const index = normalizedClean.indexOf(entry.normalized);
           const start = Math.max(0, index - 90);
           const end = Math.min(clean.length, index + entry.skill.length + 110);
-          const excerpt = clean.slice(start, end).replace(/\\s+/g, ' ').trim();
+          const excerpt = clean.slice(start, end).replace(/\s+/g, ' ').trim();
           const before = normalizedClean.slice(Math.max(0, index - 180), index);
           const confidence = /habilidades|competencias|conhecimentos|skills/.test(before) ? 0.8 : 0.6;
           return [entry.skill, { skill: entry.skill, excerpt, confidence }];
@@ -182,6 +180,7 @@ export async function extractResumeText(file: File): Promise<string> {
 
   if (lowerName.endsWith('.pdf') || file.type === 'application/pdf') {
     const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
+    const { default: workerUrl } = await import('pdfjs-dist/build/pdf.worker.min.mjs?url');
     const data = new Uint8Array(await file.arrayBuffer());
     pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
     const loadingTask = pdfjs.getDocument({ data });
@@ -190,9 +189,7 @@ export async function extractResumeText(file: File): Promise<string> {
     for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
       const page = await pdf.getPage(pageNumber);
       const content = await page.getTextContent();
-      const pageText = content.items
-        .map((item: any) => ('str' in item ? item.str : ''))
-        .join(' ');
+      const pageText = resumePdfPageText(content.items);
       pages.push(pageText);
     }
     const output = cleanText(pages.join('\n'));
@@ -209,6 +206,15 @@ export async function extractResumeText(file: File): Promise<string> {
   }
 
   throw new Error('Formato não suportado. Envie PDF ou Word (.docx).');
+}
+
+// PDF line boundaries separate names, labels and section headings.
+// Flattening a page into one line makes those fields indistinguishable.
+export function resumePdfPageText(items: unknown[]): string {
+  return items.map(item => {
+    if (!item || typeof item !== 'object' || !('str' in item) || typeof item.str !== 'string') return '';
+    return item.str + ('hasEOL' in item && item.hasEOL ? '\n' : ' ');
+  }).join('');
 }
 
 export async function parseResumeFile(file: File, catalog: string[] = []): Promise<ResumeDraft> {
