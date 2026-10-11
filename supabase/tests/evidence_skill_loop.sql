@@ -16,8 +16,13 @@ insert into public.applications(job_id,candidate_id) values('a1000000-0000-4000-
 set local role authenticated;
 insert into public.candidate_skills(candidate_id,skill_id,proficiency,verified) values('a1000000-0000-4000-8000-000000000001','a1000000-0000-4000-8000-000000000010',1,true);
 insert into public.skill_evidence(id,candidate_id,skill_id,evidence_type,title,score,verified) values
- ('a1000000-0000-4000-8000-000000000040','a1000000-0000-4000-8000-000000000001','a1000000-0000-4000-8000-000000000010','desafio','QA reviewed practical',100,true);
+ ('a1000000-0000-4000-8000-000000000040','a1000000-0000-4000-8000-000000000001','a1000000-0000-4000-8000-000000000010','certificado','QA reviewed certificate',null,false);
 do $$ declare result jsonb; begin
+ begin
+  insert into public.skill_evidence(candidate_id,skill_id,evidence_type,title,score)
+  values(auth.uid(),'a1000000-0000-4000-8000-000000000010','desafio','Forged challenge',100);
+  raise exception 'FAIL candidate forged scored challenge';
+ exception when insufficient_privilege then null; end;
  if (select verified from public.candidate_skills where skill_id='a1000000-0000-4000-8000-000000000010') then raise exception 'FAIL self verification'; end if;
  result:=public.apply_skill_evidence('a1000000-0000-4000-8000-000000000040');
  if result->>'status'<>'aguardando_validacao' then raise exception 'FAIL pending evidence applied'; end if;
@@ -67,7 +72,10 @@ do $$ declare result jsonb; begin
  if not exists(select 1 from public.matches where job_id='a1000000-0000-4000-8000-000000000030' and score>50) then raise exception 'FAIL matching refresh'; end if;
  result:=public.apply_skill_evidence('a1000000-0000-4000-8000-000000000040');
  if result->>'status'<>'ja_aplicada' then raise exception 'FAIL idempotency'; end if;
- update public.candidate_skills set proficiency=5,source_confidence=1 where skill_id='a1000000-0000-4000-8000-000000000010';
+ begin
+  update public.candidate_skills set proficiency=5,source_confidence=1 where skill_id='a1000000-0000-4000-8000-000000000010';
+  raise exception 'FAIL trusted provenance change accepted';
+ exception when raise_exception then if sqlerrm like 'FAIL%' then raise; end if; end;
  if (select proficiency from public.candidate_skills where skill_id='a1000000-0000-4000-8000-000000000010')<>2 then raise exception 'FAIL trusted proficiency overwritten'; end if;
  if has_function_privilege('anon','public.apply_skill_evidence(uuid)','execute') then raise exception 'FAIL anon RPC privilege'; end if;
  if has_table_privilege('authenticated','public.candidate_skill_events','insert') then raise exception 'FAIL audit event forgery privilege'; end if;

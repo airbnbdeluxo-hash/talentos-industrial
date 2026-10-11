@@ -1,4 +1,5 @@
 import { createClient } from 'supabase';
+import { isValidInvitationEmail } from './validation.ts';
 
 const cors = (origin: string) => ({
   'Access-Control-Allow-Origin': origin,
@@ -182,7 +183,7 @@ Deno.serve(async (request) => {
     if (action === 'invite') {
       const email = normalizeEmail(body.email);
       const role = String(body.memberRole ?? '');
-      if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email) || email.length > 254) return json({ error: 'Informe um e-mail válido.' }, 400, origin);
+      if (!isValidInvitationEmail(email)) return json({ error: 'Informe um e-mail válido.' }, 400, origin);
       if (role !== 'recruiter' && role !== 'viewer') return json({ error: 'Escolha Recruiter ou Viewer.' }, 400, origin);
 
       const findUserByEmail = async () => {
