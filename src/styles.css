@@ -992,3 +992,42 @@
 .shell .career-roadmap-item span{display:block;color:#586c85;font-size:12px;margin:4px 0 9px}
 .shell .career-roadmap-item .secondary{white-space:nowrap}
 @media(max-width:600px){.shell .career-roadmap-item{align-items:stretch;flex-direction:column}.shell .career-roadmap-item .secondary{justify-content:center}}
+
+
+/* Quality baseline v2: exact visual hierarchy of approved three KPI cards.
+   Applies to candidate/company/admin content and every modal, not the landing page. */
+.shell:not(.landing-active){
+ --talentos-font:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+ --talentos-text:#102e53;--talentos-support:#586c85;--talentos-label:#315d91;
+ font-family:var(--talentos-font);font-size:13px;line-height:1.5;font-weight:400;
+}
+.shell:not(.landing-active) :is(main,aside,section,article,nav,button,input,select,textarea,small,p,span,b,strong,h1,h2,h3,legend,label){
+ font-family:var(--talentos-font);
+}
+.shell:not(.landing-active) :is(.card,.modal,.mini-panel,.settings,.jobs-filter-panel,.candidate-resume-section,.skillcategory,.company-home,.company-jobs-page,.company-skills-page,.applications-page,.candidate-onboarding){
+ font-size:13px;line-height:1.5;
+}
+.shell:not(.landing-active) :is(.card,.modal,.mini-panel,.settings,.jobs-filter-panel,.candidate-resume-section,.skillcategory,.applications-page) :is(p,small,.field-hint,.reason,.engine-tag){
+ font-size:12px;line-height:1.55;font-weight:400;color:var(--talentos-support);
+}
+.shell:not(.landing-active) :is(.card,.modal,.mini-panel,.settings,.jobs-filter-panel,.candidate-resume-section,.skillcategory,.applications-page) :is(label,.field-label,.setting>span,.feature b,.training-title b){
+ font-size:13px;line-height:1.45;font-weight:650;color:var(--talentos-label);
+}
+.shell:not(.landing-active) :is(.card,.modal,.mini-panel,.settings,.jobs-filter-panel,.candidate-resume-section,.skillcategory,.applications-page) :is(h2,h3){
+ font-size:clamp(16px,1.5vw,21px);font-weight:750;line-height:1.25;letter-spacing:-.025em;color:var(--talentos-text);
+}
+.shell:not(.landing-active) :is(.career-metric,.stat,.company-kpi,.company-job-summary,.company-skills-summary>.card,.funnel>div) :is(span,.metric-label){
+ font-size:13px;line-height:1.45;font-weight:650;color:var(--talentos-label);
+}
+.shell:not(.landing-active) :is(.career-metric,.stat,.company-kpi,.company-job-summary,.company-skills-summary>.card,.funnel>div) :is(strong,.metric-value){
+ font-size:32px;line-height:1.2;font-weight:750;letter-spacing:-.025em;color:var(--talentos-text);
+}
+.shell:not(.landing-active) :is(.career-metric,.stat,.company-kpi,.company-job-summary,.company-skills-summary>.card,.funnel>div) small{
+ font-size:12px;line-height:1.5;font-weight:400;color:var(--talentos-support);
+}
+.shell:not(.landing-active) :is(.primary,.secondary,.textbtn,.ghost,.nav,.candidate-hero-link){font-size:13px;line-height:1.35;font-weight:650}
+.shell:not(.landing-active) .candidate-onboarding{position:relative;max-height:min(92vh,900px);overflow-y:auto;padding-top:36px}
+.shell:not(.landing-active) .candidate-onboarding .onboarding-exit{position:sticky;top:0;float:right;right:auto;margin:-18px -9px 3px 12px;z-index:9;flex-shrink:0;background:#e8f1fb;color:#143b6d;border:1px solid #c7dbed;box-shadow:0 3px 12px rgba(20,52,99,.13)}
+.shell:not(.landing-active) .candidate-onboarding .onboarding-exit:hover{background:#d9eafa}
+.shell:not(.landing-active) .candidate-onboarding .onboarding-exit:focus-visible{outline:3px solid #12b8db}
+@media(max-width:720px){.shell:not(.landing-active) .candidate-onboarding{max-height:calc(100dvh - 20px);padding-top:23px}.shell:not(.landing-active) .candidate-onboarding .onboarding-exit{margin:-10px -5px 3px 8px}}
