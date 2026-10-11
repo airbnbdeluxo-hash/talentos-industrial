@@ -28,3 +28,14 @@ test('Word text remains editable and unknown skills are not invented', () => {
   assert.equal(draft.city,'Porto Alegre');
   assert.deepEqual(draft.skills,[]);
 });
+
+test('does not infer a short skill from inside a longer word', () => {
+  const draft = parseResumeText('Maria Silva\nExperiência: planejamento técnico e mecânica\nHabilidades: Metrologia', ['CNC','Metrologia','Técnica']);
+  assert.deepEqual(draft.skills,['Metrologia']);
+});
+
+test('preserves independent source-line evidence for an extracted skill', () => {
+  const draft = parseResumeText('Maria Silva\nHabilidades\nMetrologia e Soldagem TIG', ['Metrologia','Soldagem TIG']);
+  assert.deepEqual(draft.skills,['Metrologia','Soldagem TIG']);
+  assert.ok(draft.skillMentions.every(item=>item.excerpt==='Metrologia e Soldagem TIG'));
+});
