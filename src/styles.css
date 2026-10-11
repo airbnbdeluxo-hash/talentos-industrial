@@ -859,3 +859,11 @@ p{font-size:14px;line-height:1.65}.stat span,.matchbody span,.jobrow span,.candi
 @media(max-width:720px){.shell aside{padding:14px 13px 12px}.brand{padding:3px 7px 14px}.shell nav{gap:7px;padding-bottom:6px;scrollbar-width:thin}.nav{min-width:max-content;padding:10px 13px;transform:none!important}.shell main{padding:22px 15px}.shell header{gap:14px}.stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{padding:17px}.stat strong{font-size:27px}.header-actions{flex-wrap:wrap}.jobrow{grid-template-columns:minmax(0,1fr)}.pipeline{grid-template-columns:1fr}.candidate-form-actions{bottom:-18px}}
 @media(max-width:380px){.stats{grid-template-columns:1fr}.shell main{padding:17px 11px}.card{padding:15px}}
 @media(prefers-reduced-motion:reduce){.nav,.primary,.secondary,.jobrow button,.darkbox button{transition:none!important}}
+
+
+/* Prevent mobile document overflow without disabling local horizontal menus */
+html,body,#root{max-width:100%;min-width:0}
+body{overflow-x:clip}
+.shell,.shell main,.card,.grid,.grid>*{min-width:0}
+:where(.shell main,.card,.match,.jobrow,.company,.candidate){overflow-wrap:anywhere}
+@media(max-width:720px){.shell{max-width:100%;overflow-x:clip}.shell nav{max-width:100%;overflow-x:auto}.shell main{min-width:0;max-width:100%}.header-actions,.passport-actions{max-width:100%;flex-wrap:wrap}}
