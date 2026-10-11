@@ -142,6 +142,8 @@ const [publicJob,setPublicJob]=useState<Job|null>(null);
 const [publicJobLoading,setPublicJobLoading]=useState(false);
 const [companyOnboarding,setCompanyOnboarding]=useState(false);
 const [companyCnpj,setCompanyCnpj]=useState('');
+const [companyCreateBusy,setCompanyCreateBusy]=useState(false);
+const [companyCreateError,setCompanyCreateError]=useState('');
 const [jobAlertName,setJobAlertName]=useState('');
 const [screeningJobId,setScreeningJobId]=useState<string|null>(null);
 const [screeningAnswers,setScreeningAnswers]=useState<Record<string,string>>({});
@@ -708,7 +710,17 @@ const openCandidateEditor=()=>{
  setModal('talent');
 };
 const openSkillProof=(skill?:string)=>{if(!talent?.skills.length){setToast('Adicione primeiro uma habilidade ao seu currículo');openCandidateEditor();return;}setProofSkill(skill||talent.skills[0])};
-const createCompany=async()=>{try{
+const createCompany=async()=>{
+ if(companyCreateBusy)return;
+ setCompanyCreateError('');
+ const companyName=f.name.trim();
+ if(!companyName){setCompanyCreateError('Informe o nome da empresa.');return}
+ if(!f.talentCity){setCompanyCreateError('Escolha uma cidade na lista oficial.');return}
+ if(companyOnboarding&&dataMode==='remote'&&!/^\d{14}$/.test(companyCnpj)){
+  setCompanyCreateError('Informe os 14 dígitos do CNPJ.');return;
+ }
+ setCompanyCreateBusy(true);
+ try{
  const city=await requireCanonicalCity(f.talentCity);
  if(dataMode==='remote'&&session){
   if(companyOnboarding&&role!=='admin'){
@@ -728,7 +740,11 @@ const createCompany=async()=>{try{
  }else{
   const id='c'+Date.now();persist({...db,companies:[...db.companies,{id,name:f.name||'Nova empresa',city,industry:f.industry}]},'Empresa criada');setModal(null);setTab('companies');
  }
-}catch(err){console.error(err);setToast(localizeDisplayedText(err instanceof Error?err.message:'Não foi possível criar a empresa'))}};
+}catch(err){
+ console.error(err);
+ const message=localizeDisplayedText(err instanceof Error?err.message:'Não foi possível criar a empresa');
+ setCompanyCreateError(message);setToast(message);
+}finally{setCompanyCreateBusy(false)}};
 const reviewEvidence=async(evidenceId:string,status:'aprovada'|'reprovada')=>{try{setReviewingEvidenceId(evidenceId);await reviewRemoteEvidence(evidenceId,status,reviewNotes[evidenceId]||undefined);const affectedJobIds=Array.from(new Set(db.applications.filter(app=>db.candidates.some(c=>c.evidence.some(e=>e.id===evidenceId&&c.id===app.candidateId))).map(app=>app.jobId)));for(const affectedJobId of affectedJobIds){try{await generateRemoteMatches(affectedJobId)}catch(matchErr){console.error('refresh matching',matchErr)}}await reloadRemote();setReviewNotes(x=>({...x,[evidenceId]:''}));setToast(status==='aprovada'?'Comprovante aprovado · compatibilidade atualizada':'Comprovante não aprovado · análise registrada')}catch(err){console.error(err);setToast(localizeDisplayedText(err instanceof Error?err.message:'Não foi possível revisar o comprovante'))}finally{setReviewingEvidenceId(null)}};
 const openEvidence=async(e:Evidence)=>{if(!e.storagePath)return;const tab=window.open('about:blank','_blank');try{const url=await getEvidenceDownloadUrl(e.storagePath);if(tab)tab.location.href=url;else window.location.href=url}catch(err){if(tab)tab.close();console.error(err);setToast('Não foi possível abrir o comprovante')}};
 const uploadEvidence=async(file:File,skillOverride?:string)=>{if(!session||role!=='candidato'||!talent)return;try{setUploadingEvidence(true);const skill=skillOverride||proofSkill||talent.skills[0];if(!skill)throw new Error('Adicione ao menos uma habilidade ao seu currículo');await uploadRemoteEvidence(session.user.id,skill,file);await reloadRemote();setProofSkill(null);setToast('Comprovante enviado · aguardando análise')}catch(err){console.error(err);setToast(localizeDisplayedText(err instanceof Error?err.message:'Não foi possível enviar o comprovante'))}finally{setUploadingEvidence(false)}};
@@ -1103,7 +1119,14 @@ return <div className={'shell '+(((import.meta.env.PROD||e2eAuthGate)&&!session&
 <div className="candidate-form-section"><div className="candidate-form-section-title"><div><b>Experiência e preferências</b><span>Contexto para oportunidades mais compatíveis</span></div><span className="candidate-form-step">3</span></div><div className="candidate-form-grid"><Field label="Anos de experiência" type="number" value={f.years} onChange={v=>setF({...f,years:v})}/><label className="field-label">Pretensão salarial (R$)<input inputMode="decimal" value={f.salary} onChange={e=>setF(x=>({...x,salary:e.target.value}))} onBlur={()=>setF(x=>({...x,salary:formatBrazilianMoney(x.salary)}))} placeholder="Ex.: 3.500,00" /><small className="field-hint">Use o padrão brasileiro: 3.500,00</small></label><CatalogMultiSelect label="Turnos preferidos" options={SHIFT_OPTIONS} selected={f.preferredShifts.split(',').map(value=>value.trim()).filter(Boolean)} onChange={items=>setF(x=>({...x,preferredShifts:items.join(', ')}))} hint="Escolha todas as escalas e turnos que aceita."/></div></div>
 <div className="candidate-form-section"><div className="candidate-form-section-title"><div><b>Apresentação profissional</b><span>Conte o que não cabe apenas nos campos acima</span></div><span className="candidate-form-step">4</span></div><label className="field-label candidate-bio">Sobre você<textarea rows={5} value={f.bio} onChange={e=>setF({...f,bio:e.target.value})} placeholder="Ex.: Tenho experiência com operação e preparação de torno CNC, leitura de desenho técnico, instrumentos de medição e controle de qualidade. Busco uma oportunidade para continuar evoluindo na área."/><small className="field-hint">Um resumo curto e objetivo já é suficiente.</small></label></div>
 <div className="candidate-form-actions"><button className="secondary" type="button" onClick={()=>setModal(null)}>Cancelar</button><button className="primary" type="button" onClick={createTalent}>{candidateProfileSetup?'Salvar e continuar':role==='candidato'?'Salvar currículo':'Adicionar talento'}</button></div>
-</>}{modal==='company'&&<>{companyOnboarding&&<div className="onboarding-hero"><div className="eyebrow">PREPARAÇÃO INICIAL (ONBOARDING) EMPRESARIAL (B2B)</div><h3>Bem-vindo ao TalentOS Industrial</h3><p>Em poucos passos vamos preparar sua operação: <b>1. empresa</b> → <b>2. primeira vaga</b> → <b>3. correspondência (matching)</b>.</p></div>}<Field label="Empresa" value={f.name} onChange={v=>setF({...f,name:v})}/>{companyOnboarding&&<label className="field-label">CNPJ<input inputMode="numeric" autoComplete="off" value={companyCnpj} onChange={e=>setCompanyCnpj(e.target.value.replace(/\D/g,'').slice(0,14))} placeholder="14 dígitos"/></label>}<CatalogSingleSelect label="Cidade" options={uniqueCatalogOptions(officialCityCatalog,db.candidates.map(item=>item.city),db.companies.map(item=>item.city),db.jobs.map(item=>item.city))} value={f.talentCity} onChange={value=>setF(x=>({...x,talentCity:value}))} hint="Selecione uma cidade do catálogo oficial; o texto pesquisado nunca é salvo sozinho."/><Field label="Segmento" value={f.industry} onChange={v=>setF({...f,industry:v})}/><button className="primary wide" onClick={createCompany}>Cadastrar empresa</button></>}</section></div>}</main></div>}
+</>}{modal==='company'&&<>{companyOnboarding&&<div className="onboarding-hero"><div className="eyebrow">PREPARAÇÃO INICIAL (ONBOARDING) EMPRESARIAL (B2B)</div><h3>Bem-vindo ao TalentOS Industrial</h3><p>Em poucos passos vamos preparar sua operação: <b>1. empresa</b> → <b>2. primeira vaga</b> → <b>3. correspondência (matching)</b>.</p></div>}<Field label="Empresa" value={f.name} onChange={v=>setF({...f,name:v})}/>{companyOnboarding&&<label className="field-label">CNPJ<input inputMode="numeric" autoComplete="off" value={companyCnpj} onChange={e=>setCompanyCnpj(e.target.value.replace(/\D/g,'').slice(0,14))} placeholder="14 dígitos"/></label>}<label className="field-label company-city-select">Cidade
+<select value={officialCityCatalog.includes(f.talentCity)?f.talentCity:''} onChange={e=>{setCompanyCreateError('');setF(x=>({...x,talentCity:e.target.value}))}} required>
+<option value="">Selecione uma cidade da lista oficial</option>
+{officialCityCatalog.map(city=><option key={city} value={city}>{city}</option>)}
+</select><small className="field-hint">Escolha a cidade uma única vez nesta lista.</small></label>
+<Field label="Segmento" value={f.industry} onChange={v=>setF({...f,industry:v})}/>
+{companyCreateError&&<p className="company-create-error" role="alert">{companyCreateError}</p>}
+<button className="primary wide" disabled={companyCreateBusy} onClick={()=>void createCompany()}>{companyCreateBusy?'Cadastrando empresa…':'Cadastrar empresa'}</button></>}</section></div>}</main></div>}
 
 function LandingPage({onCandidateSignup,onCompanySignup,onLogin,onDemo}:{onCandidateSignup:()=>void;onCompanySignup:()=>void;onLogin:()=>void;onDemo:()=>void}){
  const [audience,setAudience]=useState<'candidato'|'empresa'>('candidato');

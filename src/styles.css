@@ -1031,3 +1031,11 @@
 .shell:not(.landing-active) .candidate-onboarding .onboarding-exit:hover{background:#d9eafa}
 .shell:not(.landing-active) .candidate-onboarding .onboarding-exit:focus-visible{outline:3px solid #12b8db}
 @media(max-width:720px){.shell:not(.landing-active) .candidate-onboarding{max-height:calc(100dvh - 20px);padding-top:23px}.shell:not(.landing-active) .candidate-onboarding .onboarding-exit{margin:-10px -5px 3px 8px}}
+
+
+/* Company onboarding: one official city list and actionable inline errors */
+.shell:not(.landing-active) .company-city-select{display:flex;flex-direction:column;gap:8px;min-width:0;margin:12px 0}
+.shell:not(.landing-active) .company-city-select select{width:100%;max-width:100%;min-height:46px;background:#fff;border:1px solid #cbdbee;border-radius:11px;color:#102e53;padding:0 12px;font-size:14px}
+.shell:not(.landing-active) .company-city-select .field-hint{font-size:12px;color:#586c85}
+.shell:not(.landing-active) .company-create-error{padding:12px 14px;color:#a52b2b!important;font-size:13px!important;font-weight:600!important;line-height:1.5;border:1px solid #f2c5c5;background:#fff2f2;border-radius:11px;margin:12px 0}
+.shell:not(.landing-active) .modal button.primary:disabled{opacity:.62;cursor:wait}
