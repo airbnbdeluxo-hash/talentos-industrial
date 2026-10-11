@@ -172,7 +172,16 @@ export async function createRemoteCompany(userId:string, input:{name:string;city
 export async function createRemoteCompanyAccount(input:{name:string;cnpj:string;city:string;industry:string}){
  if(!supabase)throw new Error('Supabase não configurado');
  const {data,error}=await supabase.functions.invoke('company-team',{body:{action:'create-company',...input}});
- if(error)throw error;
+ if(error){
+  const response=(error as {context?:unknown}).context;
+  if(response instanceof Response){
+   try{
+    const detail=await response.clone().json() as {error?:unknown};
+    if(typeof detail?.error==='string'&&detail.error.length<300)throw new Error(detail.error);
+   }catch(detailError){if(detailError instanceof Error&&detailError.message!=='Unexpected end of JSON input'&&detailError instanceof SyntaxError===false)throw detailError}
+  }
+  throw error;
+ }
  if(data?.error)throw new Error(data.error);
  if(!data?.company)throw new Error('Não foi possível cadastrar a empresa.');
  return data.company;
