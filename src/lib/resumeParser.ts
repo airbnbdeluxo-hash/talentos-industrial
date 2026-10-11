@@ -136,20 +136,23 @@ export function parseResumeText(text: string, catalog: string[] = []): ResumeDra
     )
   ).slice(0, 4);
 
-  const normalizedClean = normalize(clean);
+  // Only match catalogued skills as complete terms. Substring matching turns
+  // short skills (e.g. "CNC") into misleading results inside longer words.
+  const normalizedLines = lines.map(line => normalize(line));
   const skillMentions = Array.from(
     new Map(
       catalog
-        .map((skill) => ({ skill, normalized: normalize(skill) }))
-        .filter((entry) => entry.normalized && normalizedClean.includes(entry.normalized))
-        .map((entry) => {
-          const index = normalizedClean.indexOf(entry.normalized);
-          const start = Math.max(0, index - 90);
-          const end = Math.min(clean.length, index + entry.skill.length + 110);
-          const excerpt = clean.slice(start, end).replace(/\s+/g, ' ').trim();
-          const before = normalizedClean.slice(Math.max(0, index - 180), index);
-          const confidence = /habilidades|competencias|conhecimentos|skills/.test(before) ? 0.8 : 0.6;
-          return [entry.skill, { skill: entry.skill, excerpt, confidence }];
+        .map(skill => ({ skill, normalized: normalize(skill) }))
+        .filter(entry => entry.normalized.length > 0)
+        .flatMap(entry => {
+          const escaped = entry.normalized.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const boundary = new RegExp('(^|[^a-z0-9])' + escaped + '(?=$|[^a-z0-9])', 'i');
+          const lineIndex = normalizedLines.findIndex(line => boundary.test(line));
+          if (lineIndex < 0) return [];
+          const line = lines[lineIndex];
+          const preceding = normalizedLines.slice(Math.max(0,lineIndex-3),lineIndex).join(' ');
+          const confidence = /habilidades|competencias|conhecimentos|skills/.test(preceding) ? 0.8 : 0.6;
+          return [[entry.skill, { skill:entry.skill, excerpt:line.slice(0,240), confidence }]] as const;
         })
     ).values()
   );
