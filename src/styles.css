@@ -854,3 +854,66 @@
 .career-practice-form small{color:#536780;font-size:11px}
 .career-practice-form .primary{justify-content:center}
 @media(max-width:420px){.career-job:has(.career-fit){grid-template-columns:42px minmax(0,1fr) 20px}.career-fit{grid-column:2;grid-row:2;align-items:flex-start}.career-job:has(.career-fit)>svg:last-child{grid-column:3;grid-row:1}}
+
+
+/* 2026-10-11 · Unified TalentOS workspace system, based on Candidate Career Hub.
+   Scoped to authenticated/demo workspace; public landing remains unchanged. */
+.shell:not(.landing-active){
+ --workspace-ink:#102747;--workspace-muted:#5e7190;--workspace-border:#dce6f2;
+ --workspace-blue:#126de2;--workspace-cyan:#17c4e7;--workspace-surface:#ffffff;
+ --line:var(--workspace-border);--muted:var(--workspace-muted);--blue:var(--workspace-blue);
+ color:var(--workspace-ink);background:#f4f7fc;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+.shell:not(.landing-active) main{min-width:0;max-width:1700px;padding:clamp(20px,3.1vw,44px);background:transparent}
+.shell:not(.landing-active) main>header{align-items:center;gap:22px;margin-bottom:27px}
+.shell:not(.landing-active) main>header h1{font-size:clamp(27px,3vw,37px);font-weight:800;line-height:1.16;letter-spacing:-.042em;color:#071c3c}
+.shell:not(.landing-active) .eyebrow{font-size:10px;font-weight:800;letter-spacing:.14em;color:#6280a5}
+.shell:not(.landing-active) main>header p{font-size:13px;line-height:1.65;color:#637895}
+.shell:not(.landing-active) h2{font-weight:800;font-size:clamp(18px,1.65vw,23px);letter-spacing:-.027em;color:#102647;line-height:1.25}
+.shell:not(.landing-active) h3{font-size:15px;font-weight:750;letter-spacing:-.012em;color:#183254;line-height:1.35}
+.shell:not(.landing-active) p{color:#61758f;line-height:1.65}
+.shell:not(.landing-active) .card{background:var(--workspace-surface);border:1px solid var(--workspace-border);border-radius:17px;box-shadow:0 8px 24px rgba(21,47,84,.045);padding:clamp(17px,1.75vw,24px)}
+.shell:not(.landing-active) .stat strong,.shell:not(.landing-active) .company-kpi strong,.shell:not(.landing-active) .funnel strong{font-size:clamp(26px,2.9vw,36px);color:#0a2a53;letter-spacing:-.04em}
+.shell:not(.landing-active) .stat span,.shell:not(.landing-active) .candidate span,.shell:not(.landing-active) .jobrow span,.shell:not(.landing-active) .company span{font-size:13px;color:#5f7390}
+.shell:not(.landing-active) .primary{background:linear-gradient(105deg,#1870e7,#0ca6d7);color:white;border:0;border-radius:10px;min-height:42px;font-size:13px;font-weight:800;box-shadow:0 7px 18px rgba(20,104,210,.15)}
+.shell:not(.landing-active) .secondary{background:#edf2f8;color:#283b58;border:1px solid #e6edf5;border-radius:10px;min-height:42px;font-size:13px;font-weight:750}
+.shell:not(.landing-active) .primary:hover{filter:brightness(1.07)}
+.shell:not(.landing-active) .secondary:hover{background:#e4edf6}
+.shell:not(.landing-active) :where(button,input,select,textarea,a):focus-visible{outline:3px solid #22c7e9;outline-offset:3px}
+.shell:not(.landing-active) .field-label{font-size:13px;color:#425c7d;line-height:1.5}
+.shell:not(.landing-active) .field-label :is(input,select,textarea),
+.shell:not(.landing-active) .search,
+.shell:not(.landing-active) .head select{border:1px solid #cedded;border-radius:11px;background:white;color:#132d4f}
+.shell:not(.landing-active) :is(input,select,textarea){min-width:0;max-width:100%}
+.shell:not(.landing-active) .field-label :is(input,select,textarea){font-size:14px}
+.shell:not(.landing-active) .head{gap:16px}.shell:not(.landing-active) .head h2{margin-bottom:7px}
+.shell:not(.landing-active) .stats,.shell:not(.landing-active) .grid,.shell:not(.landing-active) .candidategrid{gap:17px}
+.shell:not(.landing-active) .jobrow,.shell:not(.landing-active) .company,.shell:not(.landing-active) .candidate,.shell:not(.landing-active) .match,.shell:not(.landing-active) .pipeline-card{border-color:var(--workspace-border)}
+.shell:not(.landing-active) .match:hover,.shell:not(.landing-active) .pipeline-card:hover,.shell:not(.landing-active) .candidate:hover{border-color:#abd3ee;box-shadow:0 8px 22px rgba(19,91,160,.055)}
+.shell:not(.landing-active) .darkbox{background:radial-gradient(circle at 92% 7%,rgba(8,191,228,.17),transparent 47%),linear-gradient(112deg,#091a37,#113e71);border:1px solid #1b5684;border-radius:15px;padding:20px}
+.shell:not(.landing-active) .darkbox :is(h2,h3,b,strong){color:#fff}
+.shell:not(.landing-active) .darkbox p{color:#c4d8e9}
+.shell:not(.landing-active) .chips em{background:#edf4fb;color:#416080;padding:6px 10px;font-size:11px}
+.shell:not(.landing-active) .chips em.verified{background:#e5f8ef;color:#10734f}
+.shell:not(.landing-active) .skillcategory,.shell:not(.landing-active) .stage{border-color:#dce6f2;border-radius:14px;background:#f9fbfe}
+.shell:not(.landing-active) .toast{top:20px;right:22px;max-width:min(420px,calc(100vw - 32px));font-size:13px;line-height:1.45;border-radius:12px}
+.shell:not(.landing-active) .toast.success{background:#e9f8f0;color:#087448;border-color:#bce6d1}
+.shell:not(.landing-active) .toast.error{background:#fff0ef;color:#ae2523;border-color:#f2c2c0}
+.shell:not(.landing-active) .career-hero h2{color:#fff;font-size:clamp(27px,3.5vw,43px)}
+.shell:not(.landing-active) .career-hero p{color:#c6d9ee}
+.shell:not(.landing-active) .career-hero-actions .secondary{color:#fff;background:rgba(255,255,255,.1);border-color:rgba(175,224,255,.35)}
+.shell:not(.landing-active) .career-advisor{background:#f0f8ff}
+@media(max-width:1000px){.shell:not(.landing-active) main{padding:26px 22px}}
+@media(max-width:720px){
+ .shell:not(.landing-active) main{padding:21px 15px}
+ .shell:not(.landing-active) main>header{align-items:flex-start;flex-direction:column;gap:15px}
+ .shell:not(.landing-active) main>header h1{font-size:29px}
+ .shell:not(.landing-active) .header-actions{display:flex;flex-wrap:wrap;gap:8px}
+ .shell:not(.landing-active) .card{padding:17px}
+ .shell:not(.landing-active) .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .shell:not(.landing-active) .candidategrid,.shell:not(.landing-active) .grid{grid-template-columns:1fr}
+ .shell:not(.landing-active) .jobrow{grid-template-columns:minmax(0,1fr)}
+ .shell:not(.landing-active) .toast{right:12px;top:12px}
+}
+@media(max-width:380px){.shell:not(.landing-active) main{padding:17px 11px}.shell:not(.landing-active) .stats{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.shell:not(.landing-active) :where(.primary,.secondary,.card){transition:none!important}}
