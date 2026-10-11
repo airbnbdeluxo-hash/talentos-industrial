@@ -953,3 +953,29 @@
 .shell .candidate-empty-state .primary{margin-top:6px}
 @media(max-width:900px){.shell .candidate-section-symbol{flex-basis:100px;height:100px;border-radius:25px}.shell:has(.candidate-section-hero) .settings .setting{grid-template-columns:1fr}}
 @media(max-width:720px){.shell:has(.candidate-section-hero) .candidate-section-hero{padding:25px 20px;border-radius:18px}.shell .candidate-section-symbol{display:none}.shell .candidate-section-hero-actions{flex-direction:column}.shell .candidate-hero-link{justify-content:center}.shell:has(.candidate-section-hero) .skillcards{grid-template-columns:1fr}.shell:has(.candidate-section-hero) .settings .setting{padding:19px 2px}.shell:has(.candidate-section-hero) .settings .setting .secondary{margin-left:0}}
+
+
+/* Canonical inner-workspace typography: candidate metric cards reference. */
+.shell:not(.landing-active){
+ --type-label:13px;--type-caption:12px;--type-body:13px;--type-number:32px;
+ --type-navy:#102e53;--type-blue:#315d91;--type-muted:#586c85;
+}
+.shell:not(.landing-active) :is(.career-metric,.stat,.company-kpi,.company-job-summary,.company-skills-summary>.card,.funnel>div){
+ font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+ font-variant-numeric:tabular-nums;letter-spacing:normal;
+}
+.shell:not(.landing-active) :is(.career-metric,.stat,.company-kpi,.company-job-summary,.company-skills-summary>.card,.funnel>div) :is(span,.metric-label){
+ font-size:var(--type-label);line-height:1.45;font-weight:650;color:var(--type-blue);
+}
+.shell:not(.landing-active) :is(.career-metric,.stat,.company-kpi,.company-job-summary,.company-skills-summary>.card,.funnel>div) :is(strong,.metric-value){
+ font-size:var(--type-number);line-height:1.2;letter-spacing:-.025em;font-weight:750;color:var(--type-navy);
+}
+.shell:not(.landing-active) :is(.career-metric,.stat,.company-kpi,.company-job-summary,.company-skills-summary>.card,.funnel>div) small{
+ font-size:var(--type-caption);line-height:1.5;font-weight:400;color:var(--type-muted);
+}
+.shell:not(.landing-active) :is(.settings .setting,.candidate-resume-section,.applications-page,.jobs-filter-panel,.skillcategory) :is(p,span,small){
+ line-height:1.55;
+}
+.shell:not(.landing-active) :is(.settings .setting,.candidate-resume-section,.applications-page,.jobs-filter-panel,.skillcategory) small{font-size:12px}
+.shell:not(.landing-active) .settings .setting>div>small{font-size:12px}
+@media(max-width:720px){.shell:not(.landing-active){--type-number:30px}}
