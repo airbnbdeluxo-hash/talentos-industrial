@@ -40,3 +40,14 @@ Validação local: compilação aprovada e 16 testes Node aprovados. O novo test
 6. Homologar a interface com candidato e empresa, sem alterar dados de usuários reais.
 
 URL oficial: https://talentos-industrial.vercel.app
+
+## Conferência remota de 11/10/2026
+
+- PR #72 aberta, sem conflitos e aguardando revisão humana.
+- Commit de código validado: `b83f11803bd0961f287a31879e4117ea9df66dc9`.
+- GitHub Actions CI #37924777311: build aprovado; 20 testes de navegação em modo E2E e 6 testes dos fluxos públicos com endpoint sintético aprovados. Esses testes não substituem a homologação autenticada contra o backend real.
+- GitHub Actions Security #37924777239: aprovado.
+- Status Vercel no GitHub: prévia concluída (`2PXtVKnVP9XgebtEcDXNjLvcZ3rJ`); não representa publicação em produção.
+- Plugins GitHub e Supabase respondem. Supabase informa projeto `talentos-industrial` como `ACTIVE_HEALTHY`.
+- Plugin Vercel retorna 403 para a equipe `airbnbdeluxo-2819`; acesso precisa ser revisto nessa equipe. CLI Vercel não disponível neste ambiente. Não houve tentativa de contornar permissões.
+- O login do painel Supabase continua pendente. A sessão do painel é independente da conexão do plugin; reconectar o plugin não comprova a correção das URLs nem do envio SMTP.
