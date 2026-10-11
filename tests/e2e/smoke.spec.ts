@@ -37,6 +37,29 @@ test.describe('TalentOS smoke', () => {
     }
   });
 
+
+  test('tipografia e navegação do candidato permanecem consistentes', async ({ page }) => {
+    await page.goto('/?e2eRole=candidato');
+    const menus = ['Minha carreira','Vagas','Meu currículo','Minhas candidaturas','Competências e desenvolvimento','Configurações'] as const;
+    for (const menu of menus) {
+      await page.getByRole('button', {name: menu, exact: true}).click();
+      const font = await page.locator('main').evaluate(el => getComputedStyle(el).fontFamily);
+      expect(font.toLowerCase()).toContain('inter');
+    }
+    await page.getByRole('button', {name: 'Minha carreira', exact: true}).click();
+    const info = await page.locator('.career-metric').first().evaluate(el => {
+      const title = el.querySelector('span');
+      const value = el.querySelector('strong');
+      const support = el.querySelector('small');
+      return {
+        title: title ? getComputedStyle(title).fontSize : '',
+        value: value ? getComputedStyle(value).fontSize : '',
+        support: support ? getComputedStyle(support).fontSize : ''
+      };
+    });
+    expect(info).toEqual({title:'13px',value:'32px',support:'12px'});
+  });
+
   test('lista pública de vagas abre sem autenticação', async ({ page }) => {
     await page.goto('/vagas');
     await expect(page.getByRole('heading', { level: 1, name: 'Oportunidades industriais' })).toBeVisible();
