@@ -979,3 +979,16 @@
 .shell:not(.landing-active) :is(.settings .setting,.candidate-resume-section,.applications-page,.jobs-filter-panel,.skillcategory) small{font-size:12px}
 .shell:not(.landing-active) .settings .setting>div>small{font-size:12px}
 @media(max-width:720px){.shell:not(.landing-active){--type-number:30px}}
+
+
+/* Skills roadmap uses approved typography and card system */
+.shell .career-roadmap{margin-bottom:18px}
+.shell .career-roadmap>.head{margin-bottom:20px}
+.shell .career-roadmap>.head>svg{color:#1473c7;flex:0 0 auto}
+.shell .career-roadmap-list{display:grid;gap:0}
+.shell .career-roadmap-item{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:18px 2px;border-top:1px solid #dfebf5}
+.shell .career-roadmap-item>div{min-width:0}
+.shell .career-roadmap-item strong{display:block;color:#102e53;font-size:15px;line-height:1.5}
+.shell .career-roadmap-item span{display:block;color:#586c85;font-size:12px;margin:4px 0 9px}
+.shell .career-roadmap-item .secondary{white-space:nowrap}
+@media(max-width:600px){.shell .career-roadmap-item{align-items:stretch;flex-direction:column}.shell .career-roadmap-item .secondary{justify-content:center}}
