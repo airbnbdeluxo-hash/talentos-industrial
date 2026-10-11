@@ -60,6 +60,29 @@ test.describe('TalentOS smoke', () => {
     expect(info).toEqual({title:'13px',value:'32px',support:'12px'});
   });
 
+  test('área da empresa preserva tipografia e navegação protegida', async ({ page }) => {
+    await page.goto('/?e2eRole=empresa');
+    const menus = ['Início','Vagas','Candidatos','Processo seletivo','Comprovações','Competências','Análises','Equipe','Configurações'] as const;
+    for (const menu of menus) {
+      await page.getByRole('button', { name: menu, exact: true }).click();
+      const family = await page.locator('main').evaluate(el => getComputedStyle(el).fontFamily);
+      expect(family.toLowerCase()).toContain('inter');
+      await expect(page.locator('.overlay')).toHaveCount(0);
+    }
+    await expect(page.getByRole('button', { name: 'Minha carreira', exact: true })).toHaveCount(0);
+  });
+
+  test('candidato não recebe navegação de recrutador', async ({ page }) => {
+    await page.goto('/?e2eRole=candidato');
+    for (const menu of ['Equipe','Candidatos','Processo seletivo','Análises']) {
+      await expect(page.getByRole('button', { name: menu, exact: true })).toHaveCount(0);
+    }
+    await page.setViewportSize({width:390,height:844});
+    await page.getByRole('button', {name:'Minha carreira',exact:true}).click();
+    const sizes=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,viewport:document.documentElement.clientWidth}));
+    expect(sizes.scroll).toBeLessThanOrEqual(sizes.viewport + 1);
+  });
+
   test('lista pública de vagas abre sem autenticação', async ({ page }) => {
     await page.goto('/vagas');
     await expect(page.getByRole('heading', { level: 1, name: 'Oportunidades industriais' })).toBeVisible();
