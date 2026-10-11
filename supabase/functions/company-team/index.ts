@@ -88,8 +88,8 @@ Deno.serve(async (request) => {
     const limitConfig = actionLimits[action];
     if (!limitConfig) return json({ error: 'Ação desconhecida.' }, 400, origin);
 
-    if (action !== 'create-company') {
     const [rateLimit, windowSeconds] = limitConfig;
+    if (action !== 'create-company') {
     const { data: allowed, error: rateLimitError } = await admin.rpc('security_rate_limit_consume', {
       p_actor_id: caller.id,
       p_action: 'company-team:' + action,
