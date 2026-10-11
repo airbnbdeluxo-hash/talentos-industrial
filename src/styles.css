@@ -826,3 +826,44 @@
   .candidate-alert-status{justify-self:start}
   .candidate-panel-actions{justify-content:flex-start;gap:10px}
 }
+
+
+/* Workspace visual refresh — isolated presentation layer, 2026-10-11 */
+:root{--navy:#07152e;--blue:#1763e8;--line:#e1e8f2;--muted:#53647d}
+body{background:#f2f6fc;color:#14253e}
+.shell aside{background:radial-gradient(circle at 0 0,rgba(21,190,232,.16),transparent 44%),linear-gradient(165deg,#07132b,#0d2349 76%,#081a36);border-right:1px solid rgba(73,210,246,.13);box-shadow:10px 0 35px rgba(7,21,46,.08)}
+.brandmark{background:linear-gradient(135deg,#1264d9,#03b9df);box-shadow:0 0 23px rgba(9,196,242,.23)}
+.shell nav{gap:7px}.nav{min-height:44px;border:1px solid transparent;transition:background .18s,border-color .18s,transform .18s}
+.nav:hover{background:rgba(44,155,215,.12);border-color:rgba(102,214,251,.13);transform:translateX(2px)}
+.nav.active{background:linear-gradient(90deg,rgba(27,112,214,.33),rgba(21,194,229,.10));border-color:rgba(59,207,241,.30);box-shadow:inset 3px 0 0 #28d1ef;color:#fff}
+.shell main{padding:clamp(20px,3vw,46px);max-width:1700px}
+.shell header{margin-bottom:26px}.shell header h1{font-size:clamp(26px,2.7vw,37px);line-height:1.13;letter-spacing:-.035em;color:#0d2242}
+.eyebrow{color:#126caa;font-size:11px;letter-spacing:.12em}
+.card{border-radius:18px;border-color:#e2e9f3;box-shadow:0 12px 35px rgba(15,41,79,.055);padding:clamp(17px,1.6vw,24px)}
+.stat{position:relative;overflow:hidden}.stat:before{content:"";position:absolute;top:0;left:20px;right:20px;height:2px;background:linear-gradient(90deg,#2269dc,#16c4e9);opacity:.7}.stat strong{font-size:clamp(27px,2.7vw,35px);color:#112b51}
+.grid{gap:20px}.stats{gap:16px;margin-bottom:20px}
+.primary{background:linear-gradient(105deg,#1550d4,#087fc9);box-shadow:0 5px 12px rgba(20,91,210,.17)}
+.primary:hover{filter:brightness(1.08)}.secondary:hover,.jobrow button:hover{filter:brightness(.97)}
+.primary,.secondary,.jobrow button,.darkbox button{min-height:40px;transition:filter .18s,transform .18s}
+.primary:active,.secondary:active{transform:translateY(1px)}
+:where(button,a,input,select,textarea):focus-visible{outline:3px solid #19b7e9;outline-offset:3px}
+:where(input,select,textarea){font-size:16px}
+p{font-size:14px;line-height:1.65}.stat span,.matchbody span,.jobrow span,.candidate span,.company span{font-size:13px}
+.head select,.search,.field-label input,.field-label select,.field-label textarea{border-color:#cbd7e8}
+.match,.candidate,.skillcategory,.pipeline-card{border-radius:13px}
+.match:hover,.candidate:hover,.pipeline-card:hover{border-color:#b8d7f1;box-shadow:0 5px 18px rgba(15,61,121,.055)}
+.chips em{font-size:11px;padding:6px 9px}.feature span,.training-head p,.training-item-main p{font-size:12px}
+.darkbox{background:linear-gradient(120deg,#0c1f43,#11396a);border:1px solid rgba(41,202,239,.2);box-shadow:0 12px 28px rgba(10,45,89,.1)}
+.jobrow{gap:14px}.jobrow button{min-height:40px}
+@media(max-width:1000px){.shell main{padding:26px 24px}.grid{grid-template-columns:1fr}.pipeline{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){.shell aside{padding:14px 13px 12px}.brand{padding:3px 7px 14px}.shell nav{gap:7px;padding-bottom:6px;scrollbar-width:thin}.nav{min-width:max-content;padding:10px 13px;transform:none!important}.shell main{padding:22px 15px}.shell header{gap:14px}.stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{padding:17px}.stat strong{font-size:27px}.header-actions{flex-wrap:wrap}.jobrow{grid-template-columns:minmax(0,1fr)}.pipeline{grid-template-columns:1fr}.candidate-form-actions{bottom:-18px}}
+@media(max-width:380px){.stats{grid-template-columns:1fr}.shell main{padding:17px 11px}.card{padding:15px}}
+@media(prefers-reduced-motion:reduce){.nav,.primary,.secondary,.jobrow button,.darkbox button{transition:none!important}}
+
+
+/* Prevent mobile document overflow without disabling local horizontal menus */
+html,body,#root{max-width:100%;min-width:0}
+body{overflow-x:clip}
+.shell,.shell main,.card,.grid,.grid>*{min-width:0}
+:where(.shell main,.card,.match,.jobrow,.company,.candidate){overflow-wrap:anywhere}
+@media(max-width:720px){.shell{max-width:100%;overflow-x:clip}.shell nav{max-width:100%;overflow-x:auto}.shell main{min-width:0;max-width:100%}.header-actions,.passport-actions{max-width:100%;flex-wrap:wrap}}
