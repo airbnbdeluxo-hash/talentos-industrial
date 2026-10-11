@@ -917,3 +917,39 @@
 }
 @media(max-width:380px){.shell:not(.landing-active) main{padding:17px 11px}.shell:not(.landing-active) .stats{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.shell:not(.landing-active) :where(.primary,.secondary,.card){transition:none!important}}
+
+
+/* Candidate page redesign: dedicated hero + spacious content, based on Career Hub. */
+.shell:has(.candidate-section-hero) main>header{margin-bottom:20px}
+.shell:has(.candidate-section-hero) .candidate-section-hero{position:relative;overflow:hidden;display:flex;justify-content:space-between;align-items:center;gap:30px;padding:clamp(26px,3.8vw,45px);border:1px solid #21528a;border-radius:23px;margin-bottom:24px;background:radial-gradient(circle at 90% 16%,rgba(17,194,231,.22),transparent 42%),linear-gradient(115deg,#081935,#103967);color:#fff;box-shadow:0 16px 32px rgba(11,49,95,.14)}
+.shell .candidate-section-hero-content{position:relative;z-index:1;min-width:0;max-width:680px}
+.shell .candidate-section-hero h2{font-size:clamp(27px,3.25vw,42px)!important;color:#fff!important;letter-spacing:-.045em!important;line-height:1.16!important;margin:0 0 12px!important}
+.shell .candidate-section-hero p{color:#d0e0f0!important;font-size:15px!important;max-width:580px;line-height:1.65}
+.shell .candidate-section-hero .career-kicker{color:#61dcf6}
+.shell .candidate-section-symbol{display:grid;place-items:center;flex:0 0 142px;height:142px;border-radius:36px;border:1px solid rgba(103,218,244,.4);background:linear-gradient(130deg,rgba(30,171,233,.30),rgba(28,86,172,.16));color:#56e0f9;transform:rotate(-10deg);box-shadow:0 0 65px rgba(14,173,232,.18)}
+.shell .candidate-section-hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+.shell .candidate-hero-link{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:10px 14px;border:1px solid rgba(147,210,246,.35);border-radius:10px;background:rgba(255,255,255,.09);color:#fff;font-size:13px;font-weight:750;cursor:pointer}
+.shell .candidate-hero-link:hover{background:rgba(255,255,255,.18)}
+.shell:has(.candidate-section-hero) .jobs-filter-panel,.shell:has(.candidate-section-hero) .mini-panel{border:1px solid #dbe6f2;border-radius:16px;background:#f7faff;padding:clamp(15px,1.8vw,23px)}
+.shell:has(.candidate-section-hero) .jobs-filter-title{margin-bottom:17px}
+.shell:has(.candidate-section-hero) .jobs-filter-title b,.shell:has(.candidate-section-hero) .applications-availability b{font-size:17px;color:#123357}
+.shell:has(.candidate-section-hero) .candidate-jobs-panel,.shell:has(.candidate-section-hero) .application-card{border:1px solid #dce7f3;border-radius:16px;overflow:hidden;background:#fff}
+.shell:has(.candidate-section-hero) .applications-page{min-height:410px}
+.shell:has(.candidate-section-hero) .applications-page .empty{min-height:190px;flex-direction:column;text-align:center;font-size:14px}
+.shell:has(.candidate-section-hero) .settings{max-width:1100px;width:100%}
+.shell:has(.candidate-section-hero) .settings .setting{display:grid;grid-template-columns:minmax(130px,.55fr) minmax(0,2fr);gap:20px;align-items:start;padding:24px 8px;font-size:14px}
+.shell:has(.candidate-section-hero) .settings .setting>span{font-size:14px;font-weight:750;color:#28547b}
+.shell:has(.candidate-section-hero) .settings .setting>div{min-width:0;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.shell:has(.candidate-section-hero) .settings .setting>div>b{font-size:14px;color:#153656}
+.shell:has(.candidate-section-hero) .settings .setting>div>small{font-size:12px;line-height:1.6;color:#5c718c}
+.shell:has(.candidate-section-hero) .settings .setting .secondary{margin-left:auto;white-space:normal}
+.shell:has(.candidate-section-hero) .skillcards{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.shell:has(.candidate-section-hero) .skillcategory{padding:23px;border-radius:16px;min-height:180px}
+.shell:has(.candidate-section-hero) .skillcategory h3{font-size:18px}
+.shell .candidate-empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:350px;gap:14px;text-align:center}
+.shell .candidate-empty-icon{display:grid;place-items:center;width:72px;height:72px;border-radius:21px;background:#e9f5ff;color:#1473c7}
+.shell .candidate-empty-state h2{font-size:24px!important}
+.shell .candidate-empty-state p{max-width:480px;font-size:14px}
+.shell .candidate-empty-state .primary{margin-top:6px}
+@media(max-width:900px){.shell .candidate-section-symbol{flex-basis:100px;height:100px;border-radius:25px}.shell:has(.candidate-section-hero) .settings .setting{grid-template-columns:1fr}}
+@media(max-width:720px){.shell:has(.candidate-section-hero) .candidate-section-hero{padding:25px 20px;border-radius:18px}.shell .candidate-section-symbol{display:none}.shell .candidate-section-hero-actions{flex-direction:column}.shell .candidate-hero-link{justify-content:center}.shell:has(.candidate-section-hero) .skillcards{grid-template-columns:1fr}.shell:has(.candidate-section-hero) .settings .setting{padding:19px 2px}.shell:has(.candidate-section-hero) .settings .setting .secondary{margin-left:0}}
