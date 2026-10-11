@@ -838,3 +838,19 @@
 @media(max-width:720px){.career-hero{padding:25px 20px;border-radius:18px}.career-hero-glow{display:none}.career-overview{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.career-metric{padding:16px}.career-metric strong{font-size:29px}.career-hero-actions>*{justify-content:center}.career-main-panel>.head{align-items:flex-start;flex-wrap:wrap}.career-main-panel .head .secondary{width:auto}}
 @media(max-width:420px){.career-overview{grid-template-columns:1fr}.career-hero-actions{flex-direction:column}.career-hero-actions>*{width:100%}}
 @media(prefers-reduced-motion:reduce){.career-metric{transition:none}}
+
+
+/* Explainable candidate matching and guided interview preparation */
+.career-fit{display:flex!important;flex-direction:column;gap:2px;align-items:center;white-space:nowrap;color:#126dbb!important;font-size:16px!important;font-weight:800;min-width:66px}
+.career-fit small{color:#62768d!important;font-size:10px!important;font-weight:600}
+.career-job:has(.career-fit){grid-template-columns:46px minmax(0,1fr) 66px 20px}
+.career-practice{margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
+.career-practice h3{font-size:15px;margin:0 0 6px}
+.career-practice>p{font-size:12px;margin-bottom:14px}
+.career-practice-form{display:grid;gap:12px;margin-top:16px;background:#f8fbff;border:1px solid #d9e7f6;border-radius:13px;padding:15px}
+.career-practice-form>b{font-size:12px;color:#126dbb}
+.career-practice-form .field-label{margin:0}
+.career-practice-form textarea{display:block;width:100%;min-height:115px}
+.career-practice-form small{color:#536780;font-size:11px}
+.career-practice-form .primary{justify-content:center}
+@media(max-width:420px){.career-job:has(.career-fit){grid-template-columns:42px minmax(0,1fr) 20px}.career-fit{grid-column:2;grid-row:2;align-items:flex-start}.career-job:has(.career-fit)>svg:last-child{grid-column:3;grid-row:1}}
