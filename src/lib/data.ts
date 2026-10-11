@@ -175,10 +175,9 @@ export async function createRemoteCompanyAccount(input:{name:string;cnpj:string;
  if(error){
   const response=(error as {context?:unknown}).context;
   if(response instanceof Response){
-   try{
-    const detail=await response.clone().json() as {error?:unknown};
-    if(typeof detail?.error==='string'&&detail.error.length<300)throw new Error(detail.error);
-   }catch(detailError){if(detailError instanceof Error&&detailError.message!=='Unexpected end of JSON input'&&detailError instanceof SyntaxError===false)throw detailError}
+   let detail:{error?:unknown}|null=null;
+   try{detail=await response.clone().json() as {error?:unknown}}catch{/* Non-JSON backend response */}
+   if(typeof detail?.error==='string'&&detail.error.length<300)throw new Error(detail.error);
   }
   throw error;
  }
