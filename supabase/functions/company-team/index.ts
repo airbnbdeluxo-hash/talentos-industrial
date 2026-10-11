@@ -88,6 +88,7 @@ Deno.serve(async (request) => {
     const limitConfig = actionLimits[action];
     if (!limitConfig) return json({ error: 'Ação desconhecida.' }, 400, origin);
 
+    if (action !== 'create-company') {
     const [rateLimit, windowSeconds] = limitConfig;
     const { data: allowed, error: rateLimitError } = await admin.rpc('security_rate_limit_consume', {
       p_actor_id: caller.id,
@@ -98,6 +99,8 @@ Deno.serve(async (request) => {
     if (rateLimitError) throw rateLimitError;
     if (allowed !== true) {
       return json({ error: 'Muitas tentativas. Aguarde antes de tentar novamente.' }, 429, origin);
+    }
+
     }
 
     if (action === 'create-company') {
@@ -111,6 +114,14 @@ Deno.serve(async (request) => {
       if (industry.length > 120) return json({ error: 'Segmento inválido.' }, 400, origin);
       const cityMatch = cityLabel.match(/^(.+?)\s+—\s+([A-Z]{2})$/);
       if (!cityMatch) return json({ error: 'Selecione uma cidade da lista oficial de municípios.' }, 400, origin);
+      const { data: allowedCompany, error: companyLimitError } = await admin.rpc('security_rate_limit_consume', {
+        p_actor_id: caller.id,
+        p_action: 'company-team:create-company-validated',
+        p_limit: rateLimit,
+        p_window_seconds: windowSeconds,
+      });
+      if (companyLimitError) throw companyLimitError;
+      if (allowedCompany !== true) return json({ error: 'Limite de cadastros atingido. Aguarde até a próxima hora.' }, 429, origin);
       const cityName = cityMatch[1].trim();
       const state = cityMatch[2].toUpperCase();
       const { data: city, error: cityError } = await admin
