@@ -36,14 +36,16 @@ test('recuperação de senha usa título coerente e mantém a tela de login aces
   await expect(page.getByLabel('E-mail')).toBeVisible();
 });
 
-test('confirmação e recuperação usam a URL canônica de produção', async () => {
+test('confirmação e recuperação usam somente o domínio oficial aprovado', async () => {
   const here = dirname(fileURLToPath(import.meta.url));
   const source = readFileSync(resolve(here, '../../src/App.tsx'), 'utf8');
-  expect(source).toContain("https://talentos-industrial.vercel.app");
+  const guard = readFileSync(resolve(here, '../../src/lib/authRedirect.ts'), 'utf8');
   expect(source).toContain("authRedirectUrl('confirm')");
   expect(source).toContain("authRedirectUrl('recovery')");
-  expect(source).toContain("TALENTOS_OFFICIAL_ORIGIN='https://talentos-industrial.vercel.app'");
-  expect(source).toContain("['localhost','127.0.0.1','0.0.0.0']");
+  expect(source).toContain("authRedirectUrl as buildAuthRedirectUrl");
+  expect(source).toContain("buildAuthRedirectUrl(intent,String(import.meta.env.VITE_PUBLIC_APP_URL??''))");
+  expect(guard).toContain("TALENTOS_AUTH_ORIGIN = 'https://talentos-industrial.vercel.app'");
+  expect(guard).toContain("parsed.origin === TALENTOS_AUTH_ORIGIN");
   expect(source).not.toContain("window.location.origin");
   expect(source).not.toContain("resetPasswordForEmail(authEmail.trim(),{redirectTo:window.location.origin})");
 });
