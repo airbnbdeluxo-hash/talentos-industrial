@@ -25,6 +25,7 @@
 | Reenvio de confirmação | Solicitar novo envio após link expirado | Nova mensagem entregue, novo link abre confirmação, não tela de recuperação |
 | Recuperação válida | Pedir redefinição de senha | Mensagem entregue, link válido abre atualização de senha; senha antiga deixa de funcionar |
 | Recuperação expirada | Usar link invalidado/expirado | Exibir **Enviar link de recuperação**, jamais **Reenviar confirmação** |
+| URL de erro sem tokens | Abrir retorno sintético inválido com `error_code=otp_expired`, hash e parâmetros de autenticação fictícios | Remover tokens, `code`, `token_hash` e fragmento da barra de endereços sem interromper callbacks válidos; validar sem usar tokens reais nos logs/capturas |
 | Senha e servidor | Testar uma senha de 7 caracteres e uma de 8 cumprindo política | A de 7 rejeitada pelo servidor; a de 8 aceita se cumprir todos os requisitos |
 | Sessão e logout | Entrar, encerrar sessão, navegar e tentar ação protegida | Sessão removida, ações protegidas negadas e retorno ao login |
 | Isolamento de papéis | Conta candidato e empresa | Candidato não lê outros candidatos; empresa não altera recursos de outra empresa |
