@@ -1,5 +1,8 @@
 # Matriz de requisitos — 12/10/2026
 
+**CRITÉRIOS VINCULANTES:** consultar [`docs/ACCEPTANCE_CRITERIA.md`](ACCEPTANCE_CRITERIA.md) antes de mudar qualquer requisito para "Concluído". Esta matriz contém **40 requisitos**: **15 P0, 13 P1 e 12 P2** (contagem das linhas originais). Para afirmar "100% do escopo aprovado", exigir **40/40 requisitos testados e aprovados em ambiente real** ou alteração explícita de escopo aprovada por humano, além de **G01–G18 e C01–C04**. Os status históricos de implementação abaixo **não** equivalem a aceite de produção.
+
+
 Base em produção: baa7cc4; correções propostas em PR #89: 39511e1 (autenticação) e c8f485b (currículo), seguidas de atualização documental. Esta matriz distingue código existente, testes sintéticos e homologação real. Ausência de falha em scanner não prova ausência de vulnerabilidade.
 
 | Prioridade | Requisito | Estado | Evidência e critério restante |
@@ -114,3 +117,16 @@ Base em produção: baa7cc4; correções propostas em PR #89: 39511e1 (autentica
 - A janela de autenticação ganhou retorno de foco ao botão anterior no fechamento, e o Playwright testa foco inicial, tecla Escape e foco de retorno; essa verificação não equivale à auditoria visual/contraste ou navegação assistiva completa.
 - Commits funcionais: `73c3b9b`, `99b4f30`, `49fb4ec`, `18c78d1`, `5294829`, `6da0e56`. O CI/Security de cada HEAD deverá ser consultado, sem declarar aprovação antecipadamente.
 - Nenhum merge, migração, modificação de Auth/SMTP ou alteração de produção. A política real de candidaturas ainda permite status forjado/vaga fechada; correção na migração do PR requer revisão humana.
+
+
+## Portões objetivos ligados à matriz
+
+| Conjunto de requisitos | Critérios de aceite | Condição atual |
+|---|---|---|
+| P0 (15 itens) | G01–G10, G15–G18; nenhum P0 pendente após homologação | **Não aprovado:** PR #89 sem revisão, SMTP/senha servidor/RLS HTTP pendentes |
+| P1 (13 itens) | G04–G05, G09–G15; PDF e DOCX devem persistir somente após confirmação; testes HTTP e UI reais | **Parcial:** CI e SQL sintéticos aprovados; homologação com contas remotas pendente |
+| P2 (12 itens) | C01–C04, com demonstração e testes dos módulos aprovados | **Pendente:** há funcionalidades não implementadas ou não homologadas |
+| Produção oficial | G01–G18 completos no SHA de produção; assinatura de liberação | **Não aprovado:** SHA principal anterior `baa7cc4`, correção de segurança ainda em PR |
+| Declaração "100%" | **40/40** requisitos aceitos ou retirada explícita de escopo humano + G01–G18 + C01–C04 PASS | **Não atingido** |
+
+**Atualização de estado deve registrar:** ID G/C, requisito, `APROVADO`/`REPROVADO`/`BLOQUEADO`, data, ambiente, SHA de produção, evidência de teste e responsável. **Não somar** aprovação da CI sintética como aceite de SMTP, banco real, Storage HTTP ou importação persistida. Qualquer falha P0 de segurança bloqueia o release até resolução e nova verificação.
