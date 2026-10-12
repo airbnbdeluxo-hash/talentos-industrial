@@ -81,3 +81,13 @@ test('conta existente pode continuar cadastro empresarial sem nova confirmação
   expect(source).toContain('Este e-mail já está cadastrado no TalentOS.');
   expect(source).toContain('Não enviaremos outro e-mail de confirmação.');
 });
+
+test('recuperação expirada mantém acesso e layout em 360px no preview configurado', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 780 });
+  await page.goto('/?auth=recovery#error_code=otp_expired&error=access_denied');
+  await expect(page.getByRole('heading', { name: 'Recuperar acesso' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Enviar link de recuperação' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Reenviar confirmação', exact: true })).toHaveCount(0);
+  const width = await page.evaluate(() => ({scroll:document.documentElement.scrollWidth,viewport:document.documentElement.clientWidth}));
+  expect(width.scroll).toBeLessThanOrEqual(width.viewport + 1);
+});
