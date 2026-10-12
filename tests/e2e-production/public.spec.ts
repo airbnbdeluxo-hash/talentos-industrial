@@ -91,3 +91,11 @@ test('recuperação expirada mantém acesso e layout em 360px no preview configu
   const width = await page.evaluate(() => ({scroll:document.documentElement.scrollWidth,viewport:document.documentElement.clientWidth}));
   expect(width.scroll).toBeLessThanOrEqual(width.viewport + 1);
 });
+
+test('retorno de recuperação inválido não deixa tokens sintéticos no endereço', async ({ page }) => {
+  await page.goto('/?auth=recovery&code=fake-code&token_hash=fake-hash#error=access_denied&error_code=otp_expired&access_token=fake-access&refresh_token=fake-refresh');
+  await expect(page.getByRole('heading', { name: 'Recuperar acesso' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Enviar link de recuperação' })).toBeVisible();
+  await expect(page).toHaveURL(/\/\?auth=recovery$/);
+  expect(page.url()).not.toMatch(/fake-|token|code|error/);
+});
