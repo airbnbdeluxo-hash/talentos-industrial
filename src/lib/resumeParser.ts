@@ -172,7 +172,13 @@ export function parseResumeText(text: string, catalog: string[] = []): ResumeDra
   };
 }
 
-export async function extractResumeText(file: File, signal?: AbortSignal): Promise<string> {
+// Shared check for both extraction and Storage upload. MIME and filenames
+// supplied by browsers are untrusted; always identify the format from bytes.
+// This lightweight check does not replace a malware scanner or ZIP bomb limits.
+export async function validateResumeFileSignature(
+  file: File,
+  signal?: AbortSignal,
+): Promise<'application/pdf' | 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'> {
   signal?.throwIfAborted();
   const lowerName = file.name.toLowerCase();
   const isPdf = lowerName.endsWith('.pdf');
@@ -181,8 +187,6 @@ export async function extractResumeText(file: File, signal?: AbortSignal): Promi
   if (file.size === 0) throw new Error('O arquivo do currículo está vazio.');
   if (file.size > 10 * 1024 * 1024) throw new Error('O currículo deve ter no máximo 10 MB.');
 
-  // File names and browser-supplied MIME types are not proof of document format.
-  // Check magic bytes before invoking PDF.js or a ZIP-based DOCX extractor.
   const header = new Uint8Array(await file.slice(0, 1024).arrayBuffer());
   signal?.throwIfAborted();
   const validPdf = isPdf && header.some((byte, index) =>
@@ -193,6 +197,15 @@ export async function extractResumeText(file: File, signal?: AbortSignal): Promi
     header[2] === 0x03 && header[3] === 0x04;
   if (!validPdf && !validDocx) throw new Error('O arquivo não corresponde a um PDF ou Word (.docx) válido.');
 
+  return validPdf
+    ? 'application/pdf'
+    : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+}
+
+export async function extractResumeText(file: File, signal?: AbortSignal): Promise<string> {
+  const contentType = await validateResumeFileSignature(file, signal);
+  const isPdf = contentType === 'application/pdf';
+  const isDocx = contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
   if (isPdf) {
     const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
     const { default: workerUrl } = await import('pdfjs-dist/build/pdf.worker.min.mjs?url');
