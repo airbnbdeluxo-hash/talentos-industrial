@@ -1061,3 +1061,14 @@
 .public-job-card .empty span { color:#45576d; }
 /* The logo subtitle sits on a white public-vacancies card, not the navy sidebar. */
 .public-job-card .brand span { color:#405571; }
+
+/* Axe follow-up: metadata and pipeline labels on near-white cards. */
+.shell:not(.landing-active) .candidate-skill-info>span,
+.shell:not(.landing-active) .candidate-proof-body>span,
+.shell:not(.landing-active) .candidate-privacy-note>span,
+.shell:not(.landing-active) .pipeline-summary button span,
+.shell:not(.landing-active) .stage-empty,
+.shell:not(.landing-active) .pipeline-card-clean .pipeline-card-head span,
+.shell:not(.landing-active) .pipeline-card-skills span:not(.ok):not(.attention),
+.shell:not(.landing-active) .pipeline-next-info span,
+.shell:not(.landing-active) .pipeline-outcome-summary span { color:#42566e; }
