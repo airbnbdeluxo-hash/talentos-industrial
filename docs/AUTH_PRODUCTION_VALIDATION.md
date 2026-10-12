@@ -36,7 +36,7 @@ A comprovação mínima inclui: duas contas técnicas de papéis diferentes; con
 | Sessão e logout | Entrar, encerrar sessão, navegar e tentar ação protegida | Sessão removida, ações protegidas negadas e retorno ao login |
 | Isolamento de papéis | Conta candidato e empresa | Candidato não lê outros candidatos; empresa não altera recursos de outra empresa |
 | Arquivos privados | Duas contas técnicas distintas | Download de arquivo próprio permitido; download de arquivo alheio negado por API HTTP |
-| Integridade de candidatura via HTTP | Conta candidata e duas vagas (aberta/encerrada) em ambiente autorizado | Rejeitar inscrição na vaga encerrada, status inicial diferente de `novo` e rejeição forjada; não permitir autocontratação; candidatura válida deve funcionar. Executar somente após a migração aprovada. |
+| Integridade de candidatura via HTTP | Conta candidata e duas vagas (aberta/encerrada) em ambiente autorizado | Por HTTP, 1 cadastro legítimo com status `novo` deve funcionar e 5 operações maliciosas devem ser recusadas sem gravação: vaga encerrada, status `contratado`, status `triagem`, código de rejeição e nota de rejeição. Executar somente após a migração revisada e aplicada. |
 | Currículo PDF/Word | Arquivo autorizado com campos editáveis | Extrai e exibe campos para revisão; só persiste após confirmação; cancelar não salva |
 
 ## Evidências a registrar sem expor dados
