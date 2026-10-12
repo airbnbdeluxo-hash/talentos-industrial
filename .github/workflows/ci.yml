@@ -26,6 +26,8 @@ jobs:
         run: node --experimental-strip-types --test tests/supabaseTarget.test.mjs
       - name: Verify company invitation validation
         run: node --experimental-strip-types --test tests/companyTeamValidation.test.mjs
+      - name: Verify email confirmation link error handling
+        run: node --experimental-strip-types --test tests/authLink.test.mjs
       - name: Verify resume extraction
         run: node --experimental-strip-types --test tests/resumeParser.test.mjs
       - run: npm ci --no-audit --no-fund
