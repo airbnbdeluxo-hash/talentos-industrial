@@ -100,12 +100,15 @@ test('retorno de recuperação inválido não deixa tokens sintéticos no endere
   expect(page.url()).not.toMatch(/fake-|token|code|error/);
 });
 
-test('janela de login mantém foco de teclado e fecha com Escape', async ({ page }) => {
+test('janela de login mantém foco de teclado e devolve foco ao fechar com Escape', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Entrar', exact: true }).first().click();
+  const trigger = page.getByRole('button', { name: 'Entrar', exact: true }).first();
+  await trigger.focus();
+  await trigger.click();
   const dialog = page.getByRole('dialog', { name: /Entrar como candidato/i });
   await expect(dialog).toBeVisible();
   await expect(dialog.locator('input').first()).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(dialog).toHaveCount(0);
+  await expect(trigger).toBeFocused();
 });
