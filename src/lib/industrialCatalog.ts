@@ -136,6 +136,24 @@ export const SHIFT_OPTIONS = [
 export const normalizeSelection = (value: string) =>
   value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLocaleLowerCase('pt-BR');
 
+/** Matches one selected Brazilian municipality, including UF when both values have it.
+ * Legacy records without UF match the exact municipality name only, never a substring.
+ */
+export function matchesBrazilianCityFilter(jobCity: string, selectedCity: string): boolean {
+  if (!selectedCity.trim()) return true;
+  const split = (value: string) => {
+    const match = value.trim().match(/^(.*?)\s+[—-]\s+([A-Za-z]{2})$/);
+    return {
+      name: normalizeSelection(match ? match[1] : value),
+      uf: match?.[2].toUpperCase() ?? '',
+    };
+  };
+  const job = split(jobCity);
+  const selected = split(selectedCity);
+  return job.name === selected.name && (!job.uf || !selected.uf || job.uf === selected.uf);
+}
+
+
 export function uniqueCatalogOptions(...lists: ReadonlyArray<readonly string[]>): string[] {
   const found = new Map<string, string>();
   for (const list of lists) {
