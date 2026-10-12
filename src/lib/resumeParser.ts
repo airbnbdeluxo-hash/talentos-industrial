@@ -175,9 +175,25 @@ export function parseResumeText(text: string, catalog: string[] = []): ResumeDra
 export async function extractResumeText(file: File, signal?: AbortSignal): Promise<string> {
   signal?.throwIfAborted();
   const lowerName = file.name.toLowerCase();
+  const isPdf = lowerName.endsWith('.pdf');
+  const isDocx = lowerName.endsWith('.docx');
+  if (!isPdf && !isDocx) throw new Error('Formato não suportado. Envie PDF ou Word (.docx).');
+  if (file.size === 0) throw new Error('O arquivo do currículo está vazio.');
   if (file.size > 10 * 1024 * 1024) throw new Error('O currículo deve ter no máximo 10 MB.');
 
-  if (lowerName.endsWith('.pdf') || file.type === 'application/pdf') {
+  // File names and browser-supplied MIME types are not proof of document format.
+  // Check magic bytes before invoking PDF.js or a ZIP-based DOCX extractor.
+  const header = new Uint8Array(await file.slice(0, 1024).arrayBuffer());
+  signal?.throwIfAborted();
+  const validPdf = isPdf && header.some((byte, index) =>
+    byte === 0x25 && header[index + 1] === 0x50 && header[index + 2] === 0x44 &&
+    header[index + 3] === 0x46 && header[index + 4] === 0x2d
+  );
+  const validDocx = isDocx && header[0] === 0x50 && header[1] === 0x4b &&
+    header[2] === 0x03 && header[3] === 0x04;
+  if (!validPdf && !validDocx) throw new Error('O arquivo não corresponde a um PDF ou Word (.docx) válido.');
+
+  if (isPdf) {
     const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
     const { default: workerUrl } = await import('pdfjs-dist/build/pdf.worker.min.mjs?url');
     const data = new Uint8Array(await file.arrayBuffer());
@@ -207,7 +223,7 @@ export async function extractResumeText(file: File, signal?: AbortSignal): Promi
     }
   }
 
-  if (lowerName.endsWith('.docx') || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+  if (isDocx) {
     const mammoth = await import('mammoth');
     signal?.throwIfAborted();
     const arrayBuffer = await file.arrayBuffer();
