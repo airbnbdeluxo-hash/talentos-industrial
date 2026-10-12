@@ -17,7 +17,7 @@ Base em produção: baa7cc4; correções propostas em PR #89: 39511e1 (autentica
 | P0 | Isolamento de candidatos e empresas | Parcialmente implementado | recruiting_journey.sql passou no banco com identidades sintéticas e rollback; falta repetir fronteira HTTP/browser |
 | P0 | Permissões de visualizador | Concluído e comprovado no banco | Teste permite leitura da candidatura e impede mudança de status; cobertura limitada aos caminhos exercitados |
 | P0 | Privilégios administrativos | Implementado, pendente de homologação | rls_security.sql confirma provisionamento por app_metadata e proteção de role; falta jornada admin completa |
-| P0 | Arquivos privados | Parcialmente implementado | candidate-resumes e skill-evidence privados, limite 10 MiB; falta testar download negado entre usuários |
+| P0 | Arquivos privados | SQL de RLS aprovado; HTTP pendente | Buckets candidate-resumes e skill-evidence privados (10 MiB); `storage_private_rls.sql` PASS: dono lê, outro candidato/anon não leem, usuário não altera documento de terceiro, evidência imutável não pode ser sobrescrita. Sem arquivos reais; falta tentativa de download via Storage API autenticada |
 | P0 | Chaves no frontend | Concluído e comprovado no escopo do scanner | security:scan passou; não equivale a auditoria completa do histórico |
 | P1 | Cadastro empresarial/CNPJ/cidade/limites | Implementado, pendente de homologação | Correções recentes na main e função company-team v8; falta exercitar endpoint de criação com conta técnica |
 | P1 | Gestão de equipe | Parcialmente implementado | company_team_management.sql passou; transferência/remoção passaram em transação; convite real por e-mail pendente |
@@ -26,7 +26,7 @@ Base em produção: baa7cc4; correções propostas em PR #89: 39511e1 (autentica
 | P1 | Cancelar leitura sem salvar | Implementado, pendente de homologação | c8f485b: AbortController mais geração invalidada; teste Playwright de leitura atrasada e cancelamento aprovado em modo E2E, falta ambiente remoto/conta real |
 | P1 | Skills editáveis sem inventar qualificações | Parcialmente implementado | c8f485b: remove inferência de cargo a partir da primeira linha, bloqueia menções negadas/aspiracionais e preserva frases positivas; testes automatizados aprovados, falta avaliação ampla com currículos reais consentidos |
 | P1 | Filtros cargo/skill/cidade/empresa/salário/turno/modalidade | Implementado, pendente de homologação | UI e catálogos presentes; validar combinações e resultado vazio |
-| P1 | Duplicação de candidatura | Implementado, pendente de homologação | Falta teste explícito de duas submissões concorrentes |
+| P1 | Duplicação de candidatura | Garantia de unicidade comprovada em SQL; fluxo HTTP pendente | Índice único PostgreSQL `(job_id,candidate_id)` presente; `application_uniqueness.sql` PASS: segunda inserção recusada com `unique_violation`, contagem mantida em 1 e fixtures revertidas. Falta UX de concorrência/reenvio HTTP |
 | P1 | Mensagens/entrevistas/propostas/notificações | Concluído e comprovado no banco para cenário exercitado | Jornada transacional passou; e-mail/entrega externa e interface real ainda pendentes |
 | P1 | Avaliações e competências comprovadas | Comprovado na camada SQL testada; pendente de homologação real | `evidence_skill_loop.sql` PASS: ownership, autovalidação negada, proveniência, progressão limitada, evento de auditoria, rematching, idempotência, privilégios e rollback. Falta fluxo real de navegador + documentos privados |
 | P1 | Compilação e testes unitários | Concluído e comprovado no último código funcional inspecionado | CI build/e2e-smoke 38302827078 e Security 38302827143 passaram no c8f485b, inclusive extração de currículo; revalidar os commits documentais posteriores |
@@ -42,7 +42,7 @@ Base em produção: baa7cc4; correções propostas em PR #89: 39511e1 (autentica
 | P2 | Orientação de candidaturas | Parcialmente implementado | Informações de compatibilidade presentes; assistente individual ainda pendente |
 | P2 | Alertas de oportunidades | Implementado, pendente de homologação | job_alerts e notificações funcionam no cenário SQL; entrega e relevância pendentes |
 | P2 | Portfólio de competências | Implementado, pendente de homologação | Evidências e validação humana existentes; testar cadeia completa e acesso aos documentos |
-| P2 | Padrão visual desktop/mobile/admin | Parcialmente implementado | workspace.css e central de carreira existentes; falta revisão visual de todas as páginas |
+| P2 | Padrão visual desktop/mobile/admin | Parcialmente implementado | Smoke existente cobre 390 px; adicionado `tests/e2e/mobile-360.spec.ts` para menus candidato/empresa e recuperação expirada em 360 px (aguardava CI no momento do registro). Ainda falta inspeção visual real, contraste, outras larguras e dispositivos |
 | P2 | Desempenho | Parcialmente implementado | Build alerta bundle principal >500 kB; falta medição em dispositivo/rede móvel |
 
 ## Evidências desta execução
@@ -65,3 +65,12 @@ Base em produção: baa7cc4; correções propostas em PR #89: 39511e1 (autentica
 - `supabase/tests/outcome_skill_feedback_loop.sql`: PASS (30/60/90 dias, sem validação automática, rematching, feedback, idempotência e autorização).
 - Ambos executados com BEGIN/ROLLBACK em `kvxqhvngkjxqlvlzcsef`. Consulta posterior encontrou **0 usuários remanescentes** nos seis UUIDs sintéticos destes testes. Nenhuma migração foi aplicada.
 - Estes resultados comprovam os cenários SQL executados e NÃO substituem teste real de e-mail, sessão, arquivos privados via HTTP, cadastro, candidaturas e persistência de currículo.
+
+## Bloco de continuidade — segurança de armazenamento e unicidade
+- `supabase/tests/storage_private_rls.sql` criado e executado: PASS. O teste usa apenas metadados fictícios de arquivos, nenhum byte enviado; verifica buckets privados, RLS, isolamento do proprietário/outro candidato/anon e imutabilidade de evidências. Políticas `skill_evidence_objects_immutable` (UPDATE) e `skill_evidence_objects_referenced_delete_guard` (DELETE) são RESTRICTIVE; a regra de exclusão foi verificada estruturalmente, não por chamada HTTP.
+- `supabase/tests/application_uniqueness.sql` criado e executado: PASS. Índice único em `(job_id,candidate_id)` é controle transacional contra duplicação, teste de segunda inserção bloqueada. Não simula duas requisições HTTP simultâneas.
+- Os dois scripts contêm `BEGIN`/`ROLLBACK`; consulta posterior confirmou zero metadados de Storage, zero candidaturas e zero contas sintéticas nos IDs usados.
+- Novo Playwright de 360px: `tests/e2e/mobile-360.spec.ts`, cobrindo menus candidato/empresa e recuperação expirada; CI deve ser confirmado no SHA do código após a criação.
+- Vercel projeto correto: domínio `talentos-industrial.vercel.app` verificado, filtro de variáveis (sem decriptar valores) apresentou `VITE_SUPABASE_URL` e nenhuma chave pública de preview; `src/lib/supabaseTarget.ts` proíbe usar backend de produção em preview. Homologação real exige ambiente autorizado e isolado, não apontar preview para banco de produção.
+- Vercel runtime_errors (24h) não apontou erros de funções; não é prova de ausência de erros de navegador nem confirmação de e-mail.
+- Supabase advisor continua com aviso de proteção de senhas vazadas desativada. Não houve nova migração, publicação de função, criação de ambiente ou mudança de produção.
