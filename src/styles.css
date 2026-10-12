@@ -1059,3 +1059,5 @@
 .shell:not(.landing-active) .empty,
 .public-job-card .empty,
 .public-job-card .empty span { color:#45576d; }
+/* The logo subtitle sits on a white public-vacancies card, not the navy sidebar. */
+.public-job-card .brand span { color:#405571; }
