@@ -17,12 +17,15 @@ export function authLinkRepair(href: string) {
   if (!problem) return null;
   const url = new URL(href);
   const recovery = url.searchParams.get('auth') === 'recovery';
-  const fragment = new URLSearchParams(url.hash.slice(1));
-  for (const key of ['error', 'error_code', 'error_description']) {
-    url.searchParams.delete(key);
-    fragment.delete(key);
-  }
-  url.hash = fragment.toString();
+  // A failed callback must never retain authentication credentials in the
+  // browser address bar, history entry or a copied recovery URL. Successful
+  // callbacks are deliberately untouched (authLinkRepair returns null).
+  for (const key of [
+    'error', 'error_code', 'error_description',
+    'access_token', 'refresh_token', 'provider_token', 'provider_refresh_token',
+    'code', 'token', 'token_hash', 'state', 'type',
+  ]) url.searchParams.delete(key);
+  url.hash = '';
   return {
     mode: recovery ? 'recovery' as const : 'resend' as const,
     message: recovery
