@@ -3,6 +3,12 @@
 **Estado:** roteiro preparado, **NÃO EXECUTADO com contas reais**. Nenhum item abaixo deve ser marcado como aprovado a partir de testes sintéticos.
 **Escopo exclusivo:** Supabase `kvxqhvngkjxqlvlzcsef`, GitHub `airbnbdeluxo-hash/talentos-industrial` e `https://talentos-industrial.vercel.app`.
 
+## Critério obrigatório de conclusão deste roteiro
+
+Todos os cenários abaixo devem constar como **APROVADO** no ambiente final, com data, SHA e comprovante sanitizado, conforme [`docs/ACCEPTANCE_CRITERIA.md`](ACCEPTANCE_CRITERIA.md) (**G06–G10, G17 e G18**). Um e-mail meramente solicitado **não conta como recebido**; testes de Playwright com dados sintéticos não comprovam configuração real do servidor. Qualquer teste real pendente, bloqueado ou reprovado impede o aceite da autenticação.
+
+A comprovação mínima inclui: duas contas técnicas de papéis diferentes; confirmação de ambas por mensagem efetivamente recebida; reenvio e recuperação com novo link válido; senha de 7 caracteres rejeitada e senha de 8 caracteres válida aceita **pelo Auth do servidor**; expiração de sessão/logout com acesso subsequente negado; acesso alheio negado por HTTP; URLs oficiais/SMTP conferidos no projeto correto, sem exposição de tokens ou segredos.
+
 ## Condições antes de começar
 - Aprovação humana do PR #89 e deploy do commit exato na produção, se os testes incluírem as correções pendentes desse PR. Não fazer merge automaticamente.
 - Usar apenas contas de teste próprias/consentidas, diferentes para candidato e empresa; não compartilhar senhas, tokens, links com parâmetros sensíveis nem credenciais SMTP em issues, logs ou capturas.
