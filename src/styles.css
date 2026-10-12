@@ -1039,3 +1039,43 @@
 .shell:not(.landing-active) .company-city-select .field-hint{font-size:12px;color:#586c85}
 .shell:not(.landing-active) .company-create-error{padding:12px 14px;color:#a52b2b!important;font-size:13px!important;font-weight:600!important;line-height:1.5;border:1px solid #f2c5c5;background:#fff2f2;border-radius:11px;margin:12px 0}
 .shell:not(.landing-active) .modal button.primary:disabled{opacity:.62;cursor:wait}
+
+
+/* Accessibility: verified contrast corrections on light workspace surfaces.
+   Keep contextual backgrounds and all decorative/brand gradients unchanged.
+   Axe checks color-contrast for candidate, company, and public job flows. */
+.shell:not(.landing-active) .eyebrow,
+.public-job-card .eyebrow { color:#344f70; }
+.shell:not(.landing-active) main>header p,
+.shell:not(.landing-active) .company-home-hero p,
+.shell:not(.landing-active) .candidate-resume-identity>p,
+.public-job-card>p { color:#405571; }
+
+.shell:not(.landing-active) .candidate-profile-progress span,
+.shell:not(.landing-active) .candidate-facts span,
+.shell:not(.landing-active) .company-action-row span,
+.shell:not(.landing-active) .company-job-row span { color:#42566e; }
+
+.shell:not(.landing-active) .empty,
+.public-job-card .empty,
+.public-job-card .empty span { color:#45576d; }
+/* The logo subtitle sits on a white public-vacancies card, not the navy sidebar. */
+.public-job-card .brand span { color:#405571; }
+
+/* Axe follow-up: metadata and pipeline labels on near-white cards. */
+.shell:not(.landing-active) .candidate-skill-info>span,
+.shell:not(.landing-active) .candidate-proof-body>span,
+.shell:not(.landing-active) .candidate-privacy-note>span,
+.shell:not(.landing-active) .pipeline-summary button span,
+.shell:not(.landing-active) .stage-empty,
+.shell:not(.landing-active) .pipeline-card-clean .pipeline-card-head span,
+.shell:not(.landing-active) .pipeline-card-skills span:not(.ok):not(.attention),
+.shell:not(.landing-active) .pipeline-next-info span,
+.shell:not(.landing-active) .pipeline-outcome-summary span { color:#42566e; }
+
+/* Keep collapsible recruiting actions legible on white cards (axe serious). */
+.shell:not(.landing-active) .pipeline-more summary,
+.shell:not(.landing-active) .pipeline-more summary::after { color:#364d69; }
+
+/* Login and recovery modals are outside the authenticated workspace shell. */
+.auth-modal > .eyebrow { color:#344f70; }

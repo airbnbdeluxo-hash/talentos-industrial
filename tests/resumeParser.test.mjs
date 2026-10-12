@@ -1,6 +1,29 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseResumeText, resumePdfPageText } from '../src/lib/resumeParser.ts';
+import { parseResumeText, resumePdfPageText, parseResumeFile, validateResumeFileSignature } from '../src/lib/resumeParser.ts';
+
+test('missing role stays blank instead of copying the candidate name', () => {
+  const draft = parseResumeText('Maria da Silva\nHabilidades\nMetrologia', ['Metrologia']);
+  assert.equal(draft.name, 'Maria da Silva');
+  assert.equal(draft.role, '');
+});
+
+test('negative and aspirational mentions are not presented as skills', () => {
+  const draft = parseResumeText('Maria da Silva\nNão tenho experiência em CNC, mas domino Metrologia\nQuero aprender Soldagem TIG', ['CNC', 'Metrologia', 'Soldagem TIG']);
+  assert.deepEqual(draft.skills, ['Metrologia']);
+});
+
+test('a later positive mention is retained after an earlier negative mention', () => {
+  const draft = parseResumeText('Maria Silva\nAntes não conhecia CNC\nHabilidades atuais\nCNC', ['CNC']);
+  assert.deepEqual(draft.skills, ['CNC']);
+  assert.equal(draft.skillMentions[0].excerpt, 'CNC');
+});
+
+test('cancelled import does not begin reading a file', async () => {
+  const controller = new AbortController();
+  controller.abort();
+  await assert.rejects(parseResumeFile(new File(['synthetic'], 'resume.pdf'), [], controller.signal), {name:'AbortError'});
+});
 
 test('PDF line endings retain the candidate identity and labelled fields', () => {
   const text = resumePdfPageText([
@@ -38,4 +61,33 @@ test('preserves independent source-line evidence for an extracted skill', () => 
   const draft = parseResumeText('Maria Silva\nHabilidades\nMetrologia e Soldagem TIG', ['Metrologia','Soldagem TIG']);
   assert.deepEqual(draft.skills,['Metrologia','Soldagem TIG']);
   assert.ok(draft.skillMentions.every(item=>item.excerpt==='Metrologia e Soldagem TIG'));
+});
+
+test('empty files are rejected before a document parser loads', async () => {
+  await assert.rejects(parseResumeFile(new File([], 'curriculo.pdf')), /vazio/);
+  await assert.rejects(parseResumeFile(new File([], 'curriculo.docx')), /vazio/);
+});
+
+test('a renamed executable or plain text is never parsed as a PDF or Word', async () => {
+  await assert.rejects(parseResumeFile(new File(['not really PDF'], 'curriculo.pdf', {type:'application/pdf'})), /não corresponde/);
+  await assert.rejects(parseResumeFile(new File(['not really DOCX'], 'curriculo.docx', {type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'})), /não corresponde/);
+  await assert.rejects(parseResumeFile(new File(['%PDF-1.7'], 'curriculo.exe', {type:'application/pdf'})), /Formato não suportado/);
+});
+
+test('file names alone do not bypass validation', async () => {
+  await assert.rejects(parseResumeFile(new File(['PK fake zip'], 'curriculo.docx')), /não corresponde/);
+});
+
+test('upload boundary derives canonical MIME from file signature, not supplied File.type', async () => {
+  const pdf = new File(['%PDF-1.7\n'], 'curriculo.pdf', {type:'application/x-msdownload'});
+  const docx = new File([Uint8Array.from([0x50,0x4b,0x03,0x04,0x00,0x00])], 'curriculo.docx', {type:'application/pdf'});
+  assert.equal(await validateResumeFileSignature(pdf), 'application/pdf');
+  assert.equal(await validateResumeFileSignature(docx), 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+});
+
+test('Storage signature boundary refuses forged extensions, empty files and content mismatches', async () => {
+  await assert.rejects(validateResumeFileSignature(new File(['%PDF-1.7'], 'curriculo.exe', {type:'application/pdf'})), /Formato não suportado/);
+  await assert.rejects(validateResumeFileSignature(new File([], 'curriculo.pdf')), /vazio/);
+  await assert.rejects(validateResumeFileSignature(new File(['plain text'], 'curriculo.pdf', {type:'application/pdf'})), /não corresponde/);
+  await assert.rejects(validateResumeFileSignature(new File(['%PDF-1.7'], 'curriculo.docx', {type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'})), /não corresponde/);
 });

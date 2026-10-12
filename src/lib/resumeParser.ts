@@ -99,18 +99,8 @@ export function parseResumeText(text: string, catalog: string[] = []): ResumeDra
       if (role) break;
     }
   }
-  if (!role) {
-    role =
-      lines.find((line) => {
-        const n = normalize(line);
-        return (
-          line.length >= 5 &&
-          line.length <= 80 &&
-          !n.includes('@') &&
-          !/curriculo|linkedin|telefone|celular|contato|email|endereco|cidade|experiencia|formacao|habilidades|competencias|resumo|perfil/.test(n)
-        );
-      }) ?? '';
-  }
+  // A name or arbitrary first line is not evidence of a professional role.
+  // Leave unlabelled roles blank for the candidate to confirm.
 
   const cityMatch =
     clean.match(/(?:cidade|localizacao|residencia|endereco)\s*[:\-]?\s*([^\n,;]+?)(?:\s*[-,]\s*[A-Z]{2})?(?:\n|$)/i) ??
@@ -147,7 +137,12 @@ export function parseResumeText(text: string, catalog: string[] = []): ResumeDra
         .flatMap(entry => {
           const escaped = entry.normalized.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
           const boundary = new RegExp('(^|[^a-z0-9])' + escaped + '(?=$|[^a-z0-9])', 'i');
-          const lineIndex = normalizedLines.findIndex(line => boundary.test(line));
+          const lineIndex = normalizedLines.findIndex(line =>
+            line.split(/[,;.]|\bmas\b|\bporem\b/).some(clause =>
+              boundary.test(clause) &&
+              !/\b(nao|sem|nenhum|nenhuma)\b|\b(quero|desejo|pretendo|busco)\s+(aprender|estudar)|interesse em aprender/.test(clause)
+            )
+          );
           if (lineIndex < 0) return [];
           const line = lines[lineIndex];
           const preceding = normalizedLines.slice(Math.max(0,lineIndex-3),lineIndex).join(' ');
@@ -177,32 +172,77 @@ export function parseResumeText(text: string, catalog: string[] = []): ResumeDra
   };
 }
 
-export async function extractResumeText(file: File): Promise<string> {
+// Shared check for both extraction and Storage upload. MIME and filenames
+// supplied by browsers are untrusted; always identify the format from bytes.
+// This lightweight check does not replace a malware scanner or ZIP bomb limits.
+export async function validateResumeFileSignature(
+  file: File,
+  signal?: AbortSignal,
+): Promise<'application/pdf' | 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'> {
+  signal?.throwIfAborted();
   const lowerName = file.name.toLowerCase();
+  const isPdf = lowerName.endsWith('.pdf');
+  const isDocx = lowerName.endsWith('.docx');
+  if (!isPdf && !isDocx) throw new Error('Formato não suportado. Envie PDF ou Word (.docx).');
+  if (file.size === 0) throw new Error('O arquivo do currículo está vazio.');
   if (file.size > 10 * 1024 * 1024) throw new Error('O currículo deve ter no máximo 10 MB.');
 
-  if (lowerName.endsWith('.pdf') || file.type === 'application/pdf') {
+  const header = new Uint8Array(await file.slice(0, 1024).arrayBuffer());
+  signal?.throwIfAborted();
+  const validPdf = isPdf && header.some((byte, index) =>
+    byte === 0x25 && header[index + 1] === 0x50 && header[index + 2] === 0x44 &&
+    header[index + 3] === 0x46 && header[index + 4] === 0x2d
+  );
+  const validDocx = isDocx && header[0] === 0x50 && header[1] === 0x4b &&
+    header[2] === 0x03 && header[3] === 0x04;
+  if (!validPdf && !validDocx) throw new Error('O arquivo não corresponde a um PDF ou Word (.docx) válido.');
+
+  return validPdf
+    ? 'application/pdf'
+    : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+}
+
+export async function extractResumeText(file: File, signal?: AbortSignal): Promise<string> {
+  const contentType = await validateResumeFileSignature(file, signal);
+  const isPdf = contentType === 'application/pdf';
+  const isDocx = contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+  if (isPdf) {
     const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
     const { default: workerUrl } = await import('pdfjs-dist/build/pdf.worker.min.mjs?url');
     const data = new Uint8Array(await file.arrayBuffer());
+    signal?.throwIfAborted();
     pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
     const loadingTask = pdfjs.getDocument({ data });
+    const cancel = () => { void loadingTask.destroy().catch(() => {}); };
+    signal?.addEventListener('abort', cancel, { once: true });
+    try {
     const pdf = await loadingTask.promise;
+    signal?.throwIfAborted();
     const pages: string[] = [];
     for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+      signal?.throwIfAborted();
       const page = await pdf.getPage(pageNumber);
       const content = await page.getTextContent();
       const pageText = resumePdfPageText(content.items);
       pages.push(pageText);
     }
+    signal?.throwIfAborted();
     const output = cleanText(pages.join('\n'));
     if (!output) throw new Error('Esse PDF parece ser uma imagem digitalizada. Envie um PDF com texto selecionável ou um arquivo .docx.');
     return output;
+    } finally {
+      signal?.removeEventListener('abort', cancel);
+      await loadingTask.destroy();
+    }
   }
 
-  if (lowerName.endsWith('.docx') || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+  if (isDocx) {
     const mammoth = await import('mammoth');
-    const result = await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
+    signal?.throwIfAborted();
+    const arrayBuffer = await file.arrayBuffer();
+    signal?.throwIfAborted();
+    const result = await mammoth.extractRawText({ arrayBuffer });
+    signal?.throwIfAborted();
     const output = cleanText(result.value ?? '');
     if (!output) throw new Error('Não encontrei texto suficiente nesse arquivo Word.');
     return output;
@@ -220,8 +260,9 @@ export function resumePdfPageText(items: unknown[]): string {
   }).join('');
 }
 
-export async function parseResumeFile(file: File, catalog: string[] = []): Promise<ResumeDraft> {
-  const text = await extractResumeText(file);
+export async function parseResumeFile(file: File, catalog: string[] = [], signal?: AbortSignal): Promise<ResumeDraft> {
+  const text = await extractResumeText(file, signal);
+  signal?.throwIfAborted();
   return { ...parseResumeText(text, catalog), sourceFileName: file.name };
 }
 
