@@ -1,7 +1,7 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {BarChart3,BadgeCheck,Building2,CalendarClock,CheckCircle2,ChevronRight,Compass,Factory,FileCheck2,FileText,GraduationCap,LogIn,LogOut,MapPinned,Network,Plus,RotateCcw,Search,Settings,ShieldCheck,Sparkles,Target,Trash2,Upload,Users,BriefcaseBusiness,Eye,EyeOff,X,Bell,ExternalLink,XCircle,UserPlus,UserMinus,ArrowRightLeft,Wrench,Cog,Cpu,Hammer} from 'lucide-react';
 import {supabase,supabaseConfigured} from './lib/supabase';
-import {readAuthLinkProblem} from './lib/authLink';
+import {authLinkRepair} from './lib/authLink';
 import {getRemoteIndustryOccupations} from './lib/data';
 import {CatalogMultiSelect, CatalogSingleSelect} from './components/CatalogMultiSelect';
 import {INDUSTRIAL_OCCUPATIONS, INDUSTRIAL_SKILLS, SHIFT_OPTIONS, uniqueCatalogOptions, normalizeSelection, parseBrazilianMoney, formatBrazilianMoney} from './lib/industrialCatalog';
@@ -206,22 +206,15 @@ const [privacyUpdatingId,setPrivacyUpdatingId]=useState<string|null>(null);
 const [clientErrors,setClientErrors]=useState<ClientErrorEvent[]>([]);
 const onboardingHandled=useRef<string|null>(null);
 useEffect(()=>{
- const url=new URL(window.location.href);
- const query=url.searchParams;
- const fragment=window.location.hash.startsWith('#error=')?new URLSearchParams(window.location.hash.slice(1)):null;
- const problem=readAuthLinkProblem(url.href);
- if(!problem)return;
- setAuthMode('resend');
+ const repair=authLinkRepair(window.location.href);
+ if(!repair)return;
+ setAuthMode(repair.mode);
  setAuthPassword('');
  setAuthPasswordConfirm('');
  setSignupConfirmationRequested(false);
- setAuthMsg(problem==='expired'
-  ?'O link de confirmação expirou ou já foi utilizado. Informe seu e-mail para solicitar uma nova confirmação. Não é necessário criar outra conta.'
-  :'Não foi possível confirmar o e-mail por esse link. Solicite uma nova confirmação.');
+ setAuthMsg(repair.message);
  setAuthModal(true);
- for(const key of ['error','error_code','error_description'])query.delete(key);
- if(fragment)url.hash='';
- window.history.replaceState({},'',url.pathname+url.search+url.hash);
+ window.history.replaceState({},'',repair.cleanPath);
 },[]);
 
 useEffect(()=>{if(e2eRole)return;if(!supabase)return;let active=true;const hydrate=async(s:any)=>{setSession(s);if(!s){onboardingHandled.current=null;setRole(null);const demoRequested=new URLSearchParams(window.location.search).get('demo')==='1';setPublicDemo(demoRequested);setDataMode(import.meta.env.PROD&&!demoRequested?'remote':'demo');setDb(import.meta.env.PROD?(demoRequested?structuredClone(seed):structuredClone(emptyDB)):load());return}setPublicDemo(false);try{const p=await getRemoteProfile(s.user.id);const nextRole=p?.role??null;if(active)setRole(nextRole);const remote=await loadRemoteData(s.user.id,nextRole??undefined);const requestedCompanySetup=nextRole==='candidato'&&s.user?.user_metadata?.requested_account_type==='empresa';if(active){setDb(remote);setDataMode('remote');const lastTab=localStorage.getItem('talentos:last-tab:'+s.user.id);const allowedTabIds=nextRole==='candidato'?['jobs','passport','applications','skills','settings']:nextRole==='empresa'?['dashboard','jobs','talents','pipeline','validation','skills','intelligence','team','settings']:['dashboard','jobs','talents','companies','skills','intelligence','passport','applications','pipeline','validation','settings'];setTab(lastTab&&allowedTabIds.includes(lastTab)?lastTab as Tab:nextRole==='candidato'?'dashboard':'dashboard');const pendingJob=sessionStorage.getItem('talentos-pending-job');const selectedJob=pendingJob?remote.jobs.find(j=>j.id===pendingJob):null;if(selectedJob)setJobId(selectedJob.id);else if(remote.jobs[0])setJobId(remote.jobs[0].id);if(remote.candidates[0])setTalentId(remote.candidates[0].id);if(onboardingHandled.current!==s.user.id){const ownCandidate=remote.candidates.find(c=>c.id===s.user.id);if(requestedCompanySetup){onboardingHandled.current=s.user.id;setCompanyOnboarding(true);setCompanyCnpj('');setF(x=>({...x,name:'',talentCity:'',industry:''}));setModal('company')}else if(nextRole==='empresa'&&remote.companies.length===0){onboardingHandled.current=s.user.id;setCompanyOnboarding(true);setCompanyCnpj('');setModal('company')}else if(nextRole==='candidato'&&!ownCandidate){onboardingHandled.current=s.user.id;setCandidateProfileSetup(true);setCandidateOnboardingStep('choice');setResumeFile(null);setResumeDraft(null);setResumeSkillInput('');setResumeError('');setF(x=>({...x,name:'',role:'',currentRole:'',desiredRoles:[],talentCity:'',skills:'',years:'0',salary:'',preferredShifts:'',visibilityConsent:false,bio:''}));setModal('candidateOnboarding')}else if(nextRole==='candidato'&&ownCandidate){onboardingHandled.current=s.user.id;setTalentId(ownCandidate.id);if(ownCandidate.consentGiven==null){setF(x=>({...x,name:ownCandidate.name,role:ownCandidate.role,talentCity:ownCandidate.city,skills:ownCandidate.skills.join(', '),years:String(ownCandidate.years),salary:String(ownCandidate.salary),preferredShifts:ownCandidate.shifts.join(', '),visibilityConsent:false,bio:ownCandidate.bio??''}));setConsentRequired(true);setModal('consent')}}}}}catch(err){console.error(err);if(active){setDataMode('remote');setDb(import.meta.env.PROD?structuredClone(emptyDB):load());setToast(import.meta.env.PROD?'Não foi possível carregar os dados do piloto. Tente novamente.':'Supabase conectado, mas os dados remotos falharam. Modo de demonstração (Demo) ativo.')}}};supabase.auth.getSession().then(({data})=>hydrate(data.session));const sub=supabase.auth.onAuthStateChange((event,s)=>{if(event==='PASSWORD_RECOVERY'){setAuthMsg('Crie sua nova senha para recuperar o acesso.');setAuthPassword('');setAuthPasswordConfirm('');setAuthMode('reset');setAuthModal(true)}hydrate(s)});return()=>{active=false;sub.data.subscription.unsubscribe()}},[]);

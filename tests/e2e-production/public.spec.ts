@@ -3,6 +3,21 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
+test('link de recuperação expirado oferece recuperação, sem reenviar cadastro', async ({ page }) => {
+  await page.goto('/?auth=recovery#error_code=otp_expired&error=access_denied');
+  await expect(page.getByRole('heading', { name: 'Recuperar acesso' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Enviar link de recuperação' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Reenviar confirmação', exact: true })).toHaveCount(0);
+  await expect(page).toHaveURL(/\?auth=recovery$/);
+});
+
+test('link de confirmação expirado oferece reenvio de confirmação', async ({ page }) => {
+  await page.goto('/?auth=confirm#error_code=otp_expired&error=access_denied');
+  await expect(page.getByRole('heading', { name: 'Confirmar meu e-mail' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Reenviar confirmação', exact: true })).toBeVisible();
+  await expect(page).toHaveURL(/\?auth=confirm$/);
+});
+
 test('área pública não apresenta perfis de demonstração como dados reais', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1, name: 'Sua melhor vaga na indústria começa aqui.' })).toBeVisible();
