@@ -1,6 +1,7 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {BarChart3,BadgeCheck,Building2,CalendarClock,CheckCircle2,ChevronRight,Compass,Factory,FileCheck2,FileText,GraduationCap,LogIn,LogOut,MapPinned,Network,Plus,RotateCcw,Search,Settings,ShieldCheck,Sparkles,Target,Trash2,Upload,Users,BriefcaseBusiness,Eye,EyeOff,X,Bell,ExternalLink,XCircle,UserPlus,UserMinus,ArrowRightLeft,Wrench,Cog,Cpu,Hammer} from 'lucide-react';
 import {supabase,supabaseConfigured} from './lib/supabase';
+import {readAuthLinkProblem} from './lib/authLink';
 import {getRemoteIndustryOccupations} from './lib/data';
 import {CatalogMultiSelect, CatalogSingleSelect} from './components/CatalogMultiSelect';
 import {INDUSTRIAL_OCCUPATIONS, INDUSTRIAL_SKILLS, SHIFT_OPTIONS, uniqueCatalogOptions, normalizeSelection, parseBrazilianMoney, formatBrazilianMoney} from './lib/industrialCatalog';
@@ -208,14 +209,13 @@ useEffect(()=>{
  const url=new URL(window.location.href);
  const query=url.searchParams;
  const fragment=window.location.hash.startsWith('#error=')?new URLSearchParams(window.location.hash.slice(1)):null;
- const errorCode=query.get('error_code')||fragment?.get('error_code')||'';
- const authError=query.get('error')||fragment?.get('error')||'';
- if(errorCode!=='otp_expired'&&authError!=='access_denied')return;
+ const problem=readAuthLinkProblem(url.href);
+ if(!problem)return;
  setAuthMode('resend');
  setAuthPassword('');
  setAuthPasswordConfirm('');
  setSignupConfirmationRequested(false);
- setAuthMsg(errorCode==='otp_expired'
+ setAuthMsg(problem==='expired'
   ?'O link de confirmação expirou ou já foi utilizado. Informe seu e-mail para solicitar uma nova confirmação. Não é necessário criar outra conta.'
   :'Não foi possível confirmar o e-mail por esse link. Solicite uma nova confirmação.');
  setAuthModal(true);
