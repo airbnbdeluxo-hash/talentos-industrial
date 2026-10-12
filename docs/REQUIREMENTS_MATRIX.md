@@ -28,7 +28,7 @@ Base em produção: baa7cc4; correções propostas em PR #89: 39511e1 (autentica
 | P1 | Filtros cargo/skill/cidade/empresa/salário/turno/modalidade | Implementado, pendente de homologação | UI e catálogos presentes; validar combinações e resultado vazio |
 | P1 | Duplicação de candidatura | Implementado, pendente de homologação | Falta teste explícito de duas submissões concorrentes |
 | P1 | Mensagens/entrevistas/propostas/notificações | Concluído e comprovado no banco para cenário exercitado | Jornada transacional passou; e-mail/entrega externa e interface real ainda pendentes |
-| P1 | Avaliações e competências comprovadas | Implementado, pendente de homologação | Testes SQL de evidências existentes; ainda não executados neste bloco |
+| P1 | Avaliações e competências comprovadas | Comprovado na camada SQL testada; pendente de homologação real | `evidence_skill_loop.sql` PASS: ownership, autovalidação negada, proveniência, progressão limitada, evento de auditoria, rematching, idempotência, privilégios e rollback. Falta fluxo real de navegador + documentos privados |
 | P1 | Compilação e testes unitários | Concluído e comprovado no último código funcional inspecionado | CI build/e2e-smoke 38302827078 e Security 38302827143 passaram no c8f485b, inclusive extração de currículo; revalidar os commits documentais posteriores |
 | P1 | Dependências | Parcialmente implementado | npm audit: 3 avisos moderados na mesma cadeia mammoth→argparse→sprintf-js, sem high/critical; avaliar atualização segura |
 | P1 | Navegador e acessibilidade | Parcialmente implementado | CI e2e-smoke e fluxos públicos aprovados em c8f485b; inclui importação de currículo simulada e links expirados. Navegador de CI usa ambiente isolado; suíte desativa contraste e não comprova acessibilidade integral nem produção com backend real |
@@ -36,7 +36,7 @@ Base em produção: baa7cc4; correções propostas em PR #89: 39511e1 (autentica
 | P2 | Análise aprimorada de currículo | Parcialmente implementado | Extração determinística existente; não chamar de IA generativa |
 | P2 | Recomendações explicáveis de vagas | Implementado, pendente de homologação | Matching com razões e lacunas existente; validar qualidade e explicação com dados autorizados |
 | P2 | Simulador de entrevistas | Não implementado na base inspecionada | Não localizado fluxo de simulação para candidato |
-| P2 | Plano personalizado de desenvolvimento | Implementado, pendente de homologação | training_recommendations e RPCs existentes; faltam testes específicos neste bloco |
+| P2 | Plano personalizado de desenvolvimento | Comprovado em cenários SQL; pendente de homologação real | `evidence_skill_loop.sql` e `outcome_skill_feedback_loop.sql` PASS para vínculos de treinamento e recomendações após contratação, com rollback. Falta jornada real de usuário e qualidade dos recursos |
 | P2 | Mapa visual de progressão | Parcialmente implementado | SkillGraph existente não comprova mapa pessoal de progressão |
 | P2 | Pesquisa em linguagem natural | Não implementado na base inspecionada | Filtros existentes não equivalem a pesquisa semântica |
 | P2 | Orientação de candidaturas | Parcialmente implementado | Informações de compatibilidade presentes; assistente individual ainda pendente |
@@ -59,3 +59,9 @@ Base em produção: baa7cc4; correções propostas em PR #89: 39511e1 (autentica
 - Supabase ACTIVE_HEALTHY, Edge Function company-team versão 8 ACTIVE com verificação JWT; advisor de segurança mantém aviso de proteção de senhas vazadas desativada. URLs Auth, política do servidor, SMTP e entrega de mensagens não foram verificadas pelo dashboard.
 - Nenhuma migração/SQL mutável, promoção para produção ou ação sobre outros projetos foi executada nesta continuação. Testes SQL anteriormente aprovados não foram repetidos.
 - AÇÃO BLOQUEANTE: revisão humana do PR #89, seguida de nova conferência do HEAD, checks e merge somente após aprovação; demais critérios de homologação real permanecem pendentes.
+
+## Regressões SQL adicionais verificadas nesta continuação
+- `supabase/tests/evidence_skill_loop.sql`: PASS (propriedade, autovalidação, proveniência, progressão, auditoria, idempotência, grants, recomendações).
+- `supabase/tests/outcome_skill_feedback_loop.sql`: PASS (30/60/90 dias, sem validação automática, rematching, feedback, idempotência e autorização).
+- Ambos executados com BEGIN/ROLLBACK em `kvxqhvngkjxqlvlzcsef`. Consulta posterior encontrou **0 usuários remanescentes** nos seis UUIDs sintéticos destes testes. Nenhuma migração foi aplicada.
+- Estes resultados comprovam os cenários SQL executados e NÃO substituem teste real de e-mail, sessão, arquivos privados via HTTP, cadastro, candidaturas e persistência de currículo.
