@@ -20,7 +20,7 @@ insert into public.jobs(id,company_id,title,city,status) values
 set local role authenticated;
 insert into public.applications(id,job_id,candidate_id,status) values
 ('d4200000-0000-4000-8000-000000000040','d4200000-0000-4000-8000-000000000030',auth.uid(),'novo');
-do $ declare closed_was_blocked boolean := false; hired_was_blocked boolean := false; fake_rejection_was_blocked boolean := false; begin
+do $$ declare closed_was_blocked boolean := false; hired_was_blocked boolean := false; fake_rejection_was_blocked boolean := false; begin
   begin
     insert into public.applications(id,job_id,candidate_id,status) values
     ('d4200000-0000-4000-8000-000000000041','d4200000-0000-4000-8000-000000000031',auth.uid(),'novo');
