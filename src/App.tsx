@@ -4,7 +4,7 @@ import {supabase,supabaseConfigured} from './lib/supabase';
 import {authLinkRepair} from './lib/authLink';
 import {getRemoteIndustryOccupations} from './lib/data';
 import {CatalogMultiSelect, CatalogSingleSelect} from './components/CatalogMultiSelect';
-import {INDUSTRIAL_OCCUPATIONS, INDUSTRIAL_SKILLS, SHIFT_OPTIONS, uniqueCatalogOptions, normalizeSelection, parseBrazilianMoney, formatBrazilianMoney} from './lib/industrialCatalog';
+import {INDUSTRIAL_OCCUPATIONS, INDUSTRIAL_SKILLS, SHIFT_OPTIONS, uniqueCatalogOptions, normalizeSelection, matchesBrazilianCityFilter, parseBrazilianMoney, formatBrazilianMoney} from './lib/industrialCatalog';
 import {recordRemoteTrainingEvidence,getRemoteTrainingResources,getRemoteProfile,loadRemoteData,getRemoteBrazilCities,createRemoteCompany,createRemoteCompanyAccount,createRemoteJob,updateRemoteJobStatus,updateRemoteJobDetails,createRemoteCandidate,getRemoteSkills,saveRemoteCandidateConsent,updateRemoteApplication,applyToJob,generateRemoteMatches,generateRemoteTrainingRecommendations,updateRemoteTrainingRecommendation,uploadRemoteEvidence,getEvidenceDownloadUrl,getRemoteChallenges,startRemoteChallenge,completeRemoteChallenge,reviewRemoteEvidence,recordRemoteEmploymentOutcome,saveRemoteOutcomeSkillSignal,getRemoteOutcomeSkillIntelligence,getRemotePublicJob,getRemotePublicJobs,saveRemoteJob,removeRemoteSavedJob,createRemoteJobAlert,toggleRemoteJobAlert,deleteRemoteJobAlert,sendRemoteMessage,createRemoteApplicationNote,trackRemoteJobEngagement,saveRemoteCandidateAvailability,removeRemoteCandidateAvailability,scheduleRemoteInterview,rescheduleRemoteInterview,updateRemoteInterview,saveRemoteScorecard,createRemoteTalentPool,addRemoteTalentPoolMember,createRemoteOffer,respondRemoteOffer,respondRemoteOfferSecure,respondRemoteInterviewSecure,getRemoteApplicationContact,markRemoteNotificationRead,exportRemoteCandidateData,requestRemoteAccountDeletion,getRemotePrivacyRequests,getRemoteAllPrivacyRequests,updateRemotePrivacyRequestStatus,getRemoteClientErrorEvents,manageRemoteCompanyTeam,acceptRemoteCompanyInvitation,updateRemoteCompanyMemberRole,removeRemoteCompanyMember,transferRemoteCompanyOwner,type PrivacyRequest,type ClientErrorEvent,type CompanyTeamSnapshot,type CapabilityNode,type CapabilityEdge,type TrainingResource,type EmploymentOutcome,type EmploymentOutcomeSkillSignal,type OutcomeCheckpoint,type RetentionStatus,type OutcomeSkillSignalStatus,type Interview,type InterviewScorecard,type InterviewStatus,type Offer,type OfferStatus,type CandidateAvailability} from './lib/data';
 import {matchSkillToCatalog,parseResumeFile,type ResumeDraft} from './lib/resumeParser';
 
@@ -405,16 +405,16 @@ const ownAlerts=useMemo(()=>db.jobAlerts.filter(x=>x.candidateId===session?.user
 const filteredJobs=useMemo(()=>db.jobs.filter(job=>{
  const company=db.companies.find(item=>item.id===job.companyId);
  const same=(a:string,b:string)=>normalizeSelection(a)===normalizeSelection(b);
- const cityQuery=normalizeCityText(jobFilters.city.split('—')[0]??'');
+ if(role==='candidato' && job.status!=='aberta') return false;
  const minSalary=parseBrazilianMoney(jobFilters.minSalary);
  return (!jobFilters.cargo||same(job.title,jobFilters.cargo))
   &&(!jobFilters.skill||job.skills.some(skill=>same(skill,jobFilters.skill)))
-  &&(!jobFilters.city||normalizeCityText(job.city).includes(cityQuery))
+  &&(!jobFilters.city||matchesBrazilianCityFilter(job.city,jobFilters.city))
   &&(!jobFilters.company||same(company?.name??job.companyName??'',jobFilters.company))
   &&(!jobFilters.minSalary||job.min>=minSalary)
   &&(!jobFilters.shift||job.shift===jobFilters.shift)
   &&(!jobFilters.workModel||job.workModel===jobFilters.workModel);
-}),[db.jobs,db.companies,jobFilters]);
+}),[db.jobs,db.companies,jobFilters,role]);
 const unreadNotifications=useMemo(()=>db.notifications.filter(n=>n.userId===session?.user?.id&&!n.readAt),[db.notifications,session?.user?.id]);
 const unreadMessages=useMemo(()=>db.messages.filter(m=>m.recipientId===session?.user?.id&&!m.readAt).length,[db.messages,session?.user?.id]);
 const upcomingInterviews=useMemo(()=>db.interviews.filter(x=>x.status==='agendada'||x.status==='confirmada').sort((a,b)=>a.scheduledAt.localeCompare(b.scheduledAt)).slice(0,5),[db.interviews]);
