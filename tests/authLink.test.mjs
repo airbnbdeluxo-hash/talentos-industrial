@@ -29,3 +29,21 @@ test('confirmation repair removes errors and preserves unrelated query parameter
 test('successful recovery tokens are never rewritten by the repair flow',()=>{
  assert.equal(authLinkRepair('https://talentos-industrial.vercel.app/?auth=recovery#access_token=synthetic&type=recovery'),null);
 });
+
+test('expired link drops all fragment credentials and known sensitive query values',()=>{
+ const repair=authLinkRepair('https://talentos-industrial.vercel.app/?auth=recovery&campaign=industrial&code=fake-code&token_hash=fake-hash&error_code=otp_expired#access_token=fake-access&refresh_token=fake-refresh&provider_token=fake-provider&error=access_denied');
+ assert.equal(repair?.mode,'recovery');
+ assert.equal(repair?.cleanPath,'/?auth=recovery&campaign=industrial');
+ assert.doesNotMatch(repair?.cleanPath ?? '', /fake-|token|code/);
+});
+
+test('invalid confirmation error also discards all fragments, preserving ordinary query context',()=>{
+ const repair=authLinkRepair('https://talentos-industrial.vercel.app/?auth=confirm&campaign=industrial#error=access_denied&state=fake-state&tracking=safe');
+ assert.equal(repair?.mode,'resend');
+ assert.equal(repair?.cleanPath,'/?auth=confirm&campaign=industrial');
+});
+
+test('successful recovery or signup callbacks are never cleaned or modified',()=>{
+ assert.equal(authLinkRepair('https://talentos-industrial.vercel.app/?auth=recovery#access_token=fake-access&refresh_token=fake-refresh&type=recovery'),null);
+ assert.equal(authLinkRepair('https://talentos-industrial.vercel.app/?auth=confirm&code=fake-valid-code'),null);
+});
