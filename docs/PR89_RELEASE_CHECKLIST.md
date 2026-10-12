@@ -6,7 +6,7 @@
 
 ## Regra objetiva de aceite e bloqueio
 
-Este roteiro deve ser executado em conjunto com [`docs/ACCEPTANCE_CRITERIA.md`](ACCEPTANCE_CRITERIA.md). A decisão de liberar não depende de impressões: **G01–G18 devem estar APROVADOS com evidência por SHA** e a assinatura humana é necessária. Falha, evidência ausente ou estado BLOQUEADO em qualquer G01–G18 = **NÃO LIBERAR**. Uma CI verde na branch e a Vercel Preview READY **não** significam homologação da produção.
+Este roteiro deve ser executado em conjunto com [`docs/ACCEPTANCE_CRITERIA.md`](ACCEPTANCE_CRITERIA.md). A decisão de liberar não depende de impressões: **pré-deploy exige G01/G02 e plano de rollout/reversão aprovado**, enquanto **a liberação comercial pós-deploy exige G01–G18 APROVADOS com evidência por SHA e assinatura humana**. Falha, evidência ausente ou estado BLOQUEADO em qualquer G01–G18 = **NÃO HOMOLOGAR A PRODUÇÃO**. CI verde e Vercel Preview READY **não** significam homologação da produção.
 
 A declaração **“100% do escopo concluído”** exige adicionalmente **C01–C04** e 100% dos requisitos aprovados da matriz homologados. Nenhum item pode ser descartado sem decisão humana explícita. Consulte o quadro de status e o formato de evidências antes de iniciar a aprovação.
 
