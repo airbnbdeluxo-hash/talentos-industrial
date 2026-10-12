@@ -28,7 +28,7 @@ A declaração **“100% do escopo concluído”** exige adicionalmente **C01–
 - Depois da aprovação humana, coordenar a aplicação da migração versionada `20261012221728_block_closed_job_applications.sql` com a integração do código. Usar o processo normal de migrations do projeto; não executar scripts destrutivos ou recriar projeto/banco.
 - Fazer uma verificação pós-migração da expressão `WITH CHECK`: `status='novo'`, `rejection_reason_code IS NULL`, `rejection_reason_note IS NULL`, `jobs.status='aberta'`, autorização do candidato e exceção admin. Caso a migração falhe, **interromper a publicação e diagnosticar**, sem relaxar RLS automaticamente.
 - Executar `supabase/tests/application_closed_job_rls.sql` **apenas após a migração**, com `BEGIN/ROLLBACK`, e provar que não restaram fixtures específicas.
-- O teste deve aceitar uma candidatura inicial legítima e negar: vaga fechada, contratação forjada e motivo de rejeição criado pelo candidato. Complementar com chamadas HTTP autorizadas em contas de homologação próprias; teste SQL não equivale a HTTP.
+- O teste deve validar **6/6 cenários**: candidatura inicial `novo` em vaga aberta aceita, e cinco tentativas negadas (vaga fechada, status `contratado`, status `triagem`, motivo de rejeição e nota de rejeição forjados). Complementar com os mesmos seis cenários via HTTP usando contas de homologação próprias; teste SQL com rollback não equivale a HTTP.
 - Publicar a versão revisada do `main` somente com checks válidos. Conferir o SHA do deployment de produção associado a `talentos-industrial.vercel.app` e acessibilidade das rotas.
 - Preparar plano de reversão do frontend. **Não restaurar a política vulnerável como rollback automático**: qualquer reversão de segurança exige nova análise humana.
 
