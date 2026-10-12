@@ -16,11 +16,13 @@ insert into public.jobs(id,company_id,title,city,status) values
 ('d4200000-0000-4000-8000-000000000030','d4200000-0000-4000-8000-000000000020','QA OPEN','Caxias do Sul — RS','aberta'),
 ('d4200000-0000-4000-8000-000000000031','d4200000-0000-4000-8000-000000000020','QA CLOSED','Caxias do Sul — RS','fechada'),
 ('d4200000-0000-4000-8000-000000000032','d4200000-0000-4000-8000-000000000020','QA OPEN FAKE HIRE','Caxias do Sul — RS','aberta'),
-('d4200000-0000-4000-8000-000000000033','d4200000-0000-4000-8000-000000000020','QA OPEN FAKE REJECT','Caxias do Sul — RS','aberta');
+('d4200000-0000-4000-8000-000000000033','d4200000-0000-4000-8000-000000000020','QA OPEN FAKE REJECT','Caxias do Sul — RS','aberta'),
+('d4200000-0000-4000-8000-000000000034','d4200000-0000-4000-8000-000000000020','QA OPEN FAKE TRIAGE','Caxias do Sul — RS','aberta'),
+('d4200000-0000-4000-8000-000000000035','d4200000-0000-4000-8000-000000000020','QA OPEN FAKE REJECTION NOTE','Caxias do Sul — RS','aberta');
 set local role authenticated;
 insert into public.applications(id,job_id,candidate_id,status) values
 ('d4200000-0000-4000-8000-000000000040','d4200000-0000-4000-8000-000000000030',auth.uid(),'novo');
-do $$ declare closed_was_blocked boolean := false; hired_was_blocked boolean := false; fake_rejection_was_blocked boolean := false; begin
+do $ declare closed_was_blocked boolean := false; hired_was_blocked boolean := false; fake_rejection_was_blocked boolean := false; triage_was_blocked boolean := false; fake_note_was_blocked boolean := false; begin
   begin
     insert into public.applications(id,job_id,candidate_id,status) values
     ('d4200000-0000-4000-8000-000000000041','d4200000-0000-4000-8000-000000000031',auth.uid(),'novo');
@@ -48,10 +50,28 @@ do $$ declare closed_was_blocked boolean := false; hired_was_blocked boolean := 
   if not fake_rejection_was_blocked then
     raise exception 'FAIL: candidate inserted employer rejection metadata';
   end if;
+  begin
+    insert into public.applications(id,job_id,candidate_id,status) values
+    ('d4200000-0000-4000-8000-000000000044','d4200000-0000-4000-8000-000000000034',auth.uid(),'triagem');
+  exception when insufficient_privilege then
+    triage_was_blocked := true;
+  end;
+  if not triage_was_blocked then
+    raise exception 'FAIL: candidate inserted a triage-stage application';
+  end if;
+  begin
+    insert into public.applications(id,job_id,candidate_id,status,rejection_reason_note) values
+    ('d4200000-0000-4000-8000-000000000045','d4200000-0000-4000-8000-000000000035',auth.uid(),'novo','employer-only note');
+  exception when insufficient_privilege then
+    fake_note_was_blocked := true;
+  end;
+  if not fake_note_was_blocked then
+    raise exception 'FAIL: candidate inserted employer-only rejection note';
+  end if;
   if (select count(*) from public.applications where candidate_id=auth.uid()) <> 1 then
     raise exception 'FAIL: expected exactly one open application';
   end if;
 end $$;
 reset role;
 rollback;
-select 'PASS: open job accepted; closed job, forged hired status and forged rejection denied; all fixtures rolled back' as result;
+select 'PASS: legitimate open job accepted; closed, hired, triage, rejection code and rejection note blocked; all fixtures rolled back' as result;
