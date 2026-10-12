@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
@@ -119,4 +120,20 @@ test('Minha carreira permanece uma aba válida para restaurar a sessão do candi
   const here = dirname(fileURLToPath(import.meta.url));
   const source = readFileSync(resolve(here, '../../src/App.tsx'), 'utf8');
   expect(source).toContain("nextRole==='candidato'?['dashboard','jobs','passport','applications','skills','settings']");
+});
+
+test('login e recuperação não têm violações graves de contraste e acessibilidade', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Entrar', exact: true }).first().click();
+  await expect(page.getByRole('heading', { name: 'Entrar como candidato' })).toBeVisible();
+  for (const step of ['login','recovery']) {
+    if (step === 'recovery') {
+      await page.getByRole('button', { name: 'Alterar ou recuperar minha senha' }).click();
+      await expect(page.getByRole('heading', { name: 'Recuperar acesso' })).toBeVisible();
+    }
+    const report = await new AxeBuilder({ page }).include('.auth-modal').analyze();
+    const serious = report.violations.filter(v => v.impact === 'critical' || v.impact === 'serious')
+      .map(v => ({ id:v.id, targets:v.nodes.flatMap(n => n.target).slice(0,8) }));
+    expect(serious, step + ': ' + JSON.stringify(serious)).toEqual([]);
+  }
 });
