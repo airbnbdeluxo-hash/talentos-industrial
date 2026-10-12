@@ -114,3 +114,9 @@ test('janela de login mantém foco de teclado e devolve foco ao fechar com Escap
   await expect(dialog).toHaveCount(0);
   await expect(trigger).toBeFocused();
 });
+
+test('Minha carreira permanece uma aba válida para restaurar a sessão do candidato', async () => {
+  const here = dirname(fileURLToPath(import.meta.url));
+  const source = readFileSync(resolve(here, '../../src/App.tsx'), 'utf8');
+  expect(source).toContain("nextRole==='candidato'?['dashboard','jobs','passport','applications','skills','settings']");
+});
