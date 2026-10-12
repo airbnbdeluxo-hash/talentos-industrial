@@ -1072,3 +1072,7 @@
 .shell:not(.landing-active) .pipeline-card-skills span:not(.ok):not(.attention),
 .shell:not(.landing-active) .pipeline-next-info span,
 .shell:not(.landing-active) .pipeline-outcome-summary span { color:#42566e; }
+
+/* Keep collapsible recruiting actions legible on white cards (axe serious). */
+.shell:not(.landing-active) .pipeline-more summary,
+.shell:not(.landing-active) .pipeline-more summary::after { color:#364d69; }
