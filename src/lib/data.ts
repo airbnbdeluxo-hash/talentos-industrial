@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { validateResumeFileSignature } from './resumeParser';
 
 type Status='novo'|'triagem'|'entrevista'|'aprovado'|'rejeitado'|'contratado';
 export type Evidence={id:string;skill:string;type:string;title:string;issuer:string;verified:boolean;expires?:string;score?:number;storagePath?:string;fileName?:string;mimeType?:string;fileSize?:number;validationStatus?:'pendente'|'aprovada'|'reprovada';reviewedBy?:string;reviewedAt?:string;reviewNote?:string;fileHash?:string;integrityStatus?:'normal'|'duplicado'|'revisao'};
@@ -228,9 +229,10 @@ export async function createRemoteCandidate(userId:string,input:{name:string;rol
  let resume:Record<string,unknown>|null=null;
  if(input.resumeFile){
   const file=input.resumeFile;
-  const mime=file.type||(/\.pdf$/i.test(file.name)?'application/pdf':/\.docx$/i.test(file.name)?'application/vnd.openxmlformats-officedocument.wordprocessingml.document':'');
-  if(!['application/pdf','application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(mime))throw new Error('O currículo precisa ser PDF ou Word (.docx).');
-  if(file.size===0||file.size>10*1024*1024)throw new Error('O currículo deve ter conteúdo e no máximo 10 MB.');
+  // Validate again at the Storage boundary; never rely on a previous UI
+  // step or on the MIME supplied by the browser. Derive the stored MIME from
+  // the validated file signature, not from an untrusted File.type.
+  const mime=await validateResumeFileSignature(file);
   const existing=await client.from('candidate_resumes').select('storage_path').eq('candidate_id',userId).maybeSingle();
   if(existing.error)throw existing.error;
   oldStoragePath=existing.data?.storage_path??null;
