@@ -2,19 +2,17 @@ import {useEffect,useMemo,useRef,useState} from 'react';
 import {BarChart3,BadgeCheck,Building2,CalendarClock,CheckCircle2,ChevronRight,Compass,Factory,FileCheck2,FileText,GraduationCap,LogIn,LogOut,MapPinned,Network,Plus,RotateCcw,Search,Settings,ShieldCheck,Sparkles,Target,Trash2,Upload,Users,BriefcaseBusiness,Eye,EyeOff,X,Bell,ExternalLink,XCircle,UserPlus,UserMinus,ArrowRightLeft,Wrench,Cog,Cpu,Hammer} from 'lucide-react';
 import {supabase,supabaseConfigured} from './lib/supabase';
 import {authLinkRepair} from './lib/authLink';
+import {authRedirectUrl as buildAuthRedirectUrl} from './lib/authRedirect';
 import {getRemoteIndustryOccupations} from './lib/data';
 import {CatalogMultiSelect, CatalogSingleSelect} from './components/CatalogMultiSelect';
 import {INDUSTRIAL_OCCUPATIONS, INDUSTRIAL_SKILLS, SHIFT_OPTIONS, uniqueCatalogOptions, normalizeSelection, matchesBrazilianCityFilter, parseBrazilianMoney, formatBrazilianMoney} from './lib/industrialCatalog';
 import {recordRemoteTrainingEvidence,getRemoteTrainingResources,getRemoteProfile,loadRemoteData,getRemoteBrazilCities,createRemoteCompany,createRemoteCompanyAccount,createRemoteJob,updateRemoteJobStatus,updateRemoteJobDetails,createRemoteCandidate,getRemoteSkills,saveRemoteCandidateConsent,updateRemoteApplication,applyToJob,generateRemoteMatches,generateRemoteTrainingRecommendations,updateRemoteTrainingRecommendation,uploadRemoteEvidence,getEvidenceDownloadUrl,getRemoteChallenges,startRemoteChallenge,completeRemoteChallenge,reviewRemoteEvidence,recordRemoteEmploymentOutcome,saveRemoteOutcomeSkillSignal,getRemoteOutcomeSkillIntelligence,getRemotePublicJob,getRemotePublicJobs,saveRemoteJob,removeRemoteSavedJob,createRemoteJobAlert,toggleRemoteJobAlert,deleteRemoteJobAlert,sendRemoteMessage,createRemoteApplicationNote,trackRemoteJobEngagement,saveRemoteCandidateAvailability,removeRemoteCandidateAvailability,scheduleRemoteInterview,rescheduleRemoteInterview,updateRemoteInterview,saveRemoteScorecard,createRemoteTalentPool,addRemoteTalentPoolMember,createRemoteOffer,respondRemoteOffer,respondRemoteOfferSecure,respondRemoteInterviewSecure,getRemoteApplicationContact,markRemoteNotificationRead,exportRemoteCandidateData,requestRemoteAccountDeletion,getRemotePrivacyRequests,getRemoteAllPrivacyRequests,updateRemotePrivacyRequestStatus,getRemoteClientErrorEvents,manageRemoteCompanyTeam,acceptRemoteCompanyInvitation,updateRemoteCompanyMemberRole,removeRemoteCompanyMember,transferRemoteCompanyOwner,type PrivacyRequest,type ClientErrorEvent,type CompanyTeamSnapshot,type CapabilityNode,type CapabilityEdge,type TrainingResource,type EmploymentOutcome,type EmploymentOutcomeSkillSignal,type OutcomeCheckpoint,type RetentionStatus,type OutcomeSkillSignalStatus,type Interview,type InterviewScorecard,type InterviewStatus,type Offer,type OfferStatus,type CandidateAvailability} from './lib/data';
 import {matchSkillToCatalog,parseResumeFile,type ResumeDraft} from './lib/resumeParser';
 
-const TALENTOS_OFFICIAL_ORIGIN='https://talentos-industrial.vercel.app';
-const configuredPublicOrigin=String(import.meta.env.VITE_PUBLIC_APP_URL??'').trim().replace(/\/$/,'');
-const configuredPublicHost=(()=>{try{return configuredPublicOrigin?new URL(configuredPublicOrigin).hostname:''}catch{return''}})();
-const TALENTOS_PUBLIC_ORIGIN=configuredPublicOrigin&&!['localhost','127.0.0.1','0.0.0.0'].includes(configuredPublicHost)
- ? configuredPublicOrigin
- : TALENTOS_OFFICIAL_ORIGIN;
-const authRedirectUrl=(intent:'confirm'|'recovery')=>TALENTOS_PUBLIC_ORIGIN+'/?auth='+intent;
+// Never trust an arbitrary frontend environment variable as an Auth callback.
+// Only the official origin is currently approved by TalentOS and Supabase.
+const authRedirectUrl=(intent:'confirm'|'recovery')=>
+ buildAuthRedirectUrl(intent,String(import.meta.env.VITE_PUBLIC_APP_URL??''));
 
 type Tab='dashboard'|'jobs'|'talents'|'companies'|'skills'|'intelligence'|'passport'|'applications'|'pipeline'|'validation'|'settings'|'team';
 type Status='novo'|'triagem'|'entrevista'|'aprovado'|'rejeitado'|'contratado';
