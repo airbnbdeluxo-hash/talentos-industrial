@@ -62,3 +62,18 @@ test('preserves independent source-line evidence for an extracted skill', () => 
   assert.deepEqual(draft.skills,['Metrologia','Soldagem TIG']);
   assert.ok(draft.skillMentions.every(item=>item.excerpt==='Metrologia e Soldagem TIG'));
 });
+
+test('empty files are rejected before a document parser loads', async () => {
+  await assert.rejects(parseResumeFile(new File([], 'curriculo.pdf')), /vazio/);
+  await assert.rejects(parseResumeFile(new File([], 'curriculo.docx')), /vazio/);
+});
+
+test('a renamed executable or plain text is never parsed as a PDF or Word', async () => {
+  await assert.rejects(parseResumeFile(new File(['not really PDF'], 'curriculo.pdf', {type:'application/pdf'})), /não corresponde/);
+  await assert.rejects(parseResumeFile(new File(['not really DOCX'], 'curriculo.docx', {type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'})), /não corresponde/);
+  await assert.rejects(parseResumeFile(new File(['%PDF-1.7'], 'curriculo.exe', {type:'application/pdf'})), /Formato não suportado/);
+});
+
+test('file names alone do not bypass validation', async () => {
+  await assert.rejects(parseResumeFile(new File(['PK fake zip'], 'curriculo.docx')), /não corresponde/);
+});
