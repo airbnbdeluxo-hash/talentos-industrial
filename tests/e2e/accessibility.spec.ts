@@ -2,9 +2,8 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 
 async function expectNoBlockingA11yViolations(page: Page) {
-  const result = await new AxeBuilder({ page })
-    .disableRules(['color-contrast'])
-    .analyze();
+  // Contrast is a release criterion: do not waive it in the test suite.
+  const result = await new AxeBuilder({ page }).analyze();
 
   const blocking = result.violations
     .filter(v => v.impact === 'critical' || v.impact === 'serious')
