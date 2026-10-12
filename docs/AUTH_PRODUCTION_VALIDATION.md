@@ -29,6 +29,7 @@
 | Sessão e logout | Entrar, encerrar sessão, navegar e tentar ação protegida | Sessão removida, ações protegidas negadas e retorno ao login |
 | Isolamento de papéis | Conta candidato e empresa | Candidato não lê outros candidatos; empresa não altera recursos de outra empresa |
 | Arquivos privados | Duas contas técnicas distintas | Download de arquivo próprio permitido; download de arquivo alheio negado por API HTTP |
+| Integridade de candidatura via HTTP | Conta candidata e duas vagas (aberta/encerrada) em ambiente autorizado | Rejeitar inscrição na vaga encerrada, status inicial diferente de `novo` e rejeição forjada; não permitir autocontratação; candidatura válida deve funcionar. Executar somente após a migração aprovada. |
 | Currículo PDF/Word | Arquivo autorizado com campos editáveis | Extrai e exibe campos para revisão; só persiste após confirmação; cancelar não salva |
 
 ## Evidências a registrar sem expor dados
