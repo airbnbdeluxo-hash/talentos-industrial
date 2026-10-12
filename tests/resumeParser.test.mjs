@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseResumeText, resumePdfPageText, parseResumeFile } from '../src/lib/resumeParser.ts';
+import { parseResumeText, resumePdfPageText, parseResumeFile, validateResumeFileSignature } from '../src/lib/resumeParser.ts';
 
 test('missing role stays blank instead of copying the candidate name', () => {
   const draft = parseResumeText('Maria da Silva\nHabilidades\nMetrologia', ['Metrologia']);
@@ -76,4 +76,18 @@ test('a renamed executable or plain text is never parsed as a PDF or Word', asyn
 
 test('file names alone do not bypass validation', async () => {
   await assert.rejects(parseResumeFile(new File(['PK fake zip'], 'curriculo.docx')), /não corresponde/);
+});
+
+test('upload boundary derives canonical MIME from file signature, not supplied File.type', async () => {
+  const pdf = new File(['%PDF-1.7\n'], 'curriculo.pdf', {type:'application/x-msdownload'});
+  const docx = new File([Uint8Array.from([0x50,0x4b,0x03,0x04,0x00,0x00])], 'curriculo.docx', {type:'application/pdf'});
+  assert.equal(await validateResumeFileSignature(pdf), 'application/pdf');
+  assert.equal(await validateResumeFileSignature(docx), 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+});
+
+test('Storage signature boundary refuses forged extensions, empty files and content mismatches', async () => {
+  await assert.rejects(validateResumeFileSignature(new File(['%PDF-1.7'], 'curriculo.exe', {type:'application/pdf'})), /Formato não suportado/);
+  await assert.rejects(validateResumeFileSignature(new File([], 'curriculo.pdf')), /vazio/);
+  await assert.rejects(validateResumeFileSignature(new File(['plain text'], 'curriculo.pdf', {type:'application/pdf'})), /não corresponde/);
+  await assert.rejects(validateResumeFileSignature(new File(['%PDF-1.7'], 'curriculo.docx', {type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'})), /não corresponde/);
 });
