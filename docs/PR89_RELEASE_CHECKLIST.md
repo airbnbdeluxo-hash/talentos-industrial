@@ -4,6 +4,12 @@
 **Escopo imutável:** repositório `airbnbdeluxo-hash/talentos-industrial`, Vercel `prj_YEg1JW2yCyNl2dUUmNXslByfDw5B`, Supabase `kvxqhvngkjxqlvlzcsef`. Domínio oficial: `https://talentos-industrial.vercel.app`.
 **Base comprovada no início deste roteiro:** `baa7cc4f1d3f3acf87526b72eaadc66c2c77288d` em produção. Confirmar novamente antes de qualquer ação.
 
+## Regra objetiva de aceite e bloqueio
+
+Este roteiro deve ser executado em conjunto com [`docs/ACCEPTANCE_CRITERIA.md`](ACCEPTANCE_CRITERIA.md). A decisão de liberar não depende de impressões: **G01–G18 devem estar APROVADOS com evidência por SHA** e a assinatura humana é necessária. Falha, evidência ausente ou estado BLOQUEADO em qualquer G01–G18 = **NÃO LIBERAR**. Uma CI verde na branch e a Vercel Preview READY **não** significam homologação da produção.
+
+A declaração **“100% do escopo concluído”** exige adicionalmente **C01–C04** e 100% dos requisitos aprovados da matriz homologados. Nenhum item pode ser descartado sem decisão humana explícita. Consulte o quadro de status e o formato de evidências antes de iniciar a aprovação.
+
 ## Portão 1 — revisão humana (obrigatório; não automatizar aprovação)
 - Abrir https://github.com/airbnbdeluxo-hash/talentos-industrial/pull/89 e analisar o **diff completo do HEAD exato**, não apenas a descrição do PR.
 - Priorizar `src/lib/authLink.ts`, `src/App.tsx`, `src/lib/resumeParser.ts`, `src/lib/industrialCatalog.ts` e `supabase/migrations/20261012221728_block_closed_job_applications.sql`.
