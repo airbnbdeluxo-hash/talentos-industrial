@@ -16,7 +16,7 @@
 
 ## Portões quantitativos de aceite
 
-| ID | Bloqueia publicação? | Critério objetivo (100% dos cenários descritos) | Prova mínima |
+| ID | Bloqueia homologação comercial? | Critério objetivo (100% dos cenários descritos) | Prova mínima |
 |---|---|---|---|
 | G01 | **SIM** | PR #89 recebeu **revisão humana favorável do diff completo** do HEAD exato; não há solicitação de mudanças pendente. Após qualquer novo commit, revalidar revisão e SHA. | Link para revisão GitHub e SHA aprovado. |
 | G02 | **SIM** | CI **SUCCESS**, Security **SUCCESS** e Vercel Preview **READY** no **mesmo HEAD**; **0 testes falhando**; build bem-sucedido; **0 credenciais em arquivos versionados**. | IDs dos workflows, jobs e preview atrelados ao SHA. |
