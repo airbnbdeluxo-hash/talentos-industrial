@@ -22,7 +22,7 @@ insert into public.jobs(id,company_id,title,city,status) values
 set local role authenticated;
 insert into public.applications(id,job_id,candidate_id,status) values
 ('d4200000-0000-4000-8000-000000000040','d4200000-0000-4000-8000-000000000030',auth.uid(),'novo');
-do $ declare closed_was_blocked boolean := false; hired_was_blocked boolean := false; fake_rejection_was_blocked boolean := false; triage_was_blocked boolean := false; fake_note_was_blocked boolean := false; begin
+do $qa_rls$ declare closed_was_blocked boolean := false; hired_was_blocked boolean := false; fake_rejection_was_blocked boolean := false; triage_was_blocked boolean := false; fake_note_was_blocked boolean := false; begin
   begin
     insert into public.applications(id,job_id,candidate_id,status) values
     ('d4200000-0000-4000-8000-000000000041','d4200000-0000-4000-8000-000000000031',auth.uid(),'novo');
@@ -71,7 +71,7 @@ do $ declare closed_was_blocked boolean := false; hired_was_blocked boolean := f
   if (select count(*) from public.applications where candidate_id=auth.uid()) <> 1 then
     raise exception 'FAIL: expected exactly one open application';
   end if;
-end $$;
+end $qa_rls$;
 reset role;
 rollback;
 select 'PASS: legitimate open job accepted; closed, hired, triage, rejection code and rejection note blocked; all fixtures rolled back' as result;
