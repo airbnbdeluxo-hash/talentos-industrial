@@ -1,6 +1,29 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseResumeText, resumePdfPageText } from '../src/lib/resumeParser.ts';
+import { parseResumeText, resumePdfPageText, parseResumeFile } from '../src/lib/resumeParser.ts';
+
+test('missing role stays blank instead of copying the candidate name', () => {
+  const draft = parseResumeText('Maria da Silva\nHabilidades\nMetrologia', ['Metrologia']);
+  assert.equal(draft.name, 'Maria da Silva');
+  assert.equal(draft.role, '');
+});
+
+test('negative and aspirational mentions are not presented as skills', () => {
+  const draft = parseResumeText('Maria da Silva\nNão tenho experiência em CNC, mas domino Metrologia\nQuero aprender Soldagem TIG', ['CNC', 'Metrologia', 'Soldagem TIG']);
+  assert.deepEqual(draft.skills, ['Metrologia']);
+});
+
+test('a later positive mention is retained after an earlier negative mention', () => {
+  const draft = parseResumeText('Maria Silva\nAntes não conhecia CNC\nHabilidades atuais\nCNC', ['CNC']);
+  assert.deepEqual(draft.skills, ['CNC']);
+  assert.equal(draft.skillMentions[0].excerpt, 'CNC');
+});
+
+test('cancelled import does not begin reading a file', async () => {
+  const controller = new AbortController();
+  controller.abort();
+  await assert.rejects(parseResumeFile(new File(['synthetic'], 'resume.pdf'), [], controller.signal), {name:'AbortError'});
+});
 
 test('PDF line endings retain the candidate identity and labelled fields', () => {
   const text = resumePdfPageText([
