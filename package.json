@@ -10,10 +10,10 @@
     "security:scan": "node scripts/security-check.mjs"
   },
   "dependencies": {
-    "@supabase/supabase-js": "2.117.2",
-    "lucide-react": "1.49.0",
+    "@supabase/supabase-js": "2.117.3",
+    "lucide-react": "1.55.0",
     "mammoth": "1.13.0",
-    "pdfjs-dist": "6.3.289",
+    "pdfjs-dist": "6.4.299",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
